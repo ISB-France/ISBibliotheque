@@ -232,7 +232,7 @@ Interne ISB Group © 2026
 
 ## 👨‍💼 Auteur
 
-**Développé par :** Stagiaire ISB Group  
+**Développé par :** Valentin ROUSSEAU & Leo LARRIVEN   
 **Date :** Juin 2026  
 **Version :** 0.0.1  
 **Repository :** https://github.com/ISB-France/ISBibliotheque
