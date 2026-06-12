@@ -6,7 +6,7 @@
 
 ---
 
-## 🎯 Caractéristiques principales
+## 🎯 Caractéristiques principales 
 
 | Feature | Description |
 |---------|-------------|
