@@ -5,6 +5,18 @@ Ce document vous aide à naviguer vers la documentation qui correspond à vos be
 
 ---
 
+## 🔗 Suivi du Projet
+
+**➡️ [Notion Checklist — Portail Applicatif ISBibliotheque](https://artistic-selenium-fb0.notion.site/Checklist-Portail-applicatif-interne-ISBibliotheque-37d8a8bce16080839df9d48dd4d926fb)**
+
+Consultez ce Notion pour :
+- ✅ Vue complète des tâches et phases du projet
+- 📊 Statut des éléments en cours
+- 📅 Dates et assignations
+- 💬 Discussions collaboratives
+
+---
+
 ## 🎯 Par profil utilisateur
 
 ### 👨‍💻 Développeur (frontend/backend)
@@ -346,4 +358,3 @@ Avez-vous consulté ?
 **Mainteneur** : Équipe ISB Group
 
 **👉 Vous ne savez pas par où commencer ?** → Lisez [README.md](./README.md)
-
