@@ -8,15 +8,12 @@ services:
     volumes:
       - ./infra:/app/infra
       - ./apps/backend/src:/app/apps/backend/src
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
       - PORT=4000
       - LOG_LEVEL=debug
-      - JWT_SECRET=test-secret-isb-2024
-      - JWT_EXPIRES_IN=24h
-      - AUTH_ADMIN_EMAIL=admin@isb-group.fr
-      - AUTH_ADMIN_PASSWORD=admin
-      - AUTH_ADMIN_NAME=Admin SI
       - CORS_ORIGIN=http://localhost:5173
       - APP_URL=http://localhost:5173
       - CHOKIDAR_USEPOLLING=1
