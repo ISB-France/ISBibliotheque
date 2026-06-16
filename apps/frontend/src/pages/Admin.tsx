@@ -9,6 +9,7 @@ import { LoadingScreen } from '@/components/LoadingScreen'
 import { ErrorScreen } from '@/components/ErrorScreen'
 import { NotAuthorizedScreen } from '@/components/NotAuthorizedScreen'
 import { AddAppModal } from '@/components/AddAppModal'
+import { GroupManager } from '@/components/GroupManager'
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth()
@@ -18,6 +19,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [tab, setTab] = useState<'apps' | 'groups'>('apps')
 
   const fetchApps = useCallback(async () => {
     try {
@@ -87,33 +89,38 @@ export default function Admin() {
                 Administration
               </h1>
               <p className="text-[15px] mt-1.5" style={{ color: '#8C6A40' }}>
-                Gestion des applications du portail
+                {tab === 'apps' ? "Gestion des applications du portail" : "Gestion des groupes d'accès"}
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={fetchApps}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl hover:bg-[#FEEAD3] transition-colors text-[13px] font-medium"
-              style={{ color: '#3B2800' }}
-              aria-label="Rafraîchir"
-            >
-              <RefreshCw size={15} />
-              Actualiser
-            </button>
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl hover:brightness-95 active:scale-95 transition-all shadow-sm font-heading font-bold text-[14px]"
-              style={{ backgroundColor: '#FFDD00', color: '#3B2800' }}
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              Ajouter
-            </button>
-          </div>
         </div>
 
-        {loading ? (
+        <div className="flex items-center gap-1 mb-8">
+          <button
+            onClick={() => setTab('apps')}
+            className="px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-colors"
+            style={{
+              backgroundColor: tab === 'apps' ? '#3B2800' : 'transparent',
+              color: tab === 'apps' ? '#FFDD00' : '#8C6A40',
+            }}
+          >
+            Applications
+          </button>
+          <button
+            onClick={() => setTab('groups')}
+            className="px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-colors"
+            style={{
+              backgroundColor: tab === 'groups' ? '#3B2800' : 'transparent',
+              color: tab === 'groups' ? '#FFDD00' : '#8C6A40',
+            }}
+          >
+            Groupes
+          </button>
+        </div>
+
+        {tab === 'groups' ? (
+          <GroupManager />
+        ) : loading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
