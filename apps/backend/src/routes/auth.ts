@@ -95,7 +95,7 @@ router.get('/auth/callback', async (req: Request, res: Response, next: NextFunct
   }
 })
 
-router.get('/auth/logout', async (_req: Request, res: Response, next: NextFunction) => {
+router.post('/auth/logout', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     clearTokenCookie(res)
     const url = await getLogoutUrl()
