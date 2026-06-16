@@ -83,6 +83,11 @@ export const api = {
         body: JSON.stringify({ email, password }),
       }).then(r => ({ user: { email: r.email, name: r.name, roles: r.roles, isAdmin: r.isAdmin } })),
     logout: () => request<void>('/auth/logout', { method: 'POST' }),
+    changePassword: (currentPassword: string, newPassword: string) =>
+      request<{ message: string }>('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword }),
+      }),
   },
   apps: {
     list: () => request<{ apps: AppResponse[] }>('/apps').then(r => r.apps),

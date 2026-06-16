@@ -2,8 +2,16 @@ import { config } from '../config/index.js'
 import { createToken } from '../utils/jwt.js'
 import { hashPassword, verifyPassword } from '../utils/password.js'
 import { getRolesForEmail } from './groups.js'
+import { verifyStoredPassword, hasPassword } from './password-store.js'
 
 const ADMIN_HASH = hashPassword(config.authAdminPassword)
+
+function verifyAdminPassword(password: string): boolean {
+  if (hasPassword(config.authAdminEmail)) {
+    return verifyStoredPassword(config.authAdminEmail, password)
+  }
+  return verifyPassword(password, ADMIN_HASH)
+}
 
 export interface AuthResult {
   token: string
@@ -16,7 +24,7 @@ export interface AuthResult {
 export function login(email: string, password: string): AuthResult | null {
   const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase()
   if (isAdmin) {
-    if (!verifyPassword(password, ADMIN_HASH)) return null
+    if (!verifyAdminPassword(password)) return null
     const roles = ['admin']
     const token = createToken({
       sub: email,

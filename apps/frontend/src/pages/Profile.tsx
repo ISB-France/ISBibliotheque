@@ -1,14 +1,23 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { ArrowLeft, Mail, Shield, User as UserIcon } from 'lucide-react'
+import { ArrowLeft, Mail, Shield, User as UserIcon, Lock } from 'lucide-react'
+import { toast } from 'sonner'
 import { ISBLogo } from '@/components/ISBLogo'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Card } from '@/components/ui/card'
+import { api } from '@/lib/api'
 
 export default function Profile() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [changing, setChanging] = useState(false)
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
@@ -114,6 +123,85 @@ export default function Profile() {
               </div>
             </div>
           </div>
+        </Card>
+
+        <Card className="mt-6">
+          <div className="p-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-[16px] font-bold font-heading text-isb-brown">
+                Mot de passe
+              </h2>
+              <p className="text-[13px] mt-0.5 text-isb-muted">
+                Modifiez votre mot de passe de connexion
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => setShowPasswordForm(!showPasswordForm)}>
+              <Lock size={15} />
+              Changer
+            </Button>
+          </div>
+
+          {showPasswordForm && (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                if (newPassword !== confirmPassword) {
+                  toast.error('Les nouveaux mots de passe ne correspondent pas')
+                  return
+                }
+                setChanging(true)
+                try {
+                  await api.auth.changePassword(currentPassword, newPassword)
+                  toast.success('Mot de passe modifié')
+                  setShowPasswordForm(false)
+                  setCurrentPassword('')
+                  setNewPassword('')
+                  setConfirmPassword('')
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : 'Erreur')
+                } finally {
+                  setChanging(false)
+                }
+              }}
+              className="px-6 pb-6 flex flex-col gap-4"
+            >
+              <Input
+                type="password"
+                placeholder="Mot de passe actuel"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+              <Input
+                type="password"
+                placeholder="Nouveau mot de passe"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                minLength={4}
+              />
+              <Input
+                type="password"
+                placeholder="Confirmer le nouveau mot de passe"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={4}
+              />
+              <div className="flex gap-2">
+                <Button type="submit" disabled={changing}>
+                  {changing ? 'Modification...' : 'Enregistrer'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowPasswordForm(false)}
+                >
+                  Annuler
+                </Button>
+              </div>
+            </form>
+          )}
         </Card>
       </main>
     </div>

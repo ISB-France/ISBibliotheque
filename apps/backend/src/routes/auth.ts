@@ -5,7 +5,8 @@ import { config } from '../config/index.js'
 import { login, loginByEmail } from '../services/auth.js'
 import { getAuthorizationUrl, handleCallback, getLogoutUrl } from '../services/entra.js'
 import { requireAuth } from '../middleware/auth.js'
-import { UnauthorizedError } from '../utils/errors.js'
+import { setPassword } from '../services/password-store.js'
+import { UnauthorizedError, ForbiddenError } from '../utils/errors.js'
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -100,6 +101,27 @@ router.post('/auth/logout', async (_req: Request, res: Response, next: NextFunct
     clearTokenCookie(res)
     const url = await getLogoutUrl()
     res.json({ message: 'Déconnecté', logoutUrl: url ?? undefined })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.post('/auth/change-password', requireAuth, (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ error: { message: 'Mot de passe actuel et nouveau mot de passe requis' } })
+      return
+    }
+    if (newPassword.length < 4) {
+      res.status(400).json({ error: { message: 'Le nouveau mot de passe doit faire au moins 4 caractères' } })
+      return
+    }
+    if (!req.user) throw new UnauthorizedError('Authentification requise')
+    const result = login(req.user.email, currentPassword)
+    if (!result) throw new ForbiddenError('Mot de passe actuel incorrect')
+    setPassword(req.user.email, newPassword)
+    res.json({ message: 'Mot de passe modifié avec succès' })
   } catch (err) {
     next(err)
   }
