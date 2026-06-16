@@ -2,6 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { Plus, Trash2, UserPlus, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 
 interface Group {
   name: string
@@ -86,74 +90,48 @@ export function GroupManager() {
   return (
     <div>
       <div className="flex items-center justify-between gap-4 mb-6">
-        <div>
-          <p className="text-[15px]" style={{ color: '#8C6A40' }}>
-            Gérez les groupes d&apos;utilisateurs et leurs accès
-          </p>
-        </div>
+        <p className="text-[15px] text-isb-muted">
+          Gérez les groupes d&apos;utilisateurs et leurs accès
+        </p>
         <div className="flex items-center gap-2">
-          <button
-            onClick={fetchGroups}
-            className="flex items-center gap-2 px-4 py-3 rounded-xl hover:bg-[#FEEAD3] transition-colors text-[13px] font-medium"
-            style={{ color: '#3B2800' }}
-          >
+          <Button variant="outline" onClick={fetchGroups}>
             <RefreshCw size={15} />
             Actualiser
-          </button>
-          <button
-            onClick={() => setShowCreate(!showCreate)}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl hover:brightness-95 active:scale-95 transition-all shadow-sm font-heading font-bold text-[14px]"
-            style={{ backgroundColor: '#FFDD00', color: '#3B2800' }}
-          >
-            <Plus size={16} strokeWidth={2.5} />
+          </Button>
+          <Button onClick={() => setShowCreate(!showCreate)}>
+            <Plus size={16} />
             Nouveau groupe
-          </button>
+          </Button>
         </div>
       </div>
 
       {showCreate && (
-        <form
-          onSubmit={handleCreate}
-          className="bg-white rounded-2xl border p-6 mb-6 flex flex-col gap-4"
-          style={{ borderColor: 'rgba(59,40,0,0.08)' }}
-        >
-          <h3 className="text-[16px] font-bold font-heading" style={{ color: '#3B2800' }}>
-            Nouveau groupe
-          </h3>
-          <input
-            placeholder="Nom du groupe (ex: logistics.viewer)"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border outline-none transition-all text-[14px]"
-            style={{ borderColor: 'rgba(59,40,0,0.15)', backgroundColor: '#FDFAF5', color: '#3B2800' }}
-            required
-          />
-          <input
-            placeholder="Description (optionnelle)"
-            value={newDesc}
-            onChange={(e) => setNewDesc(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border outline-none transition-all text-[14px]"
-            style={{ borderColor: 'rgba(59,40,0,0.15)', backgroundColor: '#FDFAF5', color: '#3B2800' }}
-          />
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={creating}
-              className="px-5 py-3 rounded-xl font-bold text-[14px] hover:brightness-95 active:scale-95 transition-all disabled:opacity-50"
-              style={{ backgroundColor: '#FFDD00', color: '#3B2800' }}
-            >
-              {creating ? 'Création...' : 'Créer'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowCreate(false)}
-              className="px-5 py-3 rounded-xl font-medium text-[14px] hover:bg-[#FEEAD3] transition-colors"
-              style={{ color: '#3B2800' }}
-            >
-              Annuler
-            </button>
-          </div>
-        </form>
+        <Card className="p-6 mb-6">
+          <form onSubmit={handleCreate} className="flex flex-col gap-4">
+            <h3 className="text-[16px] font-bold font-heading text-isb-brown">
+              Nouveau groupe
+            </h3>
+            <Input
+              placeholder="Nom du groupe (ex: logistics.viewer)"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              required
+            />
+            <Input
+              placeholder="Description (optionnelle)"
+              value={newDesc}
+              onChange={(e) => setNewDesc(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <Button type="submit" disabled={creating}>
+                {creating ? 'Création...' : 'Créer'}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setShowCreate(false)}>
+                Annuler
+              </Button>
+            </div>
+          </form>
+        </Card>
       )}
 
       {loading ? (
@@ -161,14 +139,13 @@ export function GroupManager() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-24 bg-white rounded-2xl border animate-pulse"
-              style={{ borderColor: 'rgba(59,40,0,0.08)' }}
+              className="h-24 bg-card rounded-2xl border animate-pulse"
             />
           ))}
         </div>
       ) : groups.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <p className="text-[16px] font-semibold" style={{ color: '#3B2800' }}>
+          <p className="text-[16px] font-semibold text-isb-brown">
             Aucun groupe
           </p>
         </div>
@@ -212,94 +189,73 @@ function GroupCard({
   }
 
   return (
-    <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
-      <div className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
+    <Card>
+      <div className="px-6 py-4 flex items-center justify-between border-b">
         <div>
-          <div className="text-[16px] font-bold font-heading" style={{ color: '#3B2800' }}>
+          <div className="text-[16px] font-bold font-heading text-isb-brown">
             {group.name}
           </div>
           {group.description && (
-            <div className="text-[13px] mt-0.5" style={{ color: '#8C6A40' }}>
+            <div className="text-[13px] mt-0.5 text-isb-muted">
               {group.description}
             </div>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowAdd(!showAdd)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-[#FEEAD3] transition-colors text-[12px] font-medium"
-            style={{ color: '#3B2800' }}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowAdd(!showAdd)}>
             <UserPlus size={14} />
             Ajouter un membre
-          </button>
-          <button
-            onClick={onDelete}
-            className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-[#FEF0EA] transition-colors"
-          >
-            <Trash2 size={15} style={{ color: '#F08159' }} />
-          </button>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onDelete}>
+            <Trash2 size={15} className="text-destructive" />
+          </Button>
         </div>
       </div>
 
       {showAdd && (
-        <form onSubmit={handleSubmit} className="px-6 py-3 border-b flex gap-2" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
-          <input
+        <form onSubmit={handleSubmit} className="px-6 py-3 border-b flex gap-2">
+          <Input
             type="email"
             placeholder="email@isb-group.fr"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 px-3 py-2 rounded-xl border outline-none transition-all text-[13px]"
-            style={{ borderColor: 'rgba(59,40,0,0.15)', backgroundColor: '#FDFAF5', color: '#3B2800' }}
             required
             autoFocus
           />
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-xl font-bold text-[12px] hover:brightness-95 transition-all"
-            style={{ backgroundColor: '#FFDD00', color: '#3B2800' }}
-          >
-            Ajouter
-          </button>
+          <Button type="submit" size="sm">Ajouter</Button>
         </form>
       )}
 
       {group.members.length === 0 ? (
         <div className="px-6 py-6 text-center">
-          <p className="text-[13px]" style={{ color: '#8C6A40' }}>
+          <p className="text-[13px] text-isb-muted">
             Aucun membre dans ce groupe
           </p>
         </div>
       ) : (
-        <div className="divide-y" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
+        <div className="divide-y">
           {group.members.map((member) => (
             <div
               key={member}
-              className="px-6 py-3 flex items-center justify-between hover:bg-[#FDFAF5] transition-colors"
+              className="px-6 py-3 flex items-center justify-between hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: '#FEEAD3' }}
-                >
-                  <span className="text-[11px] font-bold" style={{ color: '#8C6A40' }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-secondary">
+                  <span className="text-[11px] font-bold text-isb-muted">
                     {member[0].toUpperCase()}
                   </span>
                 </div>
-                <span className="text-[14px]" style={{ color: '#3B2800' }}>
+                <span className="text-[14px] text-isb-brown">
                   {member}
                 </span>
               </div>
-              <button
-                onClick={() => onRemoveMember(member)}
-                className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-[#FEF0EA] transition-colors"
-              >
-                <Trash2 size={13} style={{ color: '#F08159' }} />
-              </button>
+              <Button variant="ghost" size="icon" onClick={() => onRemoveMember(member)}>
+                <Trash2 size={13} className="text-destructive" />
+              </Button>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

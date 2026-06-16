@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Plus, Trash2, RefreshCw, ArrowLeft } from 'lucide-react'
+import { Plus, Trash2, ArrowLeft, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type AppResponse } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
@@ -10,6 +10,16 @@ import { ErrorScreen } from '@/components/ErrorScreen'
 import { NotAuthorizedScreen } from '@/components/NotAuthorizedScreen'
 import { AddAppModal } from '@/components/AddAppModal'
 import { GroupManager } from '@/components/GroupManager'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth()
@@ -68,54 +78,51 @@ export default function Admin() {
   if (error) return <ErrorScreen message={error} onRetry={fetchApps} />
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FDFAF5' }}>
+    <div className="min-h-screen bg-background">
       <Header />
 
       <main className="max-w-5xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-[#FEEAD3] transition-colors"
-              aria-label="Retour au portail"
-            >
-              <ArrowLeft size={18} style={{ color: '#3B2800' }} />
-            </button>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')} aria-label="Retour au portail">
+              <ArrowLeft size={18} />
+            </Button>
             <div>
-              <h1
-                className="text-[28px] font-extrabold font-heading leading-tight"
-                style={{ color: '#3B2800' }}
-              >
+              <h1 className="text-[28px] font-extrabold font-heading leading-tight text-isb-brown">
                 Administration
               </h1>
-              <p className="text-[15px] mt-1.5" style={{ color: '#8C6A40' }}>
-                {tab === 'apps' ? "Gestion des applications du portail" : "Gestion des groupes d'accès"}
+              <p className="text-[15px] mt-1.5 text-isb-muted">
+                {tab === 'apps' ? "Gestion des applications" : "Gestion des groupes d'accès"}
               </p>
             </div>
           </div>
+          {tab === 'apps' && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={fetchApps}>
+                <RefreshCw size={15} />
+                Actualiser
+              </Button>
+              <Button onClick={() => setShowModal(true)}>
+                <Plus size={16} />
+                Ajouter
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1 mb-8">
-          <button
+          <Button
+            variant={tab === 'apps' ? 'default' : 'ghost'}
             onClick={() => setTab('apps')}
-            className="px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-colors"
-            style={{
-              backgroundColor: tab === 'apps' ? '#3B2800' : 'transparent',
-              color: tab === 'apps' ? '#FFDD00' : '#8C6A40',
-            }}
           >
             Applications
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={tab === 'groups' ? 'default' : 'ghost'}
             onClick={() => setTab('groups')}
-            className="px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-colors"
-            style={{
-              backgroundColor: tab === 'groups' ? '#3B2800' : 'transparent',
-              color: tab === 'groups' ? '#FFDD00' : '#8C6A40',
-            }}
           >
             Groupes
-          </button>
+          </Button>
         </div>
 
         {tab === 'groups' ? (
@@ -125,100 +132,61 @@ export default function Admin() {
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="h-16 bg-white rounded-2xl border animate-pulse"
-                style={{ borderColor: 'rgba(59,40,0,0.08)' }}
+                className="h-16 bg-card rounded-2xl border animate-pulse"
+                style={{ borderColor: 'hsl(var(--border))' }}
               />
             ))}
           </div>
         ) : apps.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <p className="text-[16px] font-semibold" style={{ color: '#3B2800' }}>
+            <p className="text-[16px] font-semibold text-isb-brown">
               Aucune application
             </p>
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-[14px]"
-              style={{ backgroundColor: '#FFDD00', color: '#3B2800' }}
-            >
+            <Button onClick={() => setShowModal(true)}>
               <Plus size={16} />
               Ajouter la première application
-            </button>
+            </Button>
           </div>
         ) : (
-          <div
-            className="bg-white rounded-2xl border overflow-hidden"
-            style={{ borderColor: 'rgba(59,40,0,0.08)' }}
-          >
-            <table className="w-full">
-              <thead>
-                <tr className="border-b" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
-                  <th
-                    className="text-left px-6 py-4 text-[13px] font-semibold"
-                    style={{ color: '#8C6A40' }}
-                  >
-                    Nom
-                  </th>
-                  <th
-                    className="text-left px-6 py-4 text-[13px] font-semibold"
-                    style={{ color: '#8C6A40' }}
-                  >
-                    Type
-                  </th>
-                  <th
-                    className="text-left px-6 py-4 text-[13px] font-semibold"
-                    style={{ color: '#8C6A40' }}
-                  >
-                    Catégorie
-                  </th>
-                  <th
-                    className="text-right px-6 py-4 text-[13px] font-semibold"
-                    style={{ color: '#8C6A40' }}
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="bg-card rounded-2xl border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Catégorie</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {apps.map((app) => (
-                  <tr
-                    key={app.id}
-                    className="border-b last:border-b-0 hover:bg-[#FDFAF5] transition-colors"
-                    style={{ borderColor: 'rgba(59,40,0,0.08)' }}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="text-[14px] font-medium" style={{ color: '#3B2800' }}>
+                  <TableRow key={app.id}>
+                    <TableCell>
+                      <div className="text-[14px] font-medium text-isb-brown">
                         {app.name}
                       </div>
-                      <div className="text-[12px]" style={{ color: '#8C6A40' }}>
+                      <div className="text-[12px] text-isb-muted">
                         {app.id}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-[13px]" style={{ color: '#8C6A40' }}>
-                      <span
-                        className="px-2 py-0.5 rounded-full text-[12px] font-medium"
-                        style={{ backgroundColor: '#FEEAD3', color: '#8C6A40' }}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{app.accessType}</Badge>
+                    </TableCell>
+                    <TableCell className="text-isb-muted">{app.category}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(app.id, app.name)}
+                        aria-label={`Supprimer ${app.name}`}
                       >
-                        {app.accessType}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-[13px]" style={{ color: '#8C6A40' }}>
-                      {app.category}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleDelete(app.id, app.name)}
-                          className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-[#FEF0EA] transition-colors"
-                          aria-label={`Supprimer ${app.name}`}
-                        >
-                          <Trash2 size={15} style={{ color: '#F08159' }} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        <Trash2 size={15} className="text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </main>

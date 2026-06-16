@@ -1,26 +1,37 @@
-@import 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap';
-@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-@theme inline {
-  --font-sans: 'DM Sans', sans-serif;
-  --font-heading: 'Plus Jakarta Sans', sans-serif;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  --color-isb-brown: #3b2800;
-  --color-isb-yellow: #ffdd00;
-  --color-isb-sand-light: #feead3;
-  --color-isb-sand-mid: #fdd5a5;
-  --color-isb-terracotta: #d19571;
-  --color-isb-coral: #f08159;
-  --color-isb-blush: #f8bbab;
-  --color-isb-bg: #fdfaf5;
-  --color-isb-text: #3b2800;
-  --color-isb-muted: #8c6a40;
-  --color-isb-border: rgba(59, 40, 0, 0.1);
+@layer base {
+  :root {
+    --background: 36 100% 97%;
+    --foreground: 36 100% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 36 100% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 36 100% 12%;
+    --primary: 36 100% 12%;
+    --primary-foreground: 46 100% 50%;
+    --secondary: 36 100% 93%;
+    --secondary-foreground: 36 100% 12%;
+    --muted: 36 16% 88%;
+    --muted-foreground: 34 18% 48%;
+    --accent: 36 16% 88%;
+    --accent-foreground: 36 100% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 36 100% 88%;
+    --input: 36 100% 88%;
+    --ring: 36 100% 12%;
+    --radius: 0.75rem;
+  }
 }
 
 body {
   margin: 0;
-  background-color: var(--color-isb-bg);
-  color: var(--color-isb-text);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family: 'DM Sans', sans-serif;
 }

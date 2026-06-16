@@ -2,6 +2,9 @@ import { useNavigate } from 'react-router'
 import { ArrowLeft, Mail, Shield, User as UserIcon } from 'lucide-react'
 import { ISBLogo } from '@/components/ISBLogo'
 import { useAuth } from '@/hooks/useAuth'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Card } from '@/components/ui/card'
 
 export default function Profile() {
   const { user } = useAuth()
@@ -36,38 +39,31 @@ export default function Profile() {
 
       <main className="max-w-xl mx-auto px-6 py-10">
         <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-[#FEEAD3] transition-colors"
-            aria-label="Retour"
-          >
-            <ArrowLeft size={18} style={{ color: '#3B2800' }} />
-          </button>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Retour">
+            <ArrowLeft size={18} />
+          </Button>
           <div>
-            <h1 className="text-[28px] font-extrabold font-heading leading-tight" style={{ color: '#3B2800' }}>
+            <h1 className="text-[28px] font-extrabold font-heading leading-tight text-isb-brown">
               Mon profil
             </h1>
-            <p className="text-[15px] mt-1.5" style={{ color: '#8C6A40' }}>
+            <p className="text-[15px] mt-1.5 text-isb-muted">
               Informations de votre compte
             </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
-          <div className="p-6 flex items-center gap-5 border-b" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
-            <div
-              className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: '#3B2800' }}
-            >
-              <span className="text-[20px] font-bold" style={{ color: '#FFDD00' }}>
+        <Card>
+          <div className="p-6 flex items-center gap-5 border-b">
+            <Avatar className="w-14 h-14 rounded-xl">
+              <AvatarFallback className="bg-primary text-primary-foreground text-[20px] font-bold rounded-xl">
                 {initials}
-              </span>
-            </div>
+              </AvatarFallback>
+            </Avatar>
             <div>
-              <div className="text-[18px] font-bold font-heading" style={{ color: '#3B2800' }}>
+              <div className="text-[18px] font-bold font-heading text-isb-brown">
                 {user?.name}
               </div>
-              <div className="text-[13px] mt-0.5" style={{ color: '#8C6A40' }}>
+              <div className="text-[13px] mt-0.5 text-isb-muted">
                 {user?.email}
               </div>
             </div>
@@ -75,14 +71,14 @@ export default function Profile() {
 
           <div className="p-4 flex flex-col gap-2">
             <div className="flex items-center gap-4 px-4 py-3.5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: '#FEEAD3' }}>
-                <Mail size={18} style={{ color: '#8C6A40' }} />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-secondary">
+                <Mail size={18} className="text-isb-muted" />
               </div>
               <div>
-                <div className="text-[12px] font-medium" style={{ color: '#8C6A40' }}>
+                <div className="text-[12px] font-medium text-isb-muted">
                   Adresse email
                 </div>
-                <div className="text-[14px] font-semibold" style={{ color: '#3B2800' }}>
+                <div className="text-[14px] font-semibold text-isb-brown">
                   {user?.email}
                 </div>
               </div>
@@ -90,14 +86,14 @@ export default function Profile() {
 
             {user?.isAdmin && (
               <div className="flex items-center gap-4 px-4 py-3.5">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: '#FEEAD3' }}>
-                  <Shield size={18} style={{ color: '#8C6A40' }} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-secondary">
+                  <Shield size={18} className="text-isb-muted" />
                 </div>
                 <div>
-                  <div className="text-[12px] font-medium" style={{ color: '#8C6A40' }}>
+                  <div className="text-[12px] font-medium text-isb-muted">
                     Rôle
                   </div>
-                  <div className="text-[14px] font-semibold" style={{ color: '#3B2800' }}>
+                  <div className="text-[14px] font-semibold text-isb-brown">
                     Administrateur
                   </div>
                 </div>
@@ -105,20 +101,20 @@ export default function Profile() {
             )}
 
             <div className="flex items-center gap-4 px-4 py-3.5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: '#FEEAD3' }}>
-                <UserIcon size={18} style={{ color: '#8C6A40' }} />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-secondary">
+                <UserIcon size={18} className="text-isb-muted" />
               </div>
               <div>
-                <div className="text-[12px] font-medium" style={{ color: '#8C6A40' }}>
+                <div className="text-[12px] font-medium text-isb-muted">
                   Méthode de connexion
                 </div>
-                <div className="text-[14px] font-semibold" style={{ color: '#3B2800' }}>
+                <div className="text-[14px] font-semibold text-isb-brown">
                   Email & mot de passe
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </main>
     </div>
   )

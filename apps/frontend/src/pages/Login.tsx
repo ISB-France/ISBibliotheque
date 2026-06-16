@@ -4,6 +4,8 @@ import { LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { ISBLogo } from '@/components/ISBLogo'
 import { useAuth } from '@/hooks/useAuth'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function Login() {
   const { login, user, loading: authLoading } = useAuth()
@@ -54,57 +56,46 @@ export default function Login() {
           style={{ borderColor: 'rgba(59,40,0,0.08)' }}
         >
           <div>
-            <label className="text-[13px] font-semibold block mb-1.5" style={{ color: '#3B2800' }}>
+            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
               Adresse email
             </label>
-            <input
+            <Input
               type="email"
               placeholder="marie.laurent@isb-group.fr"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border outline-none transition-all text-[14px]"
-              style={{
-                borderColor: 'rgba(59,40,0,0.15)',
-                backgroundColor: '#FDFAF5',
-                color: '#3B2800',
-              }}
+              className="bg-isb-bg"
               required
               autoFocus
             />
           </div>
 
           <div>
-            <label className="text-[13px] font-semibold block mb-1.5" style={{ color: '#3B2800' }}>
+            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
               Mot de passe
             </label>
-            <input
+            <Input
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border outline-none transition-all text-[14px]"
-              style={{
-                borderColor: 'rgba(59,40,0,0.15)',
-                backgroundColor: '#FDFAF5',
-                color: '#3B2800',
-              }}
+              className="bg-isb-bg"
               required
             />
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 rounded-xl flex items-center justify-center gap-2 hover:brightness-95 active:scale-95 transition-all text-[14px] font-bold font-heading disabled:opacity-50 mt-2"
-            style={{ backgroundColor: '#FFDD00', color: '#3B2800' }}
+            className="w-full mt-2 font-heading font-bold"
           >
             {submitting ? (
-              <div className="w-4 h-4 border-2 border-isb-brown border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
             ) : (
               <LogIn size={16} strokeWidth={2.5} />
             )}
             Se connecter
-          </button>
+          </Button>
         </form>
       </div>
     </div>

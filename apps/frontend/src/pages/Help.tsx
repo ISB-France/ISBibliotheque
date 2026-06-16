@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router'
 import { ArrowLeft, ExternalLink, Mail, FileText, MessageCircle } from 'lucide-react'
 import { ISBLogo } from '@/components/ISBLogo'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 const SUPPORT_ITEMS = [
   {
@@ -51,48 +53,43 @@ export default function Help() {
 
       <main className="max-w-xl mx-auto px-6 py-10">
         <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-[#FEEAD3] transition-colors"
-            aria-label="Retour"
-          >
-            <ArrowLeft size={18} style={{ color: '#3B2800' }} />
-          </button>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Retour">
+            <ArrowLeft size={18} />
+          </Button>
           <div>
-            <h1 className="text-[28px] font-extrabold font-heading leading-tight" style={{ color: '#3B2800' }}>
+            <h1 className="text-[28px] font-extrabold font-heading leading-tight text-isb-brown">
               Aide & support
             </h1>
-            <p className="text-[15px] mt-1.5" style={{ color: '#8C6A40' }}>
+            <p className="text-[15px] mt-1.5 text-isb-muted">
               Ressources pour vous accompagner
             </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
+        <Card>
           <div className="p-4 flex flex-col gap-2">
             {SUPPORT_ITEMS.map(({ icon: Icon, label, description, action }) => (
               <a
                 key={label}
                 href={action}
-                className="flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all hover:bg-[#FEEAD3]"
-                style={{ borderColor: 'rgba(59,40,0,0.08)' }}
+                className="flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all hover:bg-accent"
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: '#FEEAD3' }}>
-                  <Icon size={18} style={{ color: '#3B2800' }} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-secondary">
+                  <Icon size={18} className="text-isb-brown" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-[14px] font-semibold" style={{ color: '#3B2800' }}>
+                  <div className="text-[14px] font-semibold text-isb-brown">
                     {label}
                   </div>
-                  <div className="text-[12px]" style={{ color: '#8C6A40' }}>
+                  <div className="text-[12px] text-isb-muted">
                     {description}
                   </div>
                 </div>
-                <ExternalLink size={15} style={{ color: '#8C6A40' }} />
+                <ExternalLink size={15} className="text-isb-muted" />
               </a>
             ))}
           </div>
-        </div>
+        </Card>
       </main>
     </div>
   )

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { X, Plus, Code } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 const TEMPLATE = `{
   "$schema": "../../schemas/app-manifest.json",
@@ -65,98 +67,71 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#3B2800]/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 max-h-[90vh] overflow-y-auto">
+      <div className="absolute inset-0 bg-isb-brown/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-card rounded-2xl shadow-2xl w-full max-w-2xl p-8 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-[20px] font-bold font-heading" style={{ color: '#3B2800' }}>
+            <h2 className="text-[20px] font-bold font-heading text-isb-brown">
               Ajouter une application
             </h2>
-            <p className="text-[13px] mt-0.5" style={{ color: '#8C6A40' }}>
+            <p className="text-[13px] mt-0.5 text-isb-muted">
               Définir le manifest JSON de l&rsquo;application
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="flex items-center justify-center w-9 h-9 rounded-xl hover:bg-[#FEEAD3] transition-colors"
-            aria-label="Fermer"
-          >
-            <X size={18} color="#8C6A40" />
-          </button>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer">
+            <X size={18} />
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-[13px] font-semibold block mb-1.5" style={{ color: '#3B2800' }}>
+            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
               Nom (optionnel &mdash; surcharge &laquo; name &raquo; et &laquo; id &raquo; du JSON)
             </label>
-            <input
+            <Input
               type="text"
               placeholder="Ex : Mon application"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border outline-none transition-all text-[14px]"
-              style={{
-                borderColor: 'rgba(59,40,0,0.15)',
-                backgroundColor: '#FDFAF5',
-                color: '#3B2800',
-              }}
             />
           </div>
 
           <div>
-            <label className="text-[13px] font-semibold block mb-1.5" style={{ color: '#3B2800' }}>
+            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
               Manifest JSON
             </label>
-            <div
-              className="rounded-xl border overflow-hidden"
-              style={{ borderColor: 'rgba(59,40,0,0.15)' }}
-            >
-              <div
-                className="flex items-center gap-2 px-4 py-2 border-b text-[12px] font-medium"
-                style={{ backgroundColor: '#FDFAF5', borderColor: 'rgba(59,40,0,0.08)', color: '#8C6A40' }}
-              >
+            <div className="rounded-xl border overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2 border-b text-[12px] font-medium bg-secondary text-isb-muted">
                 <Code size={14} />
                 metadata.json
               </div>
               <textarea
                 value={json}
                 onChange={(e) => { setJson(e.target.value); setError(null) }}
-                className="w-full px-4 py-3 outline-none text-[13px] font-mono leading-relaxed resize-y min-h-[300px]"
-                style={{ backgroundColor: '#FFFFFF', color: '#3B2800' }}
+                className="w-full px-4 py-3 outline-none text-[13px] font-mono leading-relaxed resize-y min-h-[300px] bg-background text-foreground"
                 spellCheck={false}
               />
             </div>
           </div>
 
           {error && (
-            <p className="text-[13px] font-medium" style={{ color: '#F08159' }}>
+            <p className="text-[13px] font-medium text-destructive">
               {error}
             </p>
           )}
 
           <div className="flex gap-3 mt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 rounded-xl border transition-colors text-[14px] font-medium"
-              style={{ borderColor: 'rgba(59,40,0,0.15)', color: '#8C6A40' }}
-            >
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Annuler
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 py-3 rounded-xl flex items-center justify-center gap-2 hover:brightness-95 transition-all text-[14px] font-semibold disabled:opacity-50"
-              style={{ backgroundColor: '#FFDD00', color: '#3B2800' }}
-            >
+            </Button>
+            <Button type="submit" disabled={submitting} className="flex-1">
               {submitting ? (
-                <div className="w-4 h-4 border-2 border-isb-brown border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
               ) : (
                 <Plus size={16} />
               )}
               Créer l&rsquo;application
-            </button>
+            </Button>
           </div>
         </form>
       </div>
