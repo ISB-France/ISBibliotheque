@@ -5,6 +5,8 @@ import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Admin from '@/pages/Admin'
 import Preferences from '@/pages/Preferences'
+import Profile from '@/pages/Profile'
+import Help from '@/pages/Help'
 
 export default function App() {
   return (
@@ -15,6 +17,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/preferences" element={<Preferences />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/help" element={<Help />} />
         </Routes>
         <Toaster
           position="bottom-right"

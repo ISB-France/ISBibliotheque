@@ -48,7 +48,7 @@ export function Header({ search, onSearchChange }: HeaderProps) {
               ISB Group
             </div>
             <div className="text-[11px] leading-tight mt-0.5" style={{ color: '#8C6A40' }}>
-              Portail applicatif
+              Bibliotheque d&apos;application
             </div>
           </div>
         </button>
@@ -148,9 +148,9 @@ export function Header({ search, onSearchChange }: HeaderProps) {
                   </div>
                 </div>
                 {[
-                  { icon: User, label: 'Mon profil' },
+                  { icon: User, label: 'Mon profil', onClick: () => navigate('/profile') },
                   { icon: Settings, label: 'Préférences', onClick: () => navigate('/preferences') },
-                  { icon: HelpCircle, label: 'Aide & support' },
+                  { icon: HelpCircle, label: 'Aide & support', onClick: () => navigate('/help') },
                 ].map(({ icon: Icon, label, onClick }) => (
                   <button
                     key={label}
