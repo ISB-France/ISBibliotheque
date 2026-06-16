@@ -1,0 +1,32 @@
+[
+  {
+    "name": "admin",
+    "description": "Administrateurs SI — accès à toutes les applications et à la gestion du portail",
+    "members": ["admin@isb-group.fr"]
+  },
+  {
+    "name": "production.manager",
+    "description": "Responsables de production",
+    "members": ["marie@isb-group.fr"]
+  },
+  {
+    "name": "production.operator",
+    "description": "Opérateurs de production",
+    "members": ["paul@isb-group.fr"]
+  },
+  {
+    "name": "logistics.manager",
+    "description": "Responsables logistique",
+    "members": []
+  },
+  {
+    "name": "logistics.operator",
+    "description": "Opérateurs logistique",
+    "members": []
+  },
+  {
+    "name": "quality.manager",
+    "description": "Responsables qualité",
+    "members": ["jean@isb-group.fr"]
+  }
+]

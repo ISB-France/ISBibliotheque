@@ -1,0 +1,105 @@
+const BASE_URL = '/api'
+
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+    public details?: unknown,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    ...options,
+  })
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new ApiError(res.status, body?.error?.message ?? res.statusText, body?.error)
+  }
+
+  if (res.status === 204) return undefined as T
+  return res.json()
+}
+
+export interface AuthUser {
+  email: string
+  name: string
+  roles: string[]
+  isAdmin: boolean
+}
+
+export interface AppManifest {
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  access: AppRedirectAccess | AppDockerAccess
+  roles: string[]
+}
+
+export interface AppRedirectAccess {
+  type: 'redirect'
+  url: string
+}
+
+export interface AppDockerAccess {
+  type: 'docker'
+  composeFile: string
+  serviceName: string
+  internalPort: number
+  healthUrl?: string
+}
+
+export interface AppResponse {
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  accessType: 'redirect' | 'docker'
+  url: string | null
+  status: string | null
+}
+
+export interface DockerStatus {
+  status: 'running' | 'stopped' | 'error'
+  url: string | null
+  message?: string
+}
+
+export const api = {
+  auth: {
+    me: () => request<{ user: AuthUser }>('/auth/me').then(r => r.user),
+    login: (email: string, password: string) =>
+      request<{ email: string; name: string; roles: string[]; isAdmin: boolean }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      }).then(r => ({ user: { email: r.email, name: r.name, roles: r.roles, isAdmin: r.isAdmin } })),
+    logout: () => request<void>('/auth/logout', { method: 'POST' }),
+  },
+  apps: {
+    list: () => request<{ apps: AppResponse[] }>('/apps').then(r => r.apps),
+    categories: () => request<{ categories: string[] }>('/apps/categories').then(r => r.categories),
+  },
+  admin: {
+    listApps: () => request<{ apps: AppResponse[] }>('/admin/apps').then(r => r.apps),
+    createApp: (data: Partial<AppManifest>) =>
+      request<{ app: AppManifest }>('/admin/apps', { method: 'POST', body: JSON.stringify(data) }).then(r => r.app),
+    updateApp: (id: string, data: Partial<AppManifest>) =>
+      request<{ app: AppManifest }>(`/admin/apps/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.app),
+    deleteApp: (id: string) => request<void>(`/admin/apps/${id}`, { method: 'DELETE' }),
+  },
+  docker: {
+    start: (id: string) =>
+      request<{ status: DockerStatus }>(`/apps/${id}/start`, { method: 'POST' }),
+    stop: (id: string) => request<{ status: DockerStatus }>(`/apps/${id}/stop`, { method: 'POST' }),
+    status: (id: string) => request<{ status: DockerStatus }>(`/apps/${id}/status`),
+  },
+}

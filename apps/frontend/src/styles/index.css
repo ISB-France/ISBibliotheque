@@ -1,0 +1,26 @@
+@import 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap';
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: 'DM Sans', sans-serif;
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+
+  --color-isb-brown: #3b2800;
+  --color-isb-yellow: #ffdd00;
+  --color-isb-sand-light: #feead3;
+  --color-isb-sand-mid: #fdd5a5;
+  --color-isb-terracotta: #d19571;
+  --color-isb-coral: #f08159;
+  --color-isb-blush: #f8bbab;
+  --color-isb-bg: #fdfaf5;
+  --color-isb-text: #3b2800;
+  --color-isb-muted: #8c6a40;
+  --color-isb-border: rgba(59, 40, 0, 0.1);
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-isb-bg);
+  color: var(--color-isb-text);
+  font-family: 'DM Sans', sans-serif;
+}

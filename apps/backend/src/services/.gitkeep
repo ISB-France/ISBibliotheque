@@ -1,0 +1,4 @@
+// Services métier à implémenter dans les sprints suivants.
+// Exemple :
+// - RegistryService : lecture des manifests dans infra/apps.registry/
+// - DockerService : interface avec l'API Docker (start/stop/status)

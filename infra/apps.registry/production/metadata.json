@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/app-manifest.json",
+  "id": "production",
+  "name": "Suivi de production",
+  "description": "Ordres de fabrication, avancement et alertes temps réel",
+  "category": "Production",
+  "icon": "Zap",
+  "access": {
+    "type": "redirect",
+    "url": "https://erp.isb-group.fr/production"
+  },
+  "roles": ["production.manager", "production.operator"]
+}

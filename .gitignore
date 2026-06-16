@@ -1,0 +1,55 @@
+# Node
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# Env / Secrets
+.env
+.env.*.local
+.env.local
+.env.development.local
+.env.production.local
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.*
+credentials.json
+.git-credentials
+.netrc
+.npmrc
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Logs / Temp
+*.log
+tmp/
+*.tmp
+*.swp
+*~
+
+# Generated
+coverage/
+report/
+*.cache
+pnpm-lock.yaml
+
+# Large files
+*.psd
+*.ai
+*.zip
+*.tar.gz
+*.mov
+*.mp4
+
+# Docker
+.docker/

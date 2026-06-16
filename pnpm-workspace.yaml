@@ -1,0 +1,4 @@
+packages:
+  - 'apps/*'
+  - 'doc/Figma/Maquettes'
+  - 'infra/*'
