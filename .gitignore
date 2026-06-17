@@ -42,7 +42,6 @@ coverage/
 report/
 *.cache
 apps/backend/src/generated/
-pnpm-lock.yaml
 
 # Large files
 *.psd
