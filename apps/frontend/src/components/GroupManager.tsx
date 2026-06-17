@@ -31,6 +31,7 @@ export function GroupManager() {
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
   const [creating, setCreating] = useState(false)
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
 
   const fetchData = useCallback(async () => {
     try {
@@ -51,6 +52,14 @@ export function GroupManager() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEffect(() => {
+    if (!selectedGroup && groups.length > 0) {
+      setSelectedGroup(groups[0])
+    } else if (selectedGroup && !groups.find((g) => g.name === selectedGroup.name)) {
+      setSelectedGroup(groups[0] ?? null)
+    }
+  }, [groups, selectedGroup])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -169,18 +178,34 @@ export function GroupManager() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {groups.map((group) => (
+        <div>
+          <div className="flex items-center gap-2 mb-6 flex-wrap">
+            {groups.map((group) => (
+              <Button
+                key={group.name}
+                variant={selectedGroup?.name === group.name ? 'default' : 'secondary'}
+                size="sm"
+                onClick={() => setSelectedGroup(group)}
+              >
+                {group.name}
+              </Button>
+            ))}
+          </div>
+
+          {selectedGroup && (
             <GroupCard
-              key={group.name}
-              group={group}
-              onDelete={() => handleDelete(group.name)}
-              onAddMember={(email) => handleAddMember(group.name, email)}
-              onRemoveMember={(email) => handleRemoveMember(group.name, email)}
+              key={selectedGroup.name}
+              group={selectedGroup}
+              onDelete={() => {
+                handleDelete(selectedGroup.name)
+                setSelectedGroup(null)
+              }}
+              onAddMember={(email) => handleAddMember(selectedGroup.name, email)}
+              onRemoveMember={(email) => handleRemoveMember(selectedGroup.name, email)}
               getProfileForEmail={getProfileForEmail}
               onProfileUpdated={fetchData}
             />
-          ))}
+          )}
         </div>
       )}
     </div>
