@@ -92,7 +92,7 @@ export default function Home() {
   if (error) return <ErrorScreen message={error} onRetry={fetchApps} />
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--background))' }}>
+    <div style={{ backgroundColor: 'hsl(var(--background))' }}>
       <Header search={search} onSearchChange={setSearch} />
 
       <main className="max-w-7xl mx-auto px-6 py-10">

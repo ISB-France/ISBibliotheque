@@ -78,7 +78,7 @@ export default function Admin() {
   if (error) return <ErrorScreen message={error} onRetry={fetchApps} />
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <Header />
 
       <main className="max-w-5xl mx-auto px-6 py-10">

@@ -29,7 +29,7 @@ export default function Help() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--background))' }}>
+    <div style={{ backgroundColor: 'hsl(var(--background))' }}>
       <header
         className="sticky top-0 z-40 border-b"
         style={{

@@ -114,7 +114,7 @@ export default function Profile() {
     : '??'
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--background))' }}>
+    <div style={{ backgroundColor: 'hsl(var(--background))' }}>
       <header
         className="sticky top-0 z-40 border-b"
         style={{

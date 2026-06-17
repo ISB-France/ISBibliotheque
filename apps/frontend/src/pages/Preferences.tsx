@@ -8,7 +8,7 @@ export default function Preferences() {
   const { theme: colorTheme, themes: colorThemes, setTheme: setColorTheme } = useColorTheme()
 
   return (
-    <div className="min-h-full" style={{ backgroundColor: 'hsl(var(--background))' }}>
+    <div style={{ backgroundColor: 'hsl(var(--background))' }}>
       <header
         className="sticky top-0 z-40 border-b"
         style={{

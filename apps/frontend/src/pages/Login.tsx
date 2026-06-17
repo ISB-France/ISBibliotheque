@@ -45,7 +45,7 @@ export default function Login() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      className="flex items-center justify-center p-4 relative overflow-hidden flex-1"
       style={{ backgroundColor: 'hsl(var(--background))' }}
     >
       <div
