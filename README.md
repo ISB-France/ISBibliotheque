@@ -429,6 +429,16 @@ git push origin feature/my-feature
 
 ---
 
+## 📊 Suivi du Projet
+
+**👉 Checklist complète & Roadmap Interactive :**
+
+🔗 **[Notion — Checklist Portail ISBibliotheque](https://artistic-selenium-fb0.notion.site/Checklist-Portail-applicatif-interne-ISBibliotheque-37d8a8bce16080839df9d48dd4d926fb)**
+
+Consultez ce Notion pour suivre les étapes du projet, les tâches en cours et le statut global.
+
+---
+
 <div align="center">
 
 ## 🚀 Prêt à démarrer ?
