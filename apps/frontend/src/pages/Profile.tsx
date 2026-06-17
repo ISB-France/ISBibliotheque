@@ -114,7 +114,7 @@ export default function Profile() {
     : '??'
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FDFAF5' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--background))' }}>
       <header
         className="sticky top-0 z-40 border-b"
         style={{
@@ -126,10 +126,10 @@ export default function Profile() {
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center gap-4">
           <ISBLogo size={36} />
           <div className="text-left">
-            <div className="text-[16px] font-bold leading-tight font-heading" style={{ color: '#3B2800' }}>
+            <div className="text-[16px] font-bold leading-tight font-heading" style={{ color: 'hsl(var(--foreground))' }}>
               ISBibliotheque
             </div>
-            <div className="text-[11px] leading-tight mt-0.5" style={{ color: '#8C6A40' }}>
+            <div className="text-[11px] leading-tight mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
               Bibliotheque d&apos;application
             </div>
           </div>

@@ -92,7 +92,7 @@ export default function Home() {
   if (error) return <ErrorScreen message={error} onRetry={fetchApps} />
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FDFAF5' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--background))' }}>
       <Header search={search} onSearchChange={setSearch} />
 
       <main className="max-w-7xl mx-auto px-6 py-10">
@@ -100,11 +100,11 @@ export default function Home() {
           <div>
             <h1
               className="text-[28px] font-extrabold font-heading leading-tight"
-              style={{ color: '#3B2800' }}
+              style={{ color: 'hsl(var(--foreground))' }}
             >
               ISBibliotheque
             </h1>
-            <p className="text-[15px] mt-1.5" style={{ color: '#8C6A40' }}>
+            <p className="text-[15px] mt-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
               Retrouvez et lancez toutes vos applications métier ISB
             </p>
           </div>
@@ -130,19 +130,19 @@ export default function Home() {
               >
                 <div
                   className="w-14 h-14 rounded-xl animate-pulse"
-                  style={{ backgroundColor: '#FEEAD3' }}
+                  style={{ backgroundColor: 'hsl(var(--secondary))' }}
                 />
                 <div
                   className="h-5 w-20 rounded-full animate-pulse"
-                  style={{ backgroundColor: '#FEEAD3' }}
+                  style={{ backgroundColor: 'hsl(var(--secondary))' }}
                 />
                 <div
                   className="h-4 w-3/4 rounded-lg animate-pulse"
-                  style={{ backgroundColor: '#FDD5A5' }}
+                  style={{ backgroundColor: 'hsl(var(--muted))' }}
                 />
                 <div
                   className="h-3 w-full rounded-lg animate-pulse"
-                  style={{ backgroundColor: '#FEEAD3' }}
+                  style={{ backgroundColor: 'hsl(var(--secondary))' }}
                 />
               </div>
             ))}
@@ -174,15 +174,15 @@ export default function Home() {
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center"
-              style={{ backgroundColor: '#FEEAD3' }}
+              style={{ backgroundColor: 'hsl(var(--secondary))' }}
             >
-              <Search size={28} style={{ color: '#D19571' }} />
+              <Search size={28} style={{ color: 'hsl(var(--muted-foreground))' }} />
             </div>
             <div className="text-center">
-              <p className="text-[16px] font-semibold" style={{ color: '#3B2800' }}>
+              <p className="text-[16px] font-semibold" style={{ color: 'hsl(var(--foreground))' }}>
                 Aucune application trouvée
               </p>
-              <p className="text-[14px] mt-1" style={{ color: '#8C6A40' }}>
+              <p className="text-[14px] mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
                 Essayez un autre terme ou une autre catégorie
               </p>
             </div>
@@ -192,7 +192,7 @@ export default function Home() {
                 setActiveCategory('Toutes')
               }}
               className="px-4 py-2 rounded-xl transition-colors text-[13px] font-medium"
-              style={{ backgroundColor: '#FEEAD3', color: '#3B2800' }}
+              style={{ backgroundColor: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}
             >
               Réinitialiser les filtres
             </button>

@@ -10,18 +10,18 @@ interface AppCardProps {
 }
 
 const categoryColors: Record<string, { color: string; bgColor: string }> = {
-  Gestion: { color: '#3B2800', bgColor: '#FDD5A5' },
-  Production: { color: '#F08159', bgColor: '#FEF0EA' },
-  RH: { color: '#8C6A40', bgColor: '#FEEAD3' },
-  Finance: { color: '#F08159', bgColor: '#FEF0EA' },
-  Qualité: { color: '#8C6A40', bgColor: '#FEEAD3' },
-  Logistique: { color: '#D19571', bgColor: '#FDF3EC' },
-  Commercial: { color: '#D19571', bgColor: '#FDF3EC' },
-  IT: { color: '#3B2800', bgColor: '#FDD5A5' },
+  Gestion: { color: 'hsl(var(--foreground))', bgColor: 'hsl(var(--muted))' },
+  Production: { color: 'hsl(var(--destructive))', bgColor: 'hsl(var(--accent))' },
+  RH: { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--secondary))' },
+  Finance: { color: 'hsl(var(--destructive))', bgColor: 'hsl(var(--accent))' },
+  Qualité: { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--secondary))' },
+  Logistique: { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--muted))' },
+  Commercial: { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--muted))' },
+  IT: { color: 'hsl(var(--foreground))', bgColor: 'hsl(var(--muted))' },
 }
 
 export function getAppStyle(category: string) {
-  return categoryColors[category] ?? { color: '#8C6A40', bgColor: '#FEEAD3' }
+  return categoryColors[category] ?? { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--secondary))' }
 }
 
 export { categoryColors }
@@ -53,15 +53,15 @@ export function AppCard({
         <div className="flex items-start justify-between gap-2 mb-1">
           <span
             className="text-[13px] font-medium px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: '#FEEAD3', color: '#8C6A40' }}
+            style={{ backgroundColor: 'hsl(var(--secondary))', color: 'hsl(var(--muted-foreground))' }}
           >
             {category}
           </span>
         </div>
-        <h3 className="text-[15px] font-semibold mt-1.5 leading-tight" style={{ color: '#3B2800' }}>
+        <h3 className="text-[15px] font-semibold mt-1.5 leading-tight" style={{ color: 'hsl(var(--foreground))' }}>
           {name}
         </h3>
-        <p className="text-[13px] mt-1 leading-relaxed" style={{ color: '#8C6A40' }}>
+        <p className="text-[13px] mt-1 leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
           {description}
         </p>
       </div>
@@ -74,7 +74,7 @@ export function AppCard({
 
       <div
         className="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-        style={{ backgroundColor: '#FFDD00' }}
+        style={{ backgroundColor: 'hsl(var(--primary-foreground))' }}
       />
     </button>
   )

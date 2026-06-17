@@ -1,39 +1,11 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { ArrowLeft, Monitor, Moon, Sun, Palette } from 'lucide-react'
+import { ArrowLeft, Palette } from 'lucide-react'
 import { ISBLogo } from '@/components/ISBLogo'
 import { useColorTheme } from '@/contexts/ColorThemeContext'
-
-const THEME_KEY = 'isb-theme'
-
-function getSystemDark(): boolean {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-}
-
-function applyThemeMode(mode: 'system' | 'light' | 'dark') {
-  const isDark = mode === 'dark' || (mode === 'system' && getSystemDark())
-  document.documentElement.classList.toggle('dark', isDark)
-}
-
-const THEMES = [
-  { value: 'system' as const, icon: Monitor, label: 'Système' },
-  { value: 'light' as const, icon: Sun, label: 'Clair' },
-  { value: 'dark' as const, icon: Moon, label: 'Sombre' },
-]
 
 export default function Preferences() {
   const navigate = useNavigate()
   const { theme: colorTheme, themes: colorThemes, setTheme: setColorTheme } = useColorTheme()
-  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(() => {
-    if (typeof window === 'undefined') return 'system'
-    return (localStorage.getItem(THEME_KEY) as 'system' | 'light' | 'dark') ?? 'system'
-  })
-
-  function handleThemeMode(mode: 'system' | 'light' | 'dark') {
-    setThemeMode(mode)
-    localStorage.setItem(THEME_KEY, mode)
-    applyThemeMode(mode)
-  }
 
   return (
     <div className="min-h-full" style={{ backgroundColor: 'hsl(var(--background))' }}>
@@ -74,57 +46,6 @@ export default function Preferences() {
             <p className="text-[15px] mt-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
               Personnalisez votre expérience du portail
             </p>
-          </div>
-        </div>
-
-        <div className="bg-card rounded-2xl border mb-6" style={{ borderColor: 'hsl(var(--border))' }}>
-          <div className="px-6 py-5 border-b" style={{ borderColor: 'hsl(var(--border))' }}>
-            <h2 className="text-[16px] font-bold font-heading" style={{ color: 'hsl(var(--foreground))' }}>
-              Thème
-            </h2>
-            <p className="text-[13px] mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
-              Choisissez l&apos;apparence du portail
-            </p>
-          </div>
-
-          <div className="p-4 flex flex-col gap-2">
-            {THEMES.map(({ value, icon: Icon, label }) => (
-              <button
-                key={value}
-                onClick={() => handleThemeMode(value)}
-                className="flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all text-left"
-                style={{
-                  borderColor: themeMode === value ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                  backgroundColor: themeMode === value ? 'hsl(var(--secondary))' : 'hsl(var(--card))',
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{
-                    backgroundColor: themeMode === value ? 'hsl(var(--primary))' : 'hsl(var(--accent))',
-                  }}
-                >
-                  <Icon size={18} style={{ color: themeMode === value ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))' }} />
-                </div>
-                <div>
-                  <div className="text-[14px] font-semibold" style={{ color: 'hsl(var(--foreground))' }}>
-                    {label}
-                  </div>
-                  <div className="text-[12px]" style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    {value === 'system'
-                      ? 'Suivre la préférence de votre appareil'
-                      : value === 'light'
-                        ? 'Thème clair'
-                        : 'Thème sombre'}
-                  </div>
-                </div>
-                {themeMode === value && (
-                  <div className="ml-auto w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: 'hsl(var(--primary))' }}>
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'hsl(var(--primary-foreground))' }} />
-                  </div>
-                )}
-              </button>
-            ))}
           </div>
         </div>
 

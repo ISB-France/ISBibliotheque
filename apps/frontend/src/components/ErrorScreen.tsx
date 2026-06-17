@@ -13,7 +13,7 @@ export function ErrorScreen({
   onRetry,
 }: ErrorScreenProps) {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FDFAF5' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--background))' }}>
       <header
         className="sticky top-0 z-40 border-b"
         style={{
@@ -28,11 +28,11 @@ export function ErrorScreen({
             <div>
               <div
                 className="text-[16px] font-bold leading-tight font-heading"
-                style={{ color: '#3B2800' }}
+                style={{ color: 'hsl(var(--foreground))' }}
               >
                 ISBibliotheque
               </div>
-              <div className="text-[11px] leading-tight mt-0.5" style={{ color: '#8C6A40' }}>
+              <div className="text-[11px] leading-tight mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
                 Bibliotheque d&apos;application
               </div>
             </div>
@@ -44,15 +44,15 @@ export function ErrorScreen({
         <div className="flex flex-col items-center justify-center py-24 gap-6">
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ backgroundColor: '#FEF0EA' }}
+            style={{ backgroundColor: 'hsl(var(--accent))' }}
           >
-            <AlertTriangle size={36} style={{ color: '#F08159' }} strokeWidth={1.5} />
+            <AlertTriangle size={36} style={{ color: 'hsl(var(--destructive))' }} strokeWidth={1.5} />
           </div>
           <div className="text-center max-w-md">
-            <h1 className="text-[22px] font-bold font-heading" style={{ color: '#3B2800' }}>
+            <h1 className="text-[22px] font-bold font-heading" style={{ color: 'hsl(var(--foreground))' }}>
               {title}
             </h1>
-            <p className="text-[14px] mt-2 leading-relaxed" style={{ color: '#8C6A40' }}>
+            <p className="text-[14px] mt-2 leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
               {message}
             </p>
           </div>
@@ -60,7 +60,7 @@ export function ErrorScreen({
             <button
               onClick={onRetry}
               className="flex items-center gap-2 px-6 py-3 rounded-xl hover:brightness-95 active:scale-95 transition-all shadow-sm font-heading font-bold text-[14px]"
-              style={{ backgroundColor: '#FFDD00', color: '#3B2800' }}
+              style={{ backgroundColor: 'hsl(var(--primary-foreground))', color: 'hsl(var(--foreground))' }}
             >
               <RefreshCw size={16} strokeWidth={2.5} />
               Réessayer

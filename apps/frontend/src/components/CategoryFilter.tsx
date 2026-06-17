@@ -28,15 +28,15 @@ export function CategoryFilter({ active, count, onSelect }: CategoryFilterProps)
           className="px-4 py-2 rounded-xl transition-all text-[13px]"
           style={{
             fontWeight: active === cat ? 600 : 400,
-            backgroundColor: active === cat ? '#3B2800' : '#FEEAD3',
-            color: active === cat ? '#FFDD00' : '#8C6A40',
+            backgroundColor: active === cat ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
+            color: active === cat ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
           }}
         >
           {cat}
         </button>
       ))}
       {count > 0 && (
-        <span className="ml-auto text-[13px]" style={{ color: '#8C6A40' }}>
+        <span className="ml-auto text-[13px]" style={{ color: 'hsl(var(--muted-foreground))' }}>
           {count} application{count > 1 ? 's' : ''}
         </span>
       )}
