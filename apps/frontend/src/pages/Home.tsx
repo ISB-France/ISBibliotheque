@@ -28,14 +28,20 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('Toutes')
+  const [activeGroup, setActiveGroup] = useState<string | null>(null)
+  const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
   const [launching, setLaunching] = useState<string | null>(null)
 
   const fetchApps = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await api.apps.list()
+      const [data, groupsData] = await Promise.all([
+        api.apps.list(),
+        api.groups.list(),
+      ])
       setApps(data)
+      setGroups(groupsData)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue')
     } finally {
@@ -54,7 +60,8 @@ export default function Home() {
       app.description.toLowerCase().includes(search.toLowerCase()) ||
       app.category.toLowerCase().includes(search.toLowerCase())
     const matchCategory = activeCategory === 'Toutes' || app.category === activeCategory
-    return matchSearch && matchCategory
+    const matchGroup = !activeGroup || app.roles.length === 0 || app.roles.includes(activeGroup)
+    return matchSearch && matchCategory && matchGroup
   })
 
   async function handleLaunch(app: AppResponse) {
@@ -110,6 +117,38 @@ export default function Home() {
           </div>
 
 
+        </div>
+
+        <div className="flex items-center gap-2 mb-6 flex-wrap" role="tablist" aria-label="Groupes">
+          <button
+            onClick={() => setActiveGroup(null)}
+            role="tab"
+            aria-selected={!activeGroup}
+            className="px-4 py-2 rounded-xl transition-all text-[13px]"
+            style={{
+              fontWeight: !activeGroup ? 600 : 400,
+              backgroundColor: !activeGroup ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
+              color: !activeGroup ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+            }}
+          >
+            Tous
+          </button>
+          {groups.map((g) => (
+            <button
+              key={g.name}
+              onClick={() => setActiveGroup(g.name)}
+              role="tab"
+              aria-selected={activeGroup === g.name}
+              className="px-4 py-2 rounded-xl transition-all text-[13px]"
+              style={{
+                fontWeight: activeGroup === g.name ? 600 : 400,
+                backgroundColor: activeGroup === g.name ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
+                color: activeGroup === g.name ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+              }}
+            >
+              {g.name}
+            </button>
+          ))}
         </div>
 
         <CategoryFilter

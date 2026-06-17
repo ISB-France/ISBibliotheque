@@ -63,6 +63,7 @@ export interface AppResponse {
   description: string
   category: string
   icon: string
+  roles: string[]
   accessType: 'redirect' | 'docker'
   url: string | null
   status: string | null
@@ -81,6 +82,9 @@ export interface DockerStatus {
 }
 
 export const api = {
+  groups: {
+    list: () => request<{ groups: Array<{ name: string; description: string }> }>('/groups').then(r => r.groups),
+  },
   auth: {
     me: () => request<{ user: AuthUser }>('/auth/me').then(r => r.user),
     logout: () => request<{ message: string; logoutUrl?: string }>('/auth/logout', { method: 'POST' }),

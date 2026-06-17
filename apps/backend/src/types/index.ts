@@ -29,6 +29,7 @@ export interface AppResponse {
   description: string
   category: string
   icon: string
+  roles: string[]
   accessType: AppAccessType
   url: string | null
   status: string | null

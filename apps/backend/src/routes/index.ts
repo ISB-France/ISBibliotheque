@@ -6,6 +6,7 @@ import authRouter from './auth.js'
 import adminRouter from './admin.js'
 import appsAdminRouter from './apps-admin.js'
 import dockerRouter from './docker.js'
+import groupsRouter from './groups.js'
 
 const router: Router = Router()
 
@@ -16,5 +17,6 @@ router.use(authRouter)
 router.use(adminRouter)
 router.use(appsAdminRouter)
 router.use(dockerRouter)
+router.use(groupsRouter)
 
 export default router
