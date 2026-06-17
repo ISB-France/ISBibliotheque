@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ColorThemeProvider } from '@/contexts/ColorThemeContext'
+import { Footer } from '@/components/Footer'
 import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Admin from '@/pages/Admin'
@@ -14,14 +15,19 @@ export default function App() {
     <BrowserRouter>
       <ColorThemeProvider>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/preferences" element={<Preferences />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/help" element={<Help />} />
-          </Routes>
+          <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))' }}>
+            <div className="flex-1">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/preferences" element={<Preferences />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/help" element={<Help />} />
+              </Routes>
+            </div>
+            <Footer />
+          </div>
           <Toaster
             position="bottom-right"
             toastOptions={{

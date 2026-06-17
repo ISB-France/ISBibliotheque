@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react'
 
 export interface ColorTheme {
   id: string
@@ -26,50 +26,21 @@ function getStoredThemeId(): string {
 
 function applyTheme(hue: number) {
   const root = document.documentElement
-  root.style.setProperty('--theme-hue', String(hue))
-
-  const bgLight = 97
-  const fgLight = 12
-  const cardLight = 100
-  const secLight = 93
-  const mutLight = 88
-  const mutFgLight = 48
-  const accLight = 88
-  const borderLight = 88
-  const satPrimary = 100
-  const satBg = 100
-  const satSec = 100
-  const satAcc = 16
-  const satMut = 16
-  const satMutFg = 18
-  const satBorder = 100
-  const priFgHue = 46
-  const priFgSat = 100
-  const priFgLight = 50
-
-  const vars: Record<string, string> = {
-    '--background': `${hue} ${satBg}% ${bgLight}%`,
-    '--foreground': `${hue} ${satPrimary}% ${fgLight}%`,
-    '--card': `0 0% ${cardLight}%`,
-    '--card-foreground': `${hue} ${satPrimary}% ${fgLight}%`,
-    '--popover': `0 0% ${cardLight}%`,
-    '--popover-foreground': `${hue} ${satPrimary}% ${fgLight}%`,
-    '--primary': `${hue} ${satPrimary}% ${fgLight}%`,
-    '--primary-foreground': `${priFgHue} ${priFgSat}% ${priFgLight}%`,
-    '--secondary': `${hue} ${satSec}% ${secLight}%`,
-    '--secondary-foreground': `${hue} ${satPrimary}% ${fgLight}%`,
-    '--muted': `${hue} ${satAcc}% ${mutLight}%`,
-    '--muted-foreground': `${hue} ${satMutFg}% ${mutFgLight}%`,
-    '--accent': `${hue} ${satAcc}% ${accLight}%`,
-    '--accent-foreground': `${hue} ${satPrimary}% ${fgLight}%`,
-    '--border': `${hue} ${satBorder}% ${borderLight}%`,
-    '--input': `${hue} ${satBorder}% ${borderLight}%`,
-    '--ring': `${hue} ${satPrimary}% ${fgLight}%`,
-  }
-
-  for (const [key, value] of Object.entries(vars)) {
-    root.style.setProperty(key, value)
-  }
+  root.style.setProperty('--primary', `${hue} 100% 12%`)
+  root.style.setProperty('--primary-foreground', `46 100% 50%`)
+  root.style.setProperty('--background', `${hue} 100% 97%`)
+  root.style.setProperty('--foreground', `${hue} 100% 12%`)
+  root.style.setProperty('--secondary', `${hue} 100% 93%`)
+  root.style.setProperty('--secondary-foreground', `${hue} 100% 12%`)
+  root.style.setProperty('--muted', `${hue} 16% 88%`)
+  root.style.setProperty('--muted-foreground', `${hue} 18% 48%`)
+  root.style.setProperty('--accent', `${hue} 16% 88%`)
+  root.style.setProperty('--accent-foreground', `${hue} 100% 12%`)
+  root.style.setProperty('--border', `${hue} 100% 88%`)
+  root.style.setProperty('--input', `${hue} 100% 88%`)
+  root.style.setProperty('--ring', `${hue} 100% 12%`)
+  root.style.setProperty('--card-foreground', `${hue} 100% 12%`)
+  root.style.setProperty('--popover-foreground', `${hue} 100% 12%`)
 }
 
 export interface ColorThemeContextValue {
@@ -83,20 +54,19 @@ const ColorThemeContext = createContext<ColorThemeContextValue | null>(null)
 export function ColorThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ColorTheme>(() => {
     const id = getStoredThemeId()
-    return THEMES.find((t) => t.id === id) ?? THEMES[0]
+    const t = THEMES.find((t) => t.id === id) ?? THEMES[0]
+    applyTheme(t.hue)
+    return t
   })
 
-  useEffect(() => {
-    applyTheme(theme.hue)
-  }, [theme])
-
-  const setTheme = useCallback((id: string) => {
+  function setTheme(id: string) {
     const t = THEMES.find((t) => t.id === id)
     if (t) {
+      applyTheme(t.hue)
       setThemeState(t)
       localStorage.setItem(THEME_KEY, id)
     }
-  }, [])
+  }
 
   return (
     <ColorThemeContext.Provider value={{ theme, themes: THEMES, setTheme }}>

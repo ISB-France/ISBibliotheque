@@ -200,28 +200,6 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="border-t mt-16" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2">
-            <ISBLogo size={22} />
-            <span className="text-[13px]" style={{ color: '#8C6A40' }}>
-              &copy; 2026 ISB Group — ISBibliotheque
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            {['Support', 'Documentation', "Conditions d'utilisation"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-[12px] hover:underline"
-                style={{ color: '#8C6A40' }}
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
