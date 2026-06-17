@@ -8,10 +8,8 @@ import { api, type AppResponse } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from '@/components/Header'
 import { AppCard, getAppStyle } from '@/components/AppCard'
-import { CategoryFilter } from '@/components/CategoryFilter'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { ErrorScreen } from '@/components/ErrorScreen'
-import { ISBLogo } from '@/components/ISBLogo'
 
 function getLucideIcon(name: string): LucideIcon {
   const icon = (Lucide as Record<string, unknown>)[name]
@@ -27,7 +25,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [activeCategory, setActiveCategory] = useState('Toutes')
   const [activeGroup, setActiveGroup] = useState<string | null>(null)
   const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
   const [launching, setLaunching] = useState<string | null>(null)
@@ -59,9 +56,8 @@ export default function Home() {
       app.name.toLowerCase().includes(search.toLowerCase()) ||
       app.description.toLowerCase().includes(search.toLowerCase()) ||
       app.category.toLowerCase().includes(search.toLowerCase())
-    const matchCategory = activeCategory === 'Toutes' || app.category === activeCategory
     const matchGroup = !activeGroup || app.roles.length === 0 || app.roles.includes(activeGroup)
-    return matchSearch && matchCategory && matchGroup
+    return matchSearch && matchGroup
   })
 
   async function handleLaunch(app: AppResponse) {
@@ -151,12 +147,6 @@ export default function Home() {
           ))}
         </div>
 
-        <CategoryFilter
-          active={activeCategory}
-          count={filtered.length}
-          onSelect={setActiveCategory}
-        />
-
         {loading ? (
           <div
             className="grid gap-4"
@@ -228,7 +218,7 @@ export default function Home() {
             <button
               onClick={() => {
                 setSearch('')
-                setActiveCategory('Toutes')
+                setActiveGroup(null)
               }}
               className="px-4 py-2 rounded-xl transition-colors text-[13px] font-medium"
               style={{ backgroundColor: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}
