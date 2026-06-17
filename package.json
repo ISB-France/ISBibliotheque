@@ -1,0 +1,40 @@
+{
+  "name": "isbibliotheque",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "ISBibliotheque — Portail Applicatif Interne ISB Group",
+  "scripts": {
+    "dev": "pnpm --filter @isbibliotheque/frontend dev",
+    "dev:frontend": "pnpm --filter @isbibliotheque/frontend dev",
+    "dev:backend": "pnpm --filter @isbibliotheque/backend dev",
+    "build": "pnpm --filter @isbibliotheque/frontend build",
+    "build:backend": "pnpm --filter @isbibliotheque/backend build",
+    "preview": "pnpm --filter @isbibliotheque/frontend preview",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.4",
+    "typescript-eslint": "^8.61.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@10.10.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "overrides": {
+      "vite": "6.3.5"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "@isbibliotheque/backend",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "ISBibliotheque — Backend API",
+  "scripts": {
+    "dev": "prisma migrate deploy && tsx watch src/index.ts",
+    "dev:quick": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "prisma migrate deploy && node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:validate": "prisma validate",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "multer": "^2.2.0",
+    "openid-client": "^6.8.4",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0",
+    "prisma": "^6.19.3",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.4",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^22.15.17",
+    "tsx": "^4.19.4",
+    "typescript": "~5.8.3"
+  }
+}

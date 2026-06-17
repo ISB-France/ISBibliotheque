@@ -1,0 +1,15 @@
+{
+  "$schema": "../../schemas/app-manifest.json",
+  "id": "custom-reporting",
+  "name": "Reporting personnalisé",
+  "description": "Générateur de rapports qualité et indicateurs personnalisés",
+  "category": "Qualité",
+  "icon": "BarChart3",
+  "access": {
+    "type": "docker",
+    "composeFile": "docker-compose.yml",
+    "serviceName": "app",
+    "internalPort": 3000
+  },
+  "roles": ["admin", "quality.manager"]
+}
