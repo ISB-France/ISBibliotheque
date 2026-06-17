@@ -43,11 +43,27 @@ export async function getGroup(name: string): Promise<GroupWithMembers | null> {
   return group ? toGroupWithMembers(group) : null
 }
 
-export async function createGroup(data: { name: string; description: string }): Promise<GroupWithMembers> {
+export async function createGroup(data: { name: string; description: string; members?: string[] }): Promise<GroupWithMembers> {
   const existing = await prisma.group.findUnique({ where: { name: data.name } })
   if (existing) throw new Error(`Le groupe "${data.name}" existe déjà`)
-  const group = await prisma.group.create({ data, include: membersInclude })
-  return toGroupWithMembers(group)
+  const group = await prisma.group.create({
+    data: { name: data.name, description: data.description },
+    include: membersInclude,
+  })
+
+  if (data.members && data.members.length > 0) {
+    for (const email of data.members) {
+      const user = await prisma.user.upsert({
+        where: { email },
+        update: {},
+        create: { email, name: email.split('@')[0] },
+      })
+      await prisma.userGroup.create({ data: { userId: user.id, groupId: group.id } })
+    }
+  }
+
+  const updated = await prisma.group.findUnique({ where: { id: group.id }, include: membersInclude })
+  return toGroupWithMembers(updated!)
 }
 
 export async function updateGroup(

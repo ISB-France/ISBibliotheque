@@ -113,7 +113,7 @@ export const api = {
       request<{ app: AppManifest }>(`/admin/apps/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.app),
     deleteApp: (id: string) => request<void>(`/admin/apps/${id}`, { method: 'DELETE' }),
     listGroups: () => request<{ groups: Array<{ name: string; description: string; members: string[] }> }>('/admin/groups').then(r => r.groups),
-    createGroup: (data: { name: string; description: string }) =>
+    createGroup: (data: { name: string; description: string; members?: string[] }) =>
       request<{ group: { name: string; description: string; members: string[] } }>('/admin/groups', { method: 'POST', body: JSON.stringify(data) }).then(r => r.group),
     updateGroup: (name: string, data: { name?: string; description?: string; members?: string[] }) =>
       request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.group),

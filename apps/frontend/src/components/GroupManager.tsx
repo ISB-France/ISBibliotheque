@@ -30,6 +30,7 @@ export function GroupManager() {
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
+  const [newMembers, setNewMembers] = useState<Set<string>>(new Set())
   const [creating, setCreating] = useState(false)
 
   const fetchData = useCallback(async () => {
@@ -52,16 +53,30 @@ export function GroupManager() {
     fetchData()
   }, [fetchData])
 
+  function toggleNewMember(email: string) {
+    setNewMembers((prev) => {
+      const next = new Set(prev)
+      if (next.has(email)) next.delete(email)
+      else next.add(email)
+      return next
+    })
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (!newName.trim()) return
     setCreating(true)
     try {
-      await api.admin.createGroup({ name: newName.trim(), description: newDesc.trim() })
+      await api.admin.createGroup({
+        name: newName.trim(),
+        description: newDesc.trim(),
+        members: Array.from(newMembers),
+      })
       toast.success(`Groupe "${newName}" créé`)
       setShowCreate(false)
       setNewName('')
       setNewDesc('')
+      setNewMembers(new Set())
       fetchData()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
@@ -141,6 +156,32 @@ export function GroupManager() {
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
             />
+            <div>
+              <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
+                Membres
+              </label>
+              {profiles.length === 0 ? (
+                <p className="text-[13px] text-isb-muted">Aucun profil disponible</p>
+              ) : (
+                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto p-3 rounded-xl border" style={{ borderColor: 'hsl(var(--border))' }}>
+                  {profiles.map((p) => (
+                    <label
+                      key={p.email}
+                      className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors text-[14px]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={newMembers.has(p.email)}
+                        onChange={() => toggleNewMember(p.email)}
+                        className="accent-primary"
+                      />
+                      <span className="text-isb-brown font-medium">{p.name || p.email.split('@')[0]}</span>
+                      <span className="text-[12px] text-isb-muted">{p.email}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={creating}>
                 {creating ? 'Création...' : 'Créer'}

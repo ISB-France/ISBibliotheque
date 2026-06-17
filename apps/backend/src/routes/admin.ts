@@ -39,9 +39,9 @@ router.get('/admin/groups/:name', async (req: Request, res: Response, next: Next
 
 router.post('/admin/groups', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, description } = req.body
+    const { name, description, members } = req.body
     if (!name) { res.status(400).json({ error: { message: 'Le nom du groupe est requis' } }); return }
-    const group = await createGroup({ name, description })
+    const group = await createGroup({ name, description, members })
     res.status(201).json({ group })
   } catch (err) { next(err) }
 })
