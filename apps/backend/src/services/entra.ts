@@ -8,6 +8,7 @@ import {
   randomState,
   ClientSecretBasic,
   None,
+  clockTolerance,
   type Configuration,
 } from 'openid-client'
 import { config } from '../config/index.js'
@@ -41,7 +42,7 @@ async function getConfig(): Promise<Configuration | null> {
     _oidcConfig = await discovery(
       new URL(config.oidcIssuer),
       config.oidcClientId,
-      { redirect_uris: [config.oidcRedirectUri] },
+      { redirect_uris: [config.oidcRedirectUri], [clockTolerance]: 30 },
       clientAuth,
     )
     return _oidcConfig
