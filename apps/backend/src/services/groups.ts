@@ -1,93 +1,99 @@
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { resolve } from 'node:path'
-import { logger } from '../utils/logger.js'
+import { prisma } from './db.js'
 
-const GROUPS_PATH = resolve(process.cwd(), '../../infra/auth/groups.json')
-
-export interface Group {
-  name: string
-  description: string
-  members: string[]
+export async function listGroups() {
+  return prisma.group.findMany({ orderBy: { name: 'asc' } })
 }
 
-function loadGroups(): Group[] {
-  if (!existsSync(GROUPS_PATH)) {
-    logger.warn({ path: GROUPS_PATH }, 'Fichier groups.json introuvable')
-    return []
-  }
-  try {
-    return JSON.parse(readFileSync(GROUPS_PATH, 'utf-8')) as Group[]
-  } catch (err) {
-    logger.error({ err }, 'Erreur lecture groups.json')
-    return []
-  }
+export async function getGroup(name: string) {
+  return prisma.group.findUnique({ where: { name } })
 }
 
-function saveGroups(groups: Group[]): void {
-  writeFileSync(GROUPS_PATH, JSON.stringify(groups, null, 2), 'utf-8')
+export async function createGroup(data: { name: string; description: string }) {
+  const existing = await prisma.group.findUnique({ where: { name: data.name } })
+  if (existing) throw new Error(`Le groupe "${data.name}" existe déjà`)
+  return prisma.group.create({ data })
 }
 
-export function listGroups(): Group[] {
-  return loadGroups()
-}
-
-export function getGroup(name: string): Group | undefined {
-  return loadGroups().find((g) => g.name === name)
-}
-
-export function createGroup(data: Pick<Group, 'name' | 'description'>): Group {
-  const groups = loadGroups()
-  if (groups.some((g) => g.name === data.name)) {
-    throw new Error(`Le groupe "${data.name}" existe déjà`)
-  }
-  const group: Group = { name: data.name, description: data.description ?? '', members: [] }
-  groups.push(group)
-  saveGroups(groups)
-  return group
-}
-
-export function updateGroup(
+export async function updateGroup(
   name: string,
-  data: Partial<Pick<Group, 'description' | 'members'>>,
-): Group {
-  const groups = loadGroups()
-  const idx = groups.findIndex((g) => g.name === name)
-  if (idx === -1) throw new Error(`Groupe "${name}" introuvable`)
-  if (data.description !== undefined) groups[idx].description = data.description
-  if (data.members !== undefined) groups[idx].members = data.members
-  saveGroups(groups)
-  return groups[idx]
-}
+  data: { description?: string; members?: string[] },
+) {
+  if (data.members !== undefined) {
+    const group = await prisma.group.findUnique({ where: { name } })
+    if (!group) throw new Error(`Groupe "${name}" introuvable`)
 
-export function deleteGroup(name: string): void {
-  const groups = loadGroups()
-  const idx = groups.findIndex((g) => g.name === name)
-  if (idx === -1) throw new Error(`Groupe "${name}" introuvable`)
-  groups.splice(idx, 1)
-  saveGroups(groups)
-}
+    await prisma.userGroup.deleteMany({ where: { groupId: group.id } })
 
-export function addMember(groupName: string, email: string): Group {
-  const groups = loadGroups()
-  const idx = groups.findIndex((g) => g.name === groupName)
-  if (idx === -1) throw new Error(`Groupe "${groupName}" introuvable`)
-  if (!groups[idx].members.includes(email)) {
-    groups[idx].members.push(email)
+    for (const email of data.members) {
+      const user = await prisma.user.upsert({
+        where: { email },
+        update: {},
+        create: { email, name: email.split('@')[0] },
+      })
+      await prisma.userGroup.create({ data: { userId: user.id, groupId: group.id } })
+    }
   }
-  saveGroups(groups)
-  return groups[idx]
+
+  if (data.description !== undefined) {
+    return prisma.group.update({ where: { name }, data: { description: data.description } })
+  }
+
+  return prisma.group.findUnique({ where: { name } })
 }
 
-export function removeMember(groupName: string, email: string): Group {
-  const groups = loadGroups()
-  const idx = groups.findIndex((g) => g.name === groupName)
-  if (idx === -1) throw new Error(`Groupe "${groupName}" introuvable`)
-  groups[idx].members = groups[idx].members.filter((m) => m !== email)
-  saveGroups(groups)
-  return groups[idx]
+export async function deleteGroup(name: string): Promise<void> {
+  await prisma.group.delete({ where: { name } })
 }
 
-export function getRolesForEmail(email: string): string[] {
-  const groups = loadGroups()
-  return groups.filter((g) => g.members.includes(email)).map((g) => g.name)
+export async function addMember(groupName: string, email: string) {
+  const group = await prisma.group.findUnique({ where: { name: groupName } })
+  if (!group) throw new Error(`Groupe "${groupName}" introuvable`)
+
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {},
+    create: { email, name: email.split('@')[0] },
+  })
+
+  const existing = await prisma.userGroup.findUnique({
+    where: { userId_groupId: { userId: user.id, groupId: group.id } },
+  })
+  if (!existing) {
+    await prisma.userGroup.create({ data: { userId: user.id, groupId: group.id } })
+  }
+
+  return prisma.group.findUnique({ where: { name: groupName } })
+}
+
+export async function removeMember(groupName: string, email: string) {
+  const group = await prisma.group.findUnique({ where: { name: groupName } })
+  if (!group) throw new Error(`Groupe "${groupName}" introuvable`)
+
+  const user = await prisma.user.findUnique({ where: { email } })
+  if (user) {
+    await prisma.userGroup.deleteMany({
+      where: { userId: user.id, groupId: group.id },
+    })
+  }
+
+  return prisma.group.findUnique({ where: { name: groupName } })
+}
+
+export async function getRolesForEmail(email: string): Promise<string[]> {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { groups: { include: { group: true } } },
+  })
+  if (!user) return []
+  return user.groups.map((ug: { group: { name: string } }) => ug.group.name)
+}
+
+export async function renameMemberInAllGroups(oldEmail: string, newEmail: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email: oldEmail } })
+  if (user) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { email: newEmail },
+    })
+  }
 }

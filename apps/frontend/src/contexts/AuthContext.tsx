@@ -5,7 +5,7 @@ export interface AuthContextValue {
   user: AuthUser | null
   loading: boolean
   error: string | null
-  login: (email: string, password: string) => Promise<void>
+  loginMicrosoft: () => void
   logout: () => Promise<void>
   retry: () => Promise<void>
 }
@@ -37,18 +37,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchMe()
   }, [fetchMe])
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { user: u } = await api.auth.login(email, password)
-    setUser(u)
+  const loginMicrosoft = useCallback(() => {
+    window.location.href = '/api/auth/login'
   }, [])
 
   const logout = useCallback(async () => {
-    await api.auth.logout()
+    const result = await api.auth.logout()
     setUser(null)
+    if (result?.logoutUrl) {
+      window.location.href = result.logoutUrl
+    }
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout, retry: fetchMe }}>
+    <AuthContext.Provider value={{ user, loading, error, loginMicrosoft, logout, retry: fetchMe }}>
       {children}
     </AuthContext.Provider>
   )

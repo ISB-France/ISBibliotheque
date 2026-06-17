@@ -68,6 +68,12 @@ export interface AppResponse {
   status: string | null
 }
 
+export interface UserProfile {
+  email: string
+  name: string
+  icon: string
+}
+
 export interface DockerStatus {
   status: 'running' | 'stopped' | 'error'
   url: string | null
@@ -77,17 +83,19 @@ export interface DockerStatus {
 export const api = {
   auth: {
     me: () => request<{ user: AuthUser }>('/auth/me').then(r => r.user),
-    login: (email: string, password: string) =>
-      request<{ email: string; name: string; roles: string[]; isAdmin: boolean }>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      }).then(r => ({ user: { email: r.email, name: r.name, roles: r.roles, isAdmin: r.isAdmin } })),
-    logout: () => request<void>('/auth/logout', { method: 'POST' }),
-    changePassword: (currentPassword: string, newPassword: string) =>
-      request<{ message: string }>('/auth/change-password', {
-        method: 'POST',
-        body: JSON.stringify({ currentPassword, newPassword }),
+    logout: () => request<{ message: string; logoutUrl?: string }>('/auth/logout', { method: 'POST' }),
+    profile: () =>
+      request<{ profile: UserProfile }>('/auth/profile').then(r => r.profile),
+    updateProfile: (data: { name?: string; icon?: string }) =>
+      request<{ profile: UserProfile; user: AuthUser }>('/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify(data),
       }),
+    loginAdmin: (email: string, password: string) =>
+      request<{ token: string; email: string; name: string; roles: string[]; isAdmin: boolean }>(
+        '/auth/login-admin',
+        { method: 'POST', body: JSON.stringify({ email, password }) },
+      ),
   },
   apps: {
     list: () => request<{ apps: AppResponse[] }>('/apps').then(r => r.apps),
@@ -108,6 +116,13 @@ export const api = {
       request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(groupName)}/members`, { method: 'POST', body: JSON.stringify({ email }) }).then(r => r.group),
     removeGroupMember: (groupName: string, email: string) =>
       request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(groupName)}/members/${encodeURIComponent(email)}`, { method: 'DELETE' }).then(r => r.group),
+    listProfiles: () =>
+      request<{ profiles: UserProfile[] }>('/admin/profiles').then(r => r.profiles),
+    updateProfile: (email: string, data: { name?: string; icon?: string; email?: string }) =>
+      request<{ profile: UserProfile }>(`/admin/profiles/${encodeURIComponent(email)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }).then(r => r.profile),
   },
   docker: {
     start: (id: string) =>

@@ -3,6 +3,7 @@ import helmet from 'helmet'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import pinoHttp from 'pino-http'
+import { resolve } from 'node:path'
 import { logger } from './utils/logger.js'
 import { config } from './config/index.js'
 import routes from './routes/index.js'
@@ -12,10 +13,11 @@ import { notFoundHandler } from './middleware/not-found.js'
 export function createApp(): express.Application {
   const app = express()
 
-  app.use(helmet())
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
   app.use(cors({ origin: config.corsOrigin, credentials: true }))
   app.use(express.json({ limit: '1mb' }))
   app.use(cookieParser())
+  app.use('/uploads', express.static(resolve(process.cwd(), '../../infra/uploads')))
   app.use(
     pinoHttp({
       logger,

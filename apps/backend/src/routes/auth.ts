@@ -1,19 +1,35 @@
 import { Router } from 'express'
 import type { Request, Response, NextFunction } from 'express'
-import rateLimit from 'express-rate-limit'
+import multer from 'multer'
+import { resolve, extname } from 'node:path'
 import { config } from '../config/index.js'
-import { login, loginByEmail } from '../services/auth.js'
+import { prisma } from '../services/db.js'
 import { getAuthorizationUrl, handleCallback, getLogoutUrl } from '../services/entra.js'
-import { requireAuth } from '../middleware/auth.js'
-import { setPassword } from '../services/password-store.js'
-import { UnauthorizedError, ForbiddenError } from '../utils/errors.js'
+import { requireAuth, optionalAuth } from '../middleware/auth.js'
+import { getProfile, upsertProfile } from '../services/profiles.js'
+import { createToken } from '../utils/jwt.js'
+import { verifyPassword } from '../utils/password.js'
+import { logger } from '../utils/logger.js'
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: { message: 'Trop de tentatives, réessayez dans 15 minutes' } },
+const storage = multer.diskStorage({
+  destination: resolve(process.cwd(), '../../infra/uploads/avatars'),
+  filename(_req, file, cb) {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
+    cb(null, `${unique}${extname(file.originalname)}`)
+  },
+})
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter(_req, file, cb) {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml']
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true)
+    } else {
+      cb(new Error('Format d\'image non supporté. Utilisez JPG, PNG, WebP, GIF ou SVG.'))
+    }
+  },
 })
 
 const router: Router = Router()
@@ -32,35 +48,37 @@ function clearTokenCookie(res: Response): void {
   res.clearCookie('token', { path: '/' })
 }
 
-// ── Routes locales ──
+// ── Fallback admin (mot de passe local, sans Entra ID) ──
 
-router.post('/auth/login', limiter, (req: Request, res: Response, next: NextFunction) => {
+router.post('/auth/login-admin', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body
     if (!email || !password) {
       res.status(400).json({ error: { message: 'Email et mot de passe requis' } })
       return
     }
-    const result = login(email, password)
-    if (!result) throw new UnauthorizedError('Email ou mot de passe incorrect')
-    setTokenCookie(res, result.token)
-    res.json(result)
-  } catch (err) {
-    next(err)
-  }
-})
 
-router.post('/auth/login-email', limiter, (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { email } = req.body
-    if (!email) {
-      res.status(400).json({ error: { message: 'Email requis' } })
+    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } })
+    if (!user) {
+      res.status(401).json({ error: { message: 'Email ou mot de passe incorrect' } })
       return
     }
-    const result = loginByEmail(email)
-    if (!result) throw new UnauthorizedError('Email non reconnu')
-    setTokenCookie(res, result.token)
-    res.json(result)
+
+    if (!user.passwordHash || !verifyPassword(password, user.passwordHash)) {
+      res.status(401).json({ error: { message: 'Email ou mot de passe incorrect' } })
+      return
+    }
+
+    const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase()
+    const token = createToken({
+      sub: email,
+      email,
+      name: user.name,
+      roles: isAdmin ? ['admin'] : [],
+      isAdmin,
+    })
+    setTokenCookie(res, token)
+    res.json({ token, email, name: user.name, roles: isAdmin ? ['admin'] : [], isAdmin })
   } catch (err) {
     next(err)
   }
@@ -96,39 +114,96 @@ router.get('/auth/callback', async (req: Request, res: Response, next: NextFunct
   }
 })
 
-router.post('/auth/logout', async (_req: Request, res: Response, next: NextFunction) => {
+router.post('/auth/logout', optionalAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
     clearTokenCookie(res)
-    const url = await getLogoutUrl()
+    const url = await getLogoutUrl(req.user?.email)
     res.json({ message: 'Déconnecté', logoutUrl: url ?? undefined })
   } catch (err) {
     next(err)
   }
 })
 
-router.post('/auth/change-password', requireAuth, (req: Request, res: Response, next: NextFunction) => {
+router.get('/auth/me', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { currentPassword, newPassword } = req.body
-    if (!currentPassword || !newPassword) {
-      res.status(400).json({ error: { message: 'Mot de passe actuel et nouveau mot de passe requis' } })
-      return
-    }
-    if (newPassword.length < 4) {
-      res.status(400).json({ error: { message: 'Le nouveau mot de passe doit faire au moins 4 caractères' } })
-      return
-    }
-    if (!req.user) throw new UnauthorizedError('Authentification requise')
-    const result = login(req.user.email, currentPassword)
-    if (!result) throw new ForbiddenError('Mot de passe actuel incorrect')
-    setPassword(req.user.email, newPassword)
-    res.json({ message: 'Mot de passe modifié avec succès' })
+    const profile = req.user ? await getProfile(req.user.email) : undefined
+    res.json({
+      user: {
+        ...req.user,
+        name: profile?.name ?? req.user?.name,
+        icon: profile?.icon ?? '',
+      },
+    })
+  } catch (err) { next(err) }
+})
+
+// ── Profil utilisateur ──
+
+router.get('/auth/profile', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) return
+    const profile = await getProfile(req.user.email)
+    res.json({
+      profile: {
+        email: req.user.email,
+        name: profile?.name ?? req.user.name,
+        icon: profile?.icon ?? '',
+      },
+    })
+  } catch (err) { next(err) }
+})
+
+router.put('/auth/profile', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) return
+    const { name, icon } = req.body
+    const updated = await upsertProfile(req.user.email, { name, icon })
+    const token = createToken({
+      sub: req.user.email,
+      email: req.user.email,
+      name: updated.name,
+      roles: req.user.roles,
+      isAdmin: req.user.isAdmin,
+    })
+    setTokenCookie(res, token)
+    res.json({
+      profile: updated,
+      token,
+      user: {
+        email: req.user.email,
+        name: updated.name,
+        roles: req.user.roles,
+        isAdmin: req.user.isAdmin,
+      },
+    })
   } catch (err) {
     next(err)
   }
 })
 
-router.get('/auth/me', requireAuth, (req: Request, res: Response) => {
-  res.json({ user: req.user })
+router.post('/auth/profile/avatar', requireAuth, (req: Request, res: Response, next: NextFunction) => {
+  upload.single('avatar')(req, res, (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        res.status(400).json({ error: { message: 'Fichier trop volumineux (max 2 Mo)' } })
+        return
+      }
+      res.status(400).json({ error: { message: err.message } })
+      return
+    }
+    try {
+      if (!req.user || !req.file) {
+        res.status(400).json({ error: { message: 'Aucun fichier fourni' } })
+        return
+      }
+      const avatarUrl = `/uploads/avatars/${req.file.filename}`
+      const updated = upsertProfile(req.user.email, { icon: avatarUrl })
+      logger.info({ email: req.user.email, avatarUrl }, 'Avatar mis à jour')
+      res.json({ profile: updated, url: avatarUrl })
+    } catch (error) {
+      next(error)
+    }
+  })
 })
 
 export default router

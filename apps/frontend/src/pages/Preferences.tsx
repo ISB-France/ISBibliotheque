@@ -55,10 +55,10 @@ export default function Preferences() {
           <ISBLogo size={36} />
           <div className="text-left">
             <div className="text-[16px] font-bold leading-tight font-heading" style={{ color: '#3B2800' }}>
-              ISB Group
+              ISBibliotheque
             </div>
             <div className="text-[11px] leading-tight mt-0.5" style={{ color: '#8C6A40' }}>
-              Portail applicatif
+              Bibliotheque d&apos;application
             </div>
           </div>
         </div>

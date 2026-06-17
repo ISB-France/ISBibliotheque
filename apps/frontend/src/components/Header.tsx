@@ -1,12 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { Search, Bell, ChevronDown, User, Settings, HelpCircle, LogOut, Shield } from 'lucide-react'
 import { ISBLogo } from './ISBLogo'
 import { useAuth } from '@/hooks/useAuth'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
+
+function isImageUrl(str: string): boolean {
+  return str.startsWith('/uploads/') || str.startsWith('http')
+}
 
 interface HeaderProps {
   search?: string
@@ -18,6 +23,7 @@ export function Header({ search, onSearchChange }: HeaderProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState('')
   const isAdmin = user?.isAdmin ?? false
   const initials = user?.name
     ? user.name
@@ -28,6 +34,13 @@ export function Header({ search, onSearchChange }: HeaderProps) {
         .toUpperCase()
     : '??'
   const isHome = location.pathname === '/'
+
+  useEffect(() => {
+    if (!user) return
+    api.auth.profile().then((p) => {
+      if (isImageUrl(p.icon)) setAvatarUrl(p.icon)
+    }).catch(() => {})
+  }, [user])
 
   return (
     <header
@@ -49,7 +62,7 @@ export function Header({ search, onSearchChange }: HeaderProps) {
               className="text-[16px] font-bold leading-tight font-heading"
               style={{ color: '#3B2800' }}
             >
-              ISB Group
+              ISBibliotheque
             </div>
             <div className="text-[11px] leading-tight mt-0.5" style={{ color: '#8C6A40' }}>
               Bibliotheque d&apos;application
@@ -101,9 +114,13 @@ export function Header({ search, onSearchChange }: HeaderProps) {
             aria-expanded={userMenuOpen}
           >
             <Avatar className="w-7 h-7 rounded-lg">
-              <AvatarFallback className="bg-primary text-primary-foreground text-[12px] font-bold rounded-lg">
-                {initials}
-              </AvatarFallback>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="w-full h-full object-cover rounded-lg" />
+              ) : (
+                <AvatarFallback className="bg-primary text-primary-foreground text-[12px] font-bold rounded-lg">
+                  {initials}
+                </AvatarFallback>
+              )}
             </Avatar>
             <span className="text-[13px] font-medium text-isb-brown">
               {user?.name ?? 'Utilisateur'}

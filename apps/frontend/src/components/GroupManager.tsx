@@ -1,11 +1,21 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Plus, Trash2, UserPlus, RefreshCw } from 'lucide-react'
+import { useCallback, useEffect, useState, useRef } from 'react'
+import { Plus, Trash2, UserPlus, RefreshCw, Pencil, Save, X, Camera } from 'lucide-react'
 import { toast } from 'sonner'
-import { api } from '@/lib/api'
+import { api, type UserProfile } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+
+function isImageUrl(str: string): boolean {
+  return str.startsWith('/uploads/') || str.startsWith('http')
+}
+
+const EMOJIS = [
+  '👤', '👨', '👩', '🧑', '👨‍💻', '👩‍💻',
+  '😀', '😎', '🤓', '🦊', '🐱', '🐶',
+  '🌟', '🔥', '💡', '🎯', '🚀', '🌈',
+  '🎨', '🎵', '📚', '⚡', '🌺', '🍀',
+]
 
 interface Group {
   name: string
@@ -15,17 +25,22 @@ interface Group {
 
 export function GroupManager() {
   const [groups, setGroups] = useState<Group[]>([])
+  const [profiles, setProfiles] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
   const [creating, setCreating] = useState(false)
 
-  const fetchGroups = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await api.admin.listGroups()
-      setGroups(data)
+      const [groupsData, profilesData] = await Promise.all([
+        api.admin.listGroups(),
+        api.admin.listProfiles(),
+      ])
+      setGroups(groupsData)
+      setProfiles(profilesData)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
     } finally {
@@ -34,8 +49,8 @@ export function GroupManager() {
   }, [])
 
   useEffect(() => {
-    fetchGroups()
-  }, [fetchGroups])
+    fetchData()
+  }, [fetchData])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -47,7 +62,7 @@ export function GroupManager() {
       setShowCreate(false)
       setNewName('')
       setNewDesc('')
-      fetchGroups()
+      fetchData()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
     } finally {
@@ -60,7 +75,7 @@ export function GroupManager() {
     try {
       await api.admin.deleteGroup(name)
       toast.success(`Groupe "${name}" supprimé`)
-      fetchGroups()
+      fetchData()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
     }
@@ -70,7 +85,7 @@ export function GroupManager() {
     try {
       await api.admin.addGroupMember(groupName, email)
       toast.success(`${email} ajouté à ${groupName}`)
-      fetchGroups()
+      fetchData()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
     }
@@ -81,10 +96,14 @@ export function GroupManager() {
     try {
       await api.admin.removeGroupMember(groupName, email)
       toast.success(`${email} retiré de ${groupName}`)
-      fetchGroups()
+      fetchData()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
     }
+  }
+
+  function getProfileForEmail(email: string): UserProfile | undefined {
+    return profiles.find((p) => p.email === email)
   }
 
   return (
@@ -94,7 +113,7 @@ export function GroupManager() {
           Gérez les groupes d&apos;utilisateurs et leurs accès
         </p>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={fetchGroups}>
+          <Button variant="outline" onClick={fetchData}>
             <RefreshCw size={15} />
             Actualiser
           </Button>
@@ -158,6 +177,8 @@ export function GroupManager() {
               onDelete={() => handleDelete(group.name)}
               onAddMember={(email) => handleAddMember(group.name, email)}
               onRemoveMember={(email) => handleRemoveMember(group.name, email)}
+              getProfileForEmail={getProfileForEmail}
+              onProfileUpdated={fetchData}
             />
           ))}
         </div>
@@ -171,14 +192,19 @@ function GroupCard({
   onDelete,
   onAddMember,
   onRemoveMember,
+  getProfileForEmail,
+  onProfileUpdated,
 }: {
   group: Group
   onDelete: () => void
   onAddMember: (email: string) => void
   onRemoveMember: (email: string) => void
+  getProfileForEmail: (email: string) => UserProfile | undefined
+  onProfileUpdated: () => void
 }) {
   const [showAdd, setShowAdd] = useState(false)
   const [email, setEmail] = useState('')
+  const [editingMember, setEditingMember] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -234,28 +260,226 @@ function GroupCard({
         </div>
       ) : (
         <div className="divide-y">
-          {group.members.map((member) => (
-            <div
-              key={member}
-              className="px-6 py-3 flex items-center justify-between hover:bg-accent/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-secondary">
-                  <span className="text-[11px] font-bold text-isb-muted">
-                    {member[0].toUpperCase()}
-                  </span>
+          {group.members.map((member) =>
+            editingMember === member ? (
+              <MemberEditForm
+                key={member}
+                email={member}
+                profile={getProfileForEmail(member)}
+                onClose={() => setEditingMember(null)}
+                onSaved={onProfileUpdated}
+              />
+            ) : (
+              <div
+                key={member}
+                className="px-6 py-3 flex items-center justify-between hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-secondary text-[14px] overflow-hidden">
+                    {(() => {
+                      const mIcon = getProfileForEmail(member)?.icon
+                      return mIcon && isImageUrl(mIcon) ? (
+                        <img src={mIcon} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        mIcon || member[0].toUpperCase()
+                      )
+                    })()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[14px] font-medium text-isb-brown truncate">
+                      {getProfileForEmail(member)?.name || member.split('@')[0]}
+                    </div>
+                    <div className="text-[11px] text-isb-muted truncate">
+                      {member}
+                    </div>
+                  </div>
                 </div>
-                <span className="text-[14px] text-isb-brown">
-                  {member}
-                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" onClick={() => setEditingMember(member)}>
+                    <Pencil size={13} className="text-isb-muted" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => onRemoveMember(member)}>
+                    <Trash2 size={13} className="text-destructive" />
+                  </Button>
+                </div>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => onRemoveMember(member)}>
-                <Trash2 size={13} className="text-destructive" />
-              </Button>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       )}
     </Card>
+  )
+}
+
+function MemberEditForm({
+  email,
+  profile,
+  onClose,
+  onSaved,
+}: {
+  email: string
+  profile?: UserProfile
+  onClose: () => void
+  onSaved: () => void
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [name, setName] = useState(profile?.name ?? email.split('@')[0])
+  const [icon, setIcon] = useState(profile?.icon ?? '')
+  const [newEmail, setNewEmail] = useState(email)
+  const [showIcons, setShowIcons] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+
+  async function handleAvatarUpload(file: File) {
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image trop volumineuse (max 2 Mo)')
+      return
+    }
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      const res = await fetch('/api/auth/profile/avatar', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err?.error?.message ?? 'Échec upload')
+      }
+      const data = await res.json()
+      setIcon(data.url)
+      toast.success('Avatar mis à jour')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur upload')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handleSave() {
+    if (!name.trim() || !newEmail.trim()) return
+    setSaving(true)
+    try {
+      await api.admin.updateProfile(email, {
+        name: name.trim(),
+        icon,
+        email: newEmail.trim() !== email ? newEmail.trim() : undefined,
+      })
+      toast.success(`Profil de ${email} mis à jour`)
+      onSaved()
+      onClose()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="px-6 py-4 bg-accent/30">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-[13px] font-semibold text-isb-brown">
+          Modifier le profil
+        </span>
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <X size={14} />
+        </Button>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <div
+              className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-secondary text-[18px] overflow-hidden cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {icon && isImageUrl(icon) ? (
+                <img src={icon} alt="" className="w-full h-full object-cover" />
+              ) : (
+                icon || email[0].toUpperCase()
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleAvatarUpload(file)
+                if (fileInputRef.current) fileInputRef.current.value = ''
+              }}
+            />
+          </div>
+          <Input
+            placeholder="Nom"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="flex-1 text-[14px]"
+          />
+        </div>
+
+        <Input
+          placeholder="Email"
+          type="email"
+          value={newEmail}
+          onChange={(e) => setNewEmail(e.target.value)}
+          className="text-[14px]"
+        />
+
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowIcons(!showIcons)}
+          >
+            {isImageUrl(icon) ? '🖼️' : icon || 'Icône'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            <Camera size={13} />
+            {uploading ? '...' : 'Photo'}
+          </Button>
+        </div>
+
+        {showIcons && (
+          <div className="flex flex-wrap gap-1.5">
+            {EMOJIS.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => {
+                  setIcon(emoji)
+                  setShowIcons(false)
+                }}
+                className={`w-8 h-8 flex items-center justify-center rounded-md text-[16px] hover:bg-accent ${
+                  icon === emoji ? 'ring-2 ring-primary ring-offset-1' : ''
+                }`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2 mt-1">
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button size="sm" onClick={handleSave} disabled={saving || uploading}>
+            <Save size={13} />
+            {saving ? 'Enregistrement...' : 'Enregistrer'}
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }

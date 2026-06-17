@@ -11,7 +11,7 @@ const TEMPLATE = `{
   "category": "Gestion",
   "icon": "LayoutGrid",
   "access": {
-    "type": "redirect",
+    "type": "redirect"; "docker",
     "url": "https://"
   },
   "roles": ["admin"]

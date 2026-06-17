@@ -12,9 +12,15 @@ import {
 } from 'openid-client'
 import { config } from '../config/index.js'
 import { createToken } from '../utils/jwt.js'
-import { getRolesForEmail } from './groups.js'
 import { logger } from '../utils/logger.js'
-import type { AuthResult } from './auth.js'
+
+export interface AuthResult {
+  token: string
+  email: string
+  name: string
+  roles: string[]
+  isAdmin: boolean
+}
 
 interface Session {
   codeVerifier: string
@@ -23,6 +29,7 @@ interface Session {
 
 let _oidcConfig: Configuration | null = null
 const sessions = new Map<string, Session>()
+const idTokens = new Map<string, string>()
 
 async function getConfig(): Promise<Configuration | null> {
   if (_oidcConfig) return _oidcConfig
@@ -99,9 +106,12 @@ export async function handleCallback(params: Record<string, string>): Promise<Au
     const entraRoles: string[] = (claims.roles as string[]) ?? []
 
     const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase()
-    const roles = isAdmin ? ['admin'] : entraRoles.length > 0 ? entraRoles : getRolesForEmail(email)
+    const roles = isAdmin ? ['admin'] : entraRoles
 
-    if (!isAdmin && roles.length === 0) return null
+    const rawIdToken = (tokens as unknown as { id_token?: string }).id_token
+    if (rawIdToken) {
+      idTokens.set(email, rawIdToken)
+    }
 
     const token = createToken({
       sub: claims.sub as string,
@@ -117,12 +127,20 @@ export async function handleCallback(params: Record<string, string>): Promise<Au
   }
 }
 
-export async function getLogoutUrl(): Promise<string | null> {
+export async function getLogoutUrl(email?: string): Promise<string | null> {
   const oidcConfig = await getConfig()
   if (!oidcConfig) return null
 
-  const url = buildEndSessionUrl(oidcConfig, {
+  const params: Record<string, string> = {
     post_logout_redirect_uri: config.appUrl,
-  })
+  }
+  if (email) {
+    const idToken = idTokens.get(email)
+    if (idToken) {
+      params.id_token_hint = idToken
+    }
+  }
+
+  const url = buildEndSessionUrl(oidcConfig, params)
   return String(url)
 }

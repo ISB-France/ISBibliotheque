@@ -41,6 +41,7 @@ tmp/
 coverage/
 report/
 *.cache
+apps/backend/src/generated/
 pnpm-lock.yaml
 
 # Large files
@@ -53,3 +54,10 @@ pnpm-lock.yaml
 
 # Docker
 .docker/
+.dockershortcut
+
+# Uploads (avatars, etc.)
+infra/uploads/
+
+# User profiles (auto-generated from DB)
+infra/auth/profiles.json

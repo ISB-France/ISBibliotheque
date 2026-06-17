@@ -1,4 +1,20 @@
 services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: isbibliotheque
+      POSTGRES_USER: isb
+      POSTGRES_PASSWORD: isb-dev-password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U isb -d isbibliotheque"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: .
@@ -8,6 +24,7 @@ services:
     volumes:
       - ./infra:/app/infra
       - ./apps/backend/src:/app/apps/backend/src
+      - ./apps/backend/prisma:/app/apps/backend/prisma
     env_file:
       - .env
     environment:
@@ -16,7 +33,11 @@ services:
       - LOG_LEVEL=debug
       - CORS_ORIGIN=http://localhost:5173
       - APP_URL=http://localhost:5173
+      - OIDC_REDIRECT_URI=http://localhost:3001/api/auth/callback
       - CHOKIDAR_USEPOLLING=1
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
     build:
@@ -30,3 +51,6 @@ services:
       - backend
     environment:
       - VITE_API_PROXY_TARGET=http://backend:4000
+
+volumes:
+  pgdata:
