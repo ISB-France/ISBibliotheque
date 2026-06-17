@@ -21,18 +21,16 @@ function toGroupWithMembers(group: {
   }
 }
 
-function includeMembers() {
-  return {
-    members: {
-      include: { user: { select: { email: true } } },
-    },
-  } as const
-}
+const membersInclude = {
+  members: {
+    include: { user: { select: { email: true } } },
+  },
+} as const
 
 export async function listGroups(): Promise<GroupWithMembers[]> {
   const groups = await prisma.group.findMany({
     orderBy: { name: 'asc' },
-    ...includeMembers(),
+    include: membersInclude,
   })
   return groups.map(toGroupWithMembers)
 }
@@ -40,7 +38,7 @@ export async function listGroups(): Promise<GroupWithMembers[]> {
 export async function getGroup(name: string): Promise<GroupWithMembers | null> {
   const group = await prisma.group.findUnique({
     where: { name },
-    ...includeMembers(),
+    include: membersInclude,
   })
   return group ? toGroupWithMembers(group) : null
 }
@@ -48,7 +46,7 @@ export async function getGroup(name: string): Promise<GroupWithMembers | null> {
 export async function createGroup(data: { name: string; description: string }): Promise<GroupWithMembers> {
   const existing = await prisma.group.findUnique({ where: { name: data.name } })
   if (existing) throw new Error(`Le groupe "${data.name}" existe déjà`)
-  const group = await prisma.group.create({ data, ...includeMembers() })
+  const group = await prisma.group.create({ data, include: membersInclude })
   return toGroupWithMembers(group)
 }
 
@@ -76,7 +74,7 @@ export async function updateGroup(
     await prisma.group.update({ where: { name }, data: { description: data.description } })
   }
 
-  const updated = await prisma.group.findUnique({ where: { name }, ...includeMembers() })
+  const updated = await prisma.group.findUnique({ where: { name }, include: membersInclude })
   return toGroupWithMembers(updated!)
 }
 
@@ -101,7 +99,7 @@ export async function addMember(groupName: string, email: string): Promise<Group
     await prisma.userGroup.create({ data: { userId: user.id, groupId: group.id } })
   }
 
-  const updated = await prisma.group.findUnique({ where: { name: groupName }, ...includeMembers() })
+  const updated = await prisma.group.findUnique({ where: { name: groupName }, include: membersInclude })
   return toGroupWithMembers(updated!)
 }
 
@@ -116,7 +114,7 @@ export async function removeMember(groupName: string, email: string): Promise<Gr
     })
   }
 
-  const updated = await prisma.group.findUnique({ where: { name: groupName }, ...includeMembers() })
+  const updated = await prisma.group.findUnique({ where: { name: groupName }, include: membersInclude })
   return toGroupWithMembers(updated!)
 }
 
