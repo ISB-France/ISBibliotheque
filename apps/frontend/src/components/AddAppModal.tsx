@@ -53,10 +53,8 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
     const roles = Array.from(selectedGroups)
     const rolesField = roles.length > 0 ? { roles } : { roles: [] }
 
-    const access =
-      accessType === 'redirect'
-        ? { type: 'redirect' as const, url: url.trim() || 'https://' }
-        : undefined
+    const redirectUrl = url.trim()
+    const validUrl = redirectUrl && redirectUrl !== 'https://'
 
     if (isEdit) {
       const patch: Record<string, unknown> = {
@@ -65,7 +63,9 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
         category,
         ...rolesField,
       }
-      if (access) patch.access = access
+      if (accessType === 'redirect' && validUrl) {
+        patch.access = { type: 'redirect' as const, url: redirectUrl }
+      }
       setSubmitting(true)
       try {
         await onAdd(JSON.stringify(patch, null, 2))
@@ -79,6 +79,10 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
     }
 
     const id = name.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/\s+/g, '-')
+
+    const access = accessType === 'redirect'
+      ? { type: 'redirect' as const, url: validUrl ? redirectUrl : 'https://placeholder.com' }
+      : { type: 'docker' as const, composeFile: 'docker-compose.yml', serviceName: 'app', internalPort: 8080 }
 
     const manifest = {
       id,
