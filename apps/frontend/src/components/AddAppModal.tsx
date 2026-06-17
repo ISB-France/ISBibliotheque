@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react'
-import { X, Plus, Globe } from 'lucide-react'
+import { X, Plus } from 'lucide-react'
+import type { AppResponse } from '@/lib/api'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { api } from '@/lib/api'
 
 interface AddAppModalProps {
+  app?: AppResponse
   onClose: () => void
   onAdd: (json: string) => Promise<void>
 }
 
-export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('')
-  const [url, setUrl] = useState('')
+export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
+  const isEdit = !!app
+  const [name, setName] = useState(app?.name ?? '')
+  const [description, setDescription] = useState(app?.description ?? '')
+  const [category, setCategory] = useState(app?.category ?? '')
+  const [url, setUrl] = useState(app?.url ?? '')
   const [categories, setCategories] = useState<string[]>([])
   const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
-  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set())
+  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set(app?.roles ?? []))
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -46,8 +49,29 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
     if (!name.trim()) { setError('Le nom est requis.'); return }
     if (!category) { setError('La catégorie est requise.'); return }
 
-    const id = name.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/\s+/g, '-')
     const roles = Array.from(selectedGroups)
+    const rolesField = roles.length > 0 ? { roles } : { roles: [] }
+
+    if (isEdit) {
+      const patch = {
+        name: name.trim(),
+        description: description.trim(),
+        category,
+        ...rolesField,
+      }
+      setSubmitting(true)
+      try {
+        await onAdd(JSON.stringify(patch, null, 2))
+        onClose()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erreur lors de la modification')
+      } finally {
+        setSubmitting(false)
+      }
+      return
+    }
+
+    const id = name.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/\s+/g, '-')
 
     const manifest = {
       id,
@@ -59,7 +83,7 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
         type: 'redirect' as const,
         url: url.trim() || 'https://',
       },
-      ...(roles.length > 0 ? { roles } : {}),
+      ...rolesField,
     }
 
     setSubmitting(true)
@@ -67,7 +91,7 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
       await onAdd(JSON.stringify(manifest, null, 2))
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la création')
+      setError(err instanceof Error ? err.message : 'Erreur lors de la creation')
     } finally {
       setSubmitting(false)
     }
@@ -80,10 +104,10 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-[20px] font-bold font-heading text-isb-brown">
-              Ajouter une application
+              {isEdit ? "Modifier l'application" : 'Ajouter une application'}
             </h2>
             <p className="text-[13px] mt-0.5 text-isb-muted">
-              Nouvelle application &mdash; ID généré automatiquement
+              {isEdit ? 'Modifier les acces et la categorie' : 'Nouvelle application - ID genere automatiquement'}
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer">
@@ -101,6 +125,7 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={isEdit}
             />
           </div>
 
@@ -117,7 +142,7 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
 
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
-              Catégorie
+              Categorie
             </label>
             <select
               value={category}
@@ -126,13 +151,14 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
               className="w-full h-10 px-3 rounded-xl border bg-background text-[14px] text-foreground outline-none focus:ring-2 focus:ring-primary"
               style={{ borderColor: 'hsl(var(--border))' }}
             >
-              <option value="">Sélectionner une catégorie</option>
+              <option value="">Selectionner une categorie</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
 
+          {!isEdit && (
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
               URL de redirection
@@ -143,10 +169,11 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
               onChange={(e) => setUrl(e.target.value)}
             />
           </div>
+          )}
 
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
-              Groupes d&rsquo;accès
+              Groupes d&rsquo;acces
             </label>
             {groups.length === 0 ? (
               <p className="text-[13px] text-isb-muted">Aucun groupe disponible</p>
@@ -189,7 +216,7 @@ export function AddAppModal({ onClose, onAdd }: AddAppModalProps) {
               ) : (
                 <Plus size={16} />
               )}
-              Créer l&rsquo;application
+              {isEdit ? "Enregistrer" : "Creer l'application"}
             </Button>
           </div>
         </form>

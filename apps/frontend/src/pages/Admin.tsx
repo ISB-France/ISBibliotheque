@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Plus, Trash2, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Plus, Trash2, Pencil, ArrowLeft, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type AppResponse } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
@@ -29,6 +29,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [editingApp, setEditingApp] = useState<AppResponse | null>(null)
   const [tab, setTab] = useState<'apps' | 'groups'>('apps')
 
   const fetchApps = useCallback(async () => {
@@ -63,6 +64,15 @@ export default function Admin() {
     const data = JSON.parse(json) as Parameters<typeof api.admin.createApp>[0]
     await api.admin.createApp(data)
     toast.success(`Application "${data.name}" créée`)
+    fetchApps()
+  }
+
+  async function handleEditApp(id: string, json: string) {
+    const data = JSON.parse(json) as Record<string, unknown>
+    const { id: _, ...patch } = data
+    await api.admin.updateApp(id, patch)
+    toast.success('Application mise à jour')
+    setEditingApp(null)
     fetchApps()
   }
 
@@ -177,6 +187,14 @@ export default function Admin() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => setEditingApp(app)}
+                        aria-label={`Modifier ${app.name}`}
+                      >
+                        <Pencil size={14} className="text-isb-muted" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleDelete(app.id, app.name)}
                         aria-label={`Supprimer ${app.name}`}
                       >
@@ -192,6 +210,13 @@ export default function Admin() {
       </main>
 
       {showModal && <AddAppModal onClose={() => setShowModal(false)} onAdd={handleAddApp} />}
+      {editingApp && (
+        <AddAppModal
+          app={editingApp}
+          onClose={() => setEditingApp(null)}
+          onAdd={(json) => handleEditApp(editingApp.id, json)}
+        />
+      )}
     </div>
   )
 }
