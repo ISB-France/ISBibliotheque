@@ -52,12 +52,14 @@ export async function createGroup(data: { name: string; description: string }): 
 
 export async function updateGroup(
   name: string,
-  data: { description?: string; members?: string[] },
+  data: { name?: string; description?: string; members?: string[] },
 ): Promise<GroupWithMembers> {
-  if (data.members !== undefined) {
-    const group = await prisma.group.findUnique({ where: { name } })
-    if (!group) throw new Error(`Groupe "${name}" introuvable`)
+  const group = await prisma.group.findUnique({ where: { name } })
+  if (!group) throw new Error(`Groupe "${name}" introuvable`)
 
+  const targetName = data.name ?? name
+
+  if (data.members !== undefined) {
     await prisma.userGroup.deleteMany({ where: { groupId: group.id } })
 
     for (const email of data.members) {
@@ -70,11 +72,14 @@ export async function updateGroup(
     }
   }
 
-  if (data.description !== undefined) {
-    await prisma.group.update({ where: { name }, data: { description: data.description } })
+  const updateData: Record<string, string> = {}
+  if (data.name !== undefined) updateData.name = data.name
+  if (data.description !== undefined) updateData.description = data.description
+  if (Object.keys(updateData).length > 0) {
+    await prisma.group.update({ where: { id: group.id }, data: updateData })
   }
 
-  const updated = await prisma.group.findUnique({ where: { name }, include: membersInclude })
+  const updated = await prisma.group.findUnique({ where: { id: group.id }, include: membersInclude })
   return toGroupWithMembers(updated!)
 }
 

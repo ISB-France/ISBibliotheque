@@ -111,6 +111,8 @@ export const api = {
     listGroups: () => request<{ groups: Array<{ name: string; description: string; members: string[] }> }>('/admin/groups').then(r => r.groups),
     createGroup: (data: { name: string; description: string }) =>
       request<{ group: { name: string; description: string; members: string[] } }>('/admin/groups', { method: 'POST', body: JSON.stringify(data) }).then(r => r.group),
+    updateGroup: (name: string, data: { name?: string; description?: string; members?: string[] }) =>
+      request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.group),
     deleteGroup: (name: string) => request<void>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'DELETE' }),
     addGroupMember: (groupName: string, email: string) =>
       request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(groupName)}/members`, { method: 'POST', body: JSON.stringify({ email }) }).then(r => r.group),

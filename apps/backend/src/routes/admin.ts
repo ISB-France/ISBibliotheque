@@ -48,8 +48,8 @@ router.post('/admin/groups', async (req: Request, res: Response, next: NextFunct
 
 router.put('/admin/groups/:name', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { description, members } = req.body
-    const group = await updateGroup(String(req.params.name), { description, members })
+    const { name, description, members } = req.body
+    const group = await updateGroup(String(req.params.name), { name, description, members })
     res.json({ group })
   } catch (err) { next(err) }
 })

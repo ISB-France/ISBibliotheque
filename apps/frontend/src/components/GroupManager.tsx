@@ -205,6 +205,10 @@ function GroupCard({
   const [showAdd, setShowAdd] = useState(false)
   const [email, setEmail] = useState('')
   const [editingMember, setEditingMember] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState(group.name)
+  const [editDesc, setEditDesc] = useState(group.description)
+  const [savingGroup, setSavingGroup] = useState(false)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -214,27 +218,85 @@ function GroupCard({
     setShowAdd(false)
   }
 
+  async function handleSaveGroup() {
+    if (!editName.trim()) return
+    setSavingGroup(true)
+    try {
+      await api.admin.updateGroup(group.name, {
+        name: editName.trim() !== group.name ? editName.trim() : undefined,
+        description: editDesc.trim() !== group.description ? editDesc.trim() : undefined,
+      })
+      toast.success(`Groupe mis à jour`)
+      setEditing(false)
+      onProfileUpdated()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur')
+    } finally {
+      setSavingGroup(false)
+    }
+  }
+
+  function handleCancelEdit() {
+    setEditName(group.name)
+    setEditDesc(group.description)
+    setEditing(false)
+  }
+
   return (
     <Card>
       <div className="px-6 py-4 flex items-center justify-between border-b">
-        <div>
-          <div className="text-[16px] font-bold font-heading text-isb-brown">
-            {group.name}
+        {editing ? (
+          <div className="flex-1 flex flex-col gap-2 mr-4">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Nom du groupe"
+              className="text-[14px] font-bold font-heading"
+            />
+            <Input
+              value={editDesc}
+              onChange={(e) => setEditDesc(e.target.value)}
+              placeholder="Description (optionnelle)"
+              className="text-[13px]"
+            />
           </div>
-          {group.description && (
-            <div className="text-[13px] mt-0.5 text-isb-muted">
-              {group.description}
+        ) : (
+          <div>
+            <div className="text-[16px] font-bold font-heading text-isb-brown">
+              {group.name}
             </div>
+            {group.description && (
+              <div className="text-[13px] mt-0.5 text-isb-muted">
+                {group.description}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {editing ? (
+            <>
+              <Button size="sm" onClick={handleSaveGroup} disabled={savingGroup}>
+                <Save size={14} />
+                {savingGroup ? '...' : 'Enregistrer'}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
+                <X size={14} />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" onClick={() => setShowAdd(!showAdd)}>
+                <UserPlus size={14} />
+                Ajouter un membre
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setEditing(true)}>
+                <Pencil size={14} className="text-isb-muted" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={onDelete}>
+                <Trash2 size={15} className="text-destructive" />
+              </Button>
+            </>
           )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowAdd(!showAdd)}>
-            <UserPlus size={14} />
-            Ajouter un membre
-          </Button>
-          <Button variant="ghost" size="icon" onClick={onDelete}>
-            <Trash2 size={15} className="text-destructive" />
-          </Button>
         </div>
       </div>
 
