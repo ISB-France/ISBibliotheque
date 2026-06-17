@@ -5,6 +5,7 @@ import { api, type UserProfile } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 function isImageUrl(str: string): boolean {
   return str.startsWith('/uploads/') || str.startsWith('http')
@@ -32,6 +33,7 @@ export function GroupManager() {
   const [newDesc, setNewDesc] = useState('')
   const [newMembers, setNewMembers] = useState<Set<string>>(new Set())
   const [creating, setCreating] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     try {
@@ -86,10 +88,10 @@ export function GroupManager() {
   }
 
   async function handleDelete(name: string) {
-    if (!window.confirm(`Supprimer le groupe "${name}" ?`)) return
     try {
       await api.admin.deleteGroup(name)
       toast.success(`Groupe "${name}" supprimé`)
+      setConfirmDelete(null)
       fetchData()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
@@ -107,7 +109,6 @@ export function GroupManager() {
   }
 
   async function handleRemoveMember(groupName: string, email: string) {
-    if (!window.confirm(`Retirer ${email} de "${groupName}" ?`)) return
     try {
       await api.admin.removeGroupMember(groupName, email)
       toast.success(`${email} retiré de ${groupName}`)
@@ -215,7 +216,7 @@ export function GroupManager() {
             <GroupCard
               key={group.name}
               group={group}
-              onDelete={() => handleDelete(group.name)}
+              onDelete={() => setConfirmDelete(group.name)}
               onAddMember={(email) => handleAddMember(group.name, email)}
               onRemoveMember={(email) => handleRemoveMember(group.name, email)}
               getProfileForEmail={getProfileForEmail}
@@ -224,6 +225,15 @@ export function GroupManager() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Supprimer le groupe"
+        message={`Supprimer le groupe "${confirmDelete}" ? Cette action est irreversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={() => handleDelete(confirmDelete!)}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   )
 }
@@ -250,6 +260,7 @@ function GroupCard({
   const [editName, setEditName] = useState(group.name)
   const [editDesc, setEditDesc] = useState(group.description)
   const [savingGroup, setSavingGroup] = useState(false)
+  const [confirmRemoveMember, setConfirmRemoveMember] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -401,7 +412,7 @@ function GroupCard({
                   <Button variant="ghost" size="icon" onClick={() => setEditingMember(member)}>
                     <Pencil size={13} className="text-isb-muted" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => onRemoveMember(member)}>
+                  <Button variant="ghost" size="icon" onClick={() => setConfirmRemoveMember(member)}>
                     <Trash2 size={13} className="text-destructive" />
                   </Button>
                 </div>
@@ -410,6 +421,18 @@ function GroupCard({
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmRemoveMember}
+        title="Retirer un membre"
+        message={`Retirer "${confirmRemoveMember}" de "${group.name}" ?`}
+        confirmLabel="Retirer"
+        onConfirm={() => {
+          onRemoveMember(confirmRemoveMember!)
+          setConfirmRemoveMember(null)
+        }}
+        onCancel={() => setConfirmRemoveMember(null)}
+      />
     </Card>
   )
 }

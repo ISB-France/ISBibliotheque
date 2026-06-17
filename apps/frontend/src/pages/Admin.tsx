@@ -10,6 +10,7 @@ import { ErrorScreen } from '@/components/ErrorScreen'
 import { NotAuthorizedScreen } from '@/components/NotAuthorizedScreen'
 import { AddAppModal } from '@/components/AddAppModal'
 import { GroupManager } from '@/components/GroupManager'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -31,6 +32,7 @@ export default function Admin() {
   const [showModal, setShowModal] = useState(false)
   const [editingApp, setEditingApp] = useState<AppResponse | null>(null)
   const [tab, setTab] = useState<'apps' | 'groups'>('apps')
+  const [confirmDeleteApp, setConfirmDeleteApp] = useState<{ id: string; name: string } | null>(null)
 
   const fetchApps = useCallback(async () => {
     try {
@@ -50,10 +52,10 @@ export default function Admin() {
   }, [authLoading, fetchApps])
 
   async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Supprimer l'application "${name}" ?`)) return
     try {
       await api.admin.deleteApp(id)
       toast.success(`"${name}" supprimée`)
+      setConfirmDeleteApp(null)
       fetchApps()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
@@ -195,7 +197,7 @@ export default function Admin() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(app.id, app.name)}
+                        onClick={() => setConfirmDeleteApp({ id: app.id, name: app.name })}
                         aria-label={`Supprimer ${app.name}`}
                       >
                         <Trash2 size={15} className="text-destructive" />
@@ -209,6 +211,14 @@ export default function Admin() {
         )}
       </main>
 
+      <ConfirmDialog
+        open={!!confirmDeleteApp}
+        title="Supprimer l'application"
+        message={`Supprimer l'application "${confirmDeleteApp?.name}" ? Cette action est irreversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={() => handleDelete(confirmDeleteApp!.id, confirmDeleteApp!.name)}
+        onCancel={() => setConfirmDeleteApp(null)}
+      />
       {showModal && <AddAppModal onClose={() => setShowModal(false)} onAdd={handleAddApp} />}
       {editingApp && (
         <AddAppModal
