@@ -16,6 +16,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
   const [name, setName] = useState(app?.name ?? '')
   const [description, setDescription] = useState(app?.description ?? '')
   const [category, setCategory] = useState(app?.category ?? '')
+  const [accessType, setAccessType] = useState<'redirect' | 'docker'>(app?.accessType ?? 'redirect')
   const [url, setUrl] = useState(app?.url ?? '')
   const [categories, setCategories] = useState<string[]>([])
   const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
@@ -52,13 +53,19 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
     const roles = Array.from(selectedGroups)
     const rolesField = roles.length > 0 ? { roles } : { roles: [] }
 
+    const access =
+      accessType === 'redirect'
+        ? { type: 'redirect' as const, url: url.trim() || 'https://' }
+        : undefined
+
     if (isEdit) {
-      const patch = {
+      const patch: Record<string, unknown> = {
         name: name.trim(),
         description: description.trim(),
         category,
         ...rolesField,
       }
+      if (access) patch.access = access
       setSubmitting(true)
       try {
         await onAdd(JSON.stringify(patch, null, 2))
@@ -79,10 +86,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       description: description.trim(),
       category,
       icon: 'LayoutGrid',
-      access: {
-        type: 'redirect' as const,
-        url: url.trim() || 'https://',
-      },
+      access,
       ...rolesField,
     }
 
@@ -158,7 +162,22 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
             </select>
           </div>
 
-          {!isEdit && (
+          <div>
+            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
+              Type d&rsquo;acces
+            </label>
+            <select
+              value={accessType}
+              onChange={(e) => setAccessType(e.target.value as 'redirect' | 'docker')}
+              className="w-full h-10 px-3 rounded-xl border bg-background text-[14px] text-foreground outline-none focus:ring-2 focus:ring-primary"
+              style={{ borderColor: 'hsl(var(--border))' }}
+            >
+              <option value="redirect">Redirection (URL)</option>
+              <option value="docker">Docker</option>
+            </select>
+          </div>
+
+          {accessType === 'redirect' && (
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
               URL de redirection
