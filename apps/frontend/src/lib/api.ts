@@ -63,6 +63,7 @@ export interface AppResponse {
   description: string
   category: string
   icon: string
+  roles: string[]
   accessType: 'redirect' | 'docker'
   url: string | null
   status: string | null
@@ -81,6 +82,9 @@ export interface DockerStatus {
 }
 
 export const api = {
+  groups: {
+    list: () => request<{ groups: Array<{ name: string; description: string }> }>('/groups').then(r => r.groups),
+  },
   auth: {
     me: () => request<{ user: AuthUser }>('/auth/me').then(r => r.user),
     logout: () => request<{ message: string; logoutUrl?: string }>('/auth/logout', { method: 'POST' }),
@@ -109,8 +113,10 @@ export const api = {
       request<{ app: AppManifest }>(`/admin/apps/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.app),
     deleteApp: (id: string) => request<void>(`/admin/apps/${id}`, { method: 'DELETE' }),
     listGroups: () => request<{ groups: Array<{ name: string; description: string; members: string[] }> }>('/admin/groups').then(r => r.groups),
-    createGroup: (data: { name: string; description: string }) =>
+    createGroup: (data: { name: string; description: string; members?: string[] }) =>
       request<{ group: { name: string; description: string; members: string[] } }>('/admin/groups', { method: 'POST', body: JSON.stringify(data) }).then(r => r.group),
+    updateGroup: (name: string, data: { name?: string; description?: string; members?: string[] }) =>
+      request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.group),
     deleteGroup: (name: string) => request<void>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'DELETE' }),
     addGroupMember: (groupName: string, email: string) =>
       request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(groupName)}/members`, { method: 'POST', body: JSON.stringify({ email }) }).then(r => r.group),

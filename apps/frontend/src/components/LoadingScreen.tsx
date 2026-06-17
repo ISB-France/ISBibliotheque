@@ -2,7 +2,7 @@ import { ISBLogo } from './ISBLogo'
 
 export function LoadingScreen() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FDFAF5' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--background))' }}>
       <header
         className="sticky top-0 z-40 border-b"
         style={{
@@ -17,11 +17,11 @@ export function LoadingScreen() {
             <div>
               <div
                 className="text-[16px] font-bold leading-tight font-heading"
-                style={{ color: '#3B2800' }}
+                style={{ color: 'hsl(var(--foreground))' }}
               >
                 ISBibliotheque
               </div>
-              <div className="text-[11px] leading-tight mt-0.5" style={{ color: '#8C6A40' }}>
+              <div className="text-[11px] leading-tight mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
                 Bibliotheque d&apos;application
               </div>
             </div>
@@ -33,11 +33,11 @@ export function LoadingScreen() {
         <div className="mb-8">
           <div
             className="h-8 w-64 rounded-xl animate-pulse"
-            style={{ backgroundColor: '#FDD5A5' }}
+            style={{ backgroundColor: 'hsl(var(--muted))' }}
           />
           <div
             className="h-5 w-96 rounded-lg mt-2 animate-pulse"
-            style={{ backgroundColor: '#FEEAD3' }}
+            style={{ backgroundColor: 'hsl(var(--secondary))' }}
           />
         </div>
         <div className="flex items-center gap-2 mb-8">
@@ -45,7 +45,7 @@ export function LoadingScreen() {
             <div
               key={i}
               className="h-9 w-20 rounded-xl animate-pulse"
-              style={{ backgroundColor: '#FEEAD3' }}
+              style={{ backgroundColor: 'hsl(var(--secondary))' }}
             />
           ))}
         </div>
@@ -60,23 +60,23 @@ export function LoadingScreen() {
             >
               <div
                 className="w-14 h-14 rounded-xl animate-pulse"
-                style={{ backgroundColor: '#FEEAD3' }}
+                style={{ backgroundColor: 'hsl(var(--secondary))' }}
               />
               <div
                 className="h-5 w-20 rounded-full animate-pulse"
-                style={{ backgroundColor: '#FEEAD3' }}
+                style={{ backgroundColor: 'hsl(var(--secondary))' }}
               />
               <div
                 className="h-4 w-3/4 rounded-lg animate-pulse"
-                style={{ backgroundColor: '#FDD5A5' }}
+                style={{ backgroundColor: 'hsl(var(--muted))' }}
               />
               <div
                 className="h-3 w-full rounded-lg animate-pulse"
-                style={{ backgroundColor: '#FEEAD3' }}
+                style={{ backgroundColor: 'hsl(var(--secondary))' }}
               />
               <div
                 className="h-3 w-2/3 rounded-lg animate-pulse"
-                style={{ backgroundColor: '#FEEAD3' }}
+                style={{ backgroundColor: 'hsl(var(--secondary))' }}
               />
             </div>
           ))}

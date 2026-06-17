@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Plus, Trash2, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Plus, Trash2, Pencil, ArrowLeft, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type AppResponse } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
@@ -10,6 +10,7 @@ import { ErrorScreen } from '@/components/ErrorScreen'
 import { NotAuthorizedScreen } from '@/components/NotAuthorizedScreen'
 import { AddAppModal } from '@/components/AddAppModal'
 import { GroupManager } from '@/components/GroupManager'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -29,7 +30,9 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [editingApp, setEditingApp] = useState<AppResponse | null>(null)
   const [tab, setTab] = useState<'apps' | 'groups'>('apps')
+  const [confirmDeleteApp, setConfirmDeleteApp] = useState<{ id: string; name: string } | null>(null)
 
   const fetchApps = useCallback(async () => {
     try {
@@ -49,10 +52,10 @@ export default function Admin() {
   }, [authLoading, fetchApps])
 
   async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Supprimer l'application "${name}" ?`)) return
     try {
       await api.admin.deleteApp(id)
       toast.success(`"${name}" supprimée`)
+      setConfirmDeleteApp(null)
       fetchApps()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
@@ -63,6 +66,15 @@ export default function Admin() {
     const data = JSON.parse(json) as Parameters<typeof api.admin.createApp>[0]
     await api.admin.createApp(data)
     toast.success(`Application "${data.name}" créée`)
+    fetchApps()
+  }
+
+  async function handleEditApp(id: string, json: string) {
+    const data = JSON.parse(json) as Record<string, unknown>
+    const { id: _, ...patch } = data
+    await api.admin.updateApp(id, patch)
+    toast.success('Application mise à jour')
+    setEditingApp(null)
     fetchApps()
   }
 
@@ -78,7 +90,7 @@ export default function Admin() {
   if (error) return <ErrorScreen message={error} onRetry={fetchApps} />
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <Header />
 
       <main className="max-w-5xl mx-auto px-6 py-10">
@@ -177,7 +189,15 @@ export default function Admin() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(app.id, app.name)}
+                        onClick={() => setEditingApp(app)}
+                        aria-label={`Modifier ${app.name}`}
+                      >
+                        <Pencil size={14} className="text-isb-muted" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setConfirmDeleteApp({ id: app.id, name: app.name })}
                         aria-label={`Supprimer ${app.name}`}
                       >
                         <Trash2 size={15} className="text-destructive" />
@@ -191,7 +211,22 @@ export default function Admin() {
         )}
       </main>
 
+      <ConfirmDialog
+        open={!!confirmDeleteApp}
+        title="Supprimer l'application"
+        message={`Supprimer l'application "${confirmDeleteApp?.name}" ? Cette action est irreversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={() => handleDelete(confirmDeleteApp!.id, confirmDeleteApp!.name)}
+        onCancel={() => setConfirmDeleteApp(null)}
+      />
       {showModal && <AddAppModal onClose={() => setShowModal(false)} onAdd={handleAddApp} />}
+      {editingApp && (
+        <AddAppModal
+          app={editingApp}
+          onClose={() => setEditingApp(null)}
+          onAdd={(json) => handleEditApp(editingApp.id, json)}
+        />
+      )}
     </div>
   )
 }

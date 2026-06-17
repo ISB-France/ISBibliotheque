@@ -8,10 +8,8 @@ import { api, type AppResponse } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from '@/components/Header'
 import { AppCard, getAppStyle } from '@/components/AppCard'
-import { CategoryFilter } from '@/components/CategoryFilter'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { ErrorScreen } from '@/components/ErrorScreen'
-import { ISBLogo } from '@/components/ISBLogo'
 
 function getLucideIcon(name: string): LucideIcon {
   const icon = (Lucide as Record<string, unknown>)[name]
@@ -27,15 +25,20 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [activeCategory, setActiveCategory] = useState('Toutes')
+  const [activeGroup, setActiveGroup] = useState<string | null>(null)
+  const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
   const [launching, setLaunching] = useState<string | null>(null)
 
   const fetchApps = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await api.apps.list()
+      const [data, groupsData] = await Promise.all([
+        api.apps.list(),
+        api.groups.list(),
+      ])
       setApps(data)
+      setGroups(groupsData)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue')
     } finally {
@@ -53,8 +56,8 @@ export default function Home() {
       app.name.toLowerCase().includes(search.toLowerCase()) ||
       app.description.toLowerCase().includes(search.toLowerCase()) ||
       app.category.toLowerCase().includes(search.toLowerCase())
-    const matchCategory = activeCategory === 'Toutes' || app.category === activeCategory
-    return matchSearch && matchCategory
+    const matchGroup = !activeGroup || app.roles.length === 0 || app.roles.includes(activeGroup)
+    return matchSearch && matchGroup
   })
 
   async function handleLaunch(app: AppResponse) {
@@ -92,7 +95,7 @@ export default function Home() {
   if (error) return <ErrorScreen message={error} onRetry={fetchApps} />
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FDFAF5' }}>
+    <div style={{ backgroundColor: 'hsl(var(--background))' }}>
       <Header search={search} onSearchChange={setSearch} />
 
       <main className="max-w-7xl mx-auto px-6 py-10">
@@ -100,11 +103,11 @@ export default function Home() {
           <div>
             <h1
               className="text-[28px] font-extrabold font-heading leading-tight"
-              style={{ color: '#3B2800' }}
+              style={{ color: 'hsl(var(--foreground))' }}
             >
               ISBibliotheque
             </h1>
-            <p className="text-[15px] mt-1.5" style={{ color: '#8C6A40' }}>
+            <p className="text-[15px] mt-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
               Retrouvez et lancez toutes vos applications métier ISB
             </p>
           </div>
@@ -112,11 +115,37 @@ export default function Home() {
 
         </div>
 
-        <CategoryFilter
-          active={activeCategory}
-          count={filtered.length}
-          onSelect={setActiveCategory}
-        />
+        <div className="flex items-center gap-2 mb-6 flex-wrap" role="tablist" aria-label="Groupes">
+          <button
+            onClick={() => setActiveGroup(null)}
+            role="tab"
+            aria-selected={!activeGroup}
+            className="px-4 py-2 rounded-xl transition-all text-[13px]"
+            style={{
+              fontWeight: !activeGroup ? 600 : 400,
+              backgroundColor: !activeGroup ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
+              color: !activeGroup ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+            }}
+          >
+            Tous
+          </button>
+          {groups.map((g) => (
+            <button
+              key={g.name}
+              onClick={() => setActiveGroup(g.name)}
+              role="tab"
+              aria-selected={activeGroup === g.name}
+              className="px-4 py-2 rounded-xl transition-all text-[13px]"
+              style={{
+                fontWeight: activeGroup === g.name ? 600 : 400,
+                backgroundColor: activeGroup === g.name ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
+                color: activeGroup === g.name ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+              }}
+            >
+              {g.name}
+            </button>
+          ))}
+        </div>
 
         {loading ? (
           <div
@@ -130,19 +159,19 @@ export default function Home() {
               >
                 <div
                   className="w-14 h-14 rounded-xl animate-pulse"
-                  style={{ backgroundColor: '#FEEAD3' }}
+                  style={{ backgroundColor: 'hsl(var(--secondary))' }}
                 />
                 <div
                   className="h-5 w-20 rounded-full animate-pulse"
-                  style={{ backgroundColor: '#FEEAD3' }}
+                  style={{ backgroundColor: 'hsl(var(--secondary))' }}
                 />
                 <div
                   className="h-4 w-3/4 rounded-lg animate-pulse"
-                  style={{ backgroundColor: '#FDD5A5' }}
+                  style={{ backgroundColor: 'hsl(var(--muted))' }}
                 />
                 <div
                   className="h-3 w-full rounded-lg animate-pulse"
-                  style={{ backgroundColor: '#FEEAD3' }}
+                  style={{ backgroundColor: 'hsl(var(--secondary))' }}
                 />
               </div>
             ))}
@@ -174,25 +203,25 @@ export default function Home() {
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center"
-              style={{ backgroundColor: '#FEEAD3' }}
+              style={{ backgroundColor: 'hsl(var(--secondary))' }}
             >
-              <Search size={28} style={{ color: '#D19571' }} />
+              <Search size={28} style={{ color: 'hsl(var(--muted-foreground))' }} />
             </div>
             <div className="text-center">
-              <p className="text-[16px] font-semibold" style={{ color: '#3B2800' }}>
+              <p className="text-[16px] font-semibold" style={{ color: 'hsl(var(--foreground))' }}>
                 Aucune application trouvée
               </p>
-              <p className="text-[14px] mt-1" style={{ color: '#8C6A40' }}>
+              <p className="text-[14px] mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
                 Essayez un autre terme ou une autre catégorie
               </p>
             </div>
             <button
               onClick={() => {
                 setSearch('')
-                setActiveCategory('Toutes')
+                setActiveGroup(null)
               }}
               className="px-4 py-2 rounded-xl transition-colors text-[13px] font-medium"
-              style={{ backgroundColor: '#FEEAD3', color: '#3B2800' }}
+              style={{ backgroundColor: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))' }}
             >
               Réinitialiser les filtres
             </button>
@@ -200,28 +229,6 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="border-t mt-16" style={{ borderColor: 'rgba(59,40,0,0.08)' }}>
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2">
-            <ISBLogo size={22} />
-            <span className="text-[13px]" style={{ color: '#8C6A40' }}>
-              &copy; 2026 ISB Group — ISBibliotheque
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            {['Support', 'Documentation', "Conditions d'utilisation"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-[12px] hover:underline"
-                style={{ color: '#8C6A40' }}
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

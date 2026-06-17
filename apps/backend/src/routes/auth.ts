@@ -70,15 +70,27 @@ router.post('/auth/login-admin', async (req: Request, res: Response, next: NextF
     }
 
     const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase()
+
+    let roles: string[] = []
+    if (isAdmin) {
+      roles = ['admin']
+    } else {
+      const groups = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { groups: { include: { group: true } } },
+      })
+      roles = groups?.groups.map((ug: { group: { name: string } }) => ug.group.name) ?? []
+    }
+
     const token = createToken({
       sub: email,
       email,
       name: user.name,
-      roles: isAdmin ? ['admin'] : [],
+      roles,
       isAdmin,
     })
     setTokenCookie(res, token)
-    res.json({ token, email, name: user.name, roles: isAdmin ? ['admin'] : [], isAdmin })
+    res.json({ token, email, name: user.name, roles, isAdmin })
   } catch (err) {
     next(err)
   }

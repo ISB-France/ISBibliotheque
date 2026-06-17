@@ -45,17 +45,17 @@ export default function Login() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ backgroundColor: '#FDFAF5' }}
+      className="flex items-center justify-center p-4 relative overflow-hidden flex-1"
+      style={{ backgroundColor: 'hsl(var(--background))' }}
     >
       <div
         className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-10"
-        style={{ backgroundColor: '#3B2800' }}
+        style={{ backgroundColor: 'hsl(var(--primary))' }}
         aria-hidden="true"
       />
       <div
         className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full opacity-10"
-        style={{ backgroundColor: '#8C6A40' }}
+        style={{ backgroundColor: 'hsl(var(--muted-foreground))' }}
         aria-hidden="true"
       />
 
@@ -64,10 +64,10 @@ export default function Login() {
           <div className="mb-5">
             <ISBLogo size={56} />
           </div>
-          <h1 className="text-[26px] font-extrabold font-heading tracking-tight" style={{ color: '#3B2800' }}>
+          <h1 className="text-[26px] font-extrabold font-heading tracking-tight" style={{ color: 'hsl(var(--foreground))' }}>
             ISBibliotheque
           </h1>
-          <p className="text-[14px] mt-1.5" style={{ color: '#8C6A40' }}>
+          <p className="text-[14px] mt-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
             Bibliotheque d&apos;application ISB Group
           </p>
         </div>
@@ -76,8 +76,8 @@ export default function Login() {
           className="bg-white rounded-2xl shadow-sm border p-7"
           style={{ borderColor: 'rgba(59,40,0,0.08)' }}
         >
-          <p className="text-[13px] text-center mb-6 leading-relaxed" style={{ color: '#8C6A40' }}>
-            Connectez-vous avec votre compte <span className="font-semibold" style={{ color: '#3B2800' }}>ISB Group</span> pour accéder au catalogue d&apos;applications.
+          <p className="text-[13px] text-center mb-6 leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            Connectez-vous avec votre compte <span className="font-semibold" style={{ color: 'hsl(var(--foreground))' }}>ISB Group</span> pour accéder au catalogue d&apos;applications.
           </p>
 
           <button
@@ -88,7 +88,7 @@ export default function Login() {
             style={{
               backgroundColor: '#ffffff',
               borderColor: 'rgba(59,40,0,0.15)',
-              color: '#3B2800',
+              color: 'hsl(var(--foreground))',
             }}
           >
             {authLoading ? (

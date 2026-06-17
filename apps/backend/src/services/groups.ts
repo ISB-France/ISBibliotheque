@@ -1,27 +1,81 @@
 import { prisma } from './db.js'
 
-export async function listGroups() {
-  return prisma.group.findMany({ orderBy: { name: 'asc' } })
+type GroupWithMembers = {
+  id: string
+  name: string
+  description: string
+  members: string[]
 }
 
-export async function getGroup(name: string) {
-  return prisma.group.findUnique({ where: { name } })
+function toGroupWithMembers(group: {
+  id: string
+  name: string
+  description: string
+  members: Array<{ user: { email: string } }>
+}): GroupWithMembers {
+  return {
+    id: group.id,
+    name: group.name,
+    description: group.description,
+    members: group.members.map((m) => m.user.email),
+  }
 }
 
-export async function createGroup(data: { name: string; description: string }) {
+const membersInclude = {
+  members: {
+    include: { user: { select: { email: true } } },
+  },
+} as const
+
+export async function listGroups(): Promise<GroupWithMembers[]> {
+  const groups = await prisma.group.findMany({
+    orderBy: { name: 'asc' },
+    include: membersInclude,
+  })
+  return groups.map(toGroupWithMembers)
+}
+
+export async function getGroup(name: string): Promise<GroupWithMembers | null> {
+  const group = await prisma.group.findUnique({
+    where: { name },
+    include: membersInclude,
+  })
+  return group ? toGroupWithMembers(group) : null
+}
+
+export async function createGroup(data: { name: string; description: string; members?: string[] }): Promise<GroupWithMembers> {
   const existing = await prisma.group.findUnique({ where: { name: data.name } })
   if (existing) throw new Error(`Le groupe "${data.name}" existe déjà`)
-  return prisma.group.create({ data })
+  const group = await prisma.group.create({
+    data: { name: data.name, description: data.description },
+    include: membersInclude,
+  })
+
+  if (data.members && data.members.length > 0) {
+    for (const email of data.members) {
+      const user = await prisma.user.upsert({
+        where: { email },
+        update: {},
+        create: { email, name: email.split('@')[0] },
+      })
+      await prisma.userGroup.create({ data: { userId: user.id, groupId: group.id } })
+    }
+  }
+
+  const updated = await prisma.group.findUnique({ where: { id: group.id }, include: membersInclude })
+  return toGroupWithMembers(updated!)
 }
 
 export async function updateGroup(
   name: string,
-  data: { description?: string; members?: string[] },
-) {
-  if (data.members !== undefined) {
-    const group = await prisma.group.findUnique({ where: { name } })
-    if (!group) throw new Error(`Groupe "${name}" introuvable`)
+  data: { name?: string; description?: string; members?: string[] },
+): Promise<GroupWithMembers> {
+  const group = await prisma.group.findUnique({ where: { name } })
+  if (!group) throw new Error(`Groupe "${name}" introuvable`)
 
+  const targetName = data.name ?? name
+
+  if (data.members !== undefined) {
     await prisma.userGroup.deleteMany({ where: { groupId: group.id } })
 
     for (const email of data.members) {
@@ -34,18 +88,22 @@ export async function updateGroup(
     }
   }
 
-  if (data.description !== undefined) {
-    return prisma.group.update({ where: { name }, data: { description: data.description } })
+  const updateData: Record<string, string> = {}
+  if (data.name !== undefined) updateData.name = data.name
+  if (data.description !== undefined) updateData.description = data.description
+  if (Object.keys(updateData).length > 0) {
+    await prisma.group.update({ where: { id: group.id }, data: updateData })
   }
 
-  return prisma.group.findUnique({ where: { name } })
+  const updated = await prisma.group.findUnique({ where: { id: group.id }, include: membersInclude })
+  return toGroupWithMembers(updated!)
 }
 
 export async function deleteGroup(name: string): Promise<void> {
   await prisma.group.delete({ where: { name } })
 }
 
-export async function addMember(groupName: string, email: string) {
+export async function addMember(groupName: string, email: string): Promise<GroupWithMembers> {
   const group = await prisma.group.findUnique({ where: { name: groupName } })
   if (!group) throw new Error(`Groupe "${groupName}" introuvable`)
 
@@ -62,10 +120,11 @@ export async function addMember(groupName: string, email: string) {
     await prisma.userGroup.create({ data: { userId: user.id, groupId: group.id } })
   }
 
-  return prisma.group.findUnique({ where: { name: groupName } })
+  const updated = await prisma.group.findUnique({ where: { name: groupName }, include: membersInclude })
+  return toGroupWithMembers(updated!)
 }
 
-export async function removeMember(groupName: string, email: string) {
+export async function removeMember(groupName: string, email: string): Promise<GroupWithMembers> {
   const group = await prisma.group.findUnique({ where: { name: groupName } })
   if (!group) throw new Error(`Groupe "${groupName}" introuvable`)
 
@@ -76,7 +135,8 @@ export async function removeMember(groupName: string, email: string) {
     })
   }
 
-  return prisma.group.findUnique({ where: { name: groupName } })
+  const updated = await prisma.group.findUnique({ where: { name: groupName }, include: membersInclude })
+  return toGroupWithMembers(updated!)
 }
 
 export async function getRolesForEmail(email: string): Promise<string[]> {

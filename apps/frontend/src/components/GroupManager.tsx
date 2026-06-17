@@ -5,6 +5,7 @@ import { api, type UserProfile } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 function isImageUrl(str: string): boolean {
   return str.startsWith('/uploads/') || str.startsWith('http')
@@ -30,7 +31,9 @@ export function GroupManager() {
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
+  const [newMembers, setNewMembers] = useState<Set<string>>(new Set())
   const [creating, setCreating] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     try {
@@ -52,16 +55,30 @@ export function GroupManager() {
     fetchData()
   }, [fetchData])
 
+  function toggleNewMember(email: string) {
+    setNewMembers((prev) => {
+      const next = new Set(prev)
+      if (next.has(email)) next.delete(email)
+      else next.add(email)
+      return next
+    })
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (!newName.trim()) return
     setCreating(true)
     try {
-      await api.admin.createGroup({ name: newName.trim(), description: newDesc.trim() })
+      await api.admin.createGroup({
+        name: newName.trim(),
+        description: newDesc.trim(),
+        members: Array.from(newMembers),
+      })
       toast.success(`Groupe "${newName}" créé`)
       setShowCreate(false)
       setNewName('')
       setNewDesc('')
+      setNewMembers(new Set())
       fetchData()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
@@ -71,10 +88,10 @@ export function GroupManager() {
   }
 
   async function handleDelete(name: string) {
-    if (!window.confirm(`Supprimer le groupe "${name}" ?`)) return
     try {
       await api.admin.deleteGroup(name)
       toast.success(`Groupe "${name}" supprimé`)
+      setConfirmDelete(null)
       fetchData()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur')
@@ -92,7 +109,6 @@ export function GroupManager() {
   }
 
   async function handleRemoveMember(groupName: string, email: string) {
-    if (!window.confirm(`Retirer ${email} de "${groupName}" ?`)) return
     try {
       await api.admin.removeGroupMember(groupName, email)
       toast.success(`${email} retiré de ${groupName}`)
@@ -141,6 +157,32 @@ export function GroupManager() {
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
             />
+            <div>
+              <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
+                Membres
+              </label>
+              {profiles.length === 0 ? (
+                <p className="text-[13px] text-isb-muted">Aucun profil disponible</p>
+              ) : (
+                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto p-3 rounded-xl border" style={{ borderColor: 'hsl(var(--border))' }}>
+                  {profiles.map((p) => (
+                    <label
+                      key={p.email}
+                      className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors text-[14px]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={newMembers.has(p.email)}
+                        onChange={() => toggleNewMember(p.email)}
+                        className="accent-primary"
+                      />
+                      <span className="text-isb-brown font-medium">{p.name || p.email.split('@')[0]}</span>
+                      <span className="text-[12px] text-isb-muted">{p.email}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={creating}>
                 {creating ? 'Création...' : 'Créer'}
@@ -174,7 +216,7 @@ export function GroupManager() {
             <GroupCard
               key={group.name}
               group={group}
-              onDelete={() => handleDelete(group.name)}
+              onDelete={() => setConfirmDelete(group.name)}
               onAddMember={(email) => handleAddMember(group.name, email)}
               onRemoveMember={(email) => handleRemoveMember(group.name, email)}
               getProfileForEmail={getProfileForEmail}
@@ -183,6 +225,15 @@ export function GroupManager() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Supprimer le groupe"
+        message={`Supprimer le groupe "${confirmDelete}" ? Cette action est irreversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={() => handleDelete(confirmDelete!)}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   )
 }
@@ -205,6 +256,11 @@ function GroupCard({
   const [showAdd, setShowAdd] = useState(false)
   const [email, setEmail] = useState('')
   const [editingMember, setEditingMember] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState(group.name)
+  const [editDesc, setEditDesc] = useState(group.description)
+  const [savingGroup, setSavingGroup] = useState(false)
+  const [confirmRemoveMember, setConfirmRemoveMember] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -214,27 +270,85 @@ function GroupCard({
     setShowAdd(false)
   }
 
+  async function handleSaveGroup() {
+    if (!editName.trim()) return
+    setSavingGroup(true)
+    try {
+      await api.admin.updateGroup(group.name, {
+        name: editName.trim() !== group.name ? editName.trim() : undefined,
+        description: editDesc.trim() !== group.description ? editDesc.trim() : undefined,
+      })
+      toast.success(`Groupe mis à jour`)
+      setEditing(false)
+      onProfileUpdated()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur')
+    } finally {
+      setSavingGroup(false)
+    }
+  }
+
+  function handleCancelEdit() {
+    setEditName(group.name)
+    setEditDesc(group.description)
+    setEditing(false)
+  }
+
   return (
     <Card>
       <div className="px-6 py-4 flex items-center justify-between border-b">
-        <div>
-          <div className="text-[16px] font-bold font-heading text-isb-brown">
-            {group.name}
+        {editing ? (
+          <div className="flex-1 flex flex-col gap-2 mr-4">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Nom du groupe"
+              className="text-[14px] font-bold font-heading"
+            />
+            <Input
+              value={editDesc}
+              onChange={(e) => setEditDesc(e.target.value)}
+              placeholder="Description (optionnelle)"
+              className="text-[13px]"
+            />
           </div>
-          {group.description && (
-            <div className="text-[13px] mt-0.5 text-isb-muted">
-              {group.description}
+        ) : (
+          <div>
+            <div className="text-[16px] font-bold font-heading text-isb-brown">
+              {group.name}
             </div>
+            {group.description && (
+              <div className="text-[13px] mt-0.5 text-isb-muted">
+                {group.description}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {editing ? (
+            <>
+              <Button size="sm" onClick={handleSaveGroup} disabled={savingGroup}>
+                <Save size={14} />
+                {savingGroup ? '...' : 'Enregistrer'}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
+                <X size={14} />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" onClick={() => setShowAdd(!showAdd)}>
+                <UserPlus size={14} />
+                Ajouter un membre
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setEditing(true)}>
+                <Pencil size={14} className="text-isb-muted" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={onDelete}>
+                <Trash2 size={15} className="text-destructive" />
+              </Button>
+            </>
           )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowAdd(!showAdd)}>
-            <UserPlus size={14} />
-            Ajouter un membre
-          </Button>
-          <Button variant="ghost" size="icon" onClick={onDelete}>
-            <Trash2 size={15} className="text-destructive" />
-          </Button>
         </div>
       </div>
 
@@ -298,7 +412,7 @@ function GroupCard({
                   <Button variant="ghost" size="icon" onClick={() => setEditingMember(member)}>
                     <Pencil size={13} className="text-isb-muted" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => onRemoveMember(member)}>
+                  <Button variant="ghost" size="icon" onClick={() => setConfirmRemoveMember(member)}>
                     <Trash2 size={13} className="text-destructive" />
                   </Button>
                 </div>
@@ -307,6 +421,18 @@ function GroupCard({
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmRemoveMember}
+        title="Retirer un membre"
+        message={`Retirer "${confirmRemoveMember}" de "${group.name}" ?`}
+        confirmLabel="Retirer"
+        onConfirm={() => {
+          onRemoveMember(confirmRemoveMember!)
+          setConfirmRemoveMember(null)
+        }}
+        onCancel={() => setConfirmRemoveMember(null)}
+      />
     </Card>
   )
 }
