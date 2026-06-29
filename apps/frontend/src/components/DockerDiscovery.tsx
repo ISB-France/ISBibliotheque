@@ -1,13 +1,5 @@
 import { useState } from 'react'
-import {
-  Server,
-  Search,
-  Download,
-  Container,
-  Check,
-  X,
-  Loader2,
-} from 'lucide-react'
+import { Server, Search, Download, Container, Check, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type DiscoveredContainer } from '@/lib/api'
 import { Button } from '@/components/ui/button'
