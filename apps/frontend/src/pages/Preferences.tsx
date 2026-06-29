@@ -20,10 +20,16 @@ export default function Preferences() {
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center gap-4">
           <ISBLogo size={36} />
           <div className="text-left">
-            <div className="text-[16px] font-bold leading-tight font-heading" style={{ color: 'hsl(var(--foreground))' }}>
+            <div
+              className="text-[16px] font-bold leading-tight font-heading"
+              style={{ color: 'hsl(var(--foreground))' }}
+            >
               ISBibliotheque
             </div>
-            <div className="text-[11px] leading-tight mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <div
+              className="text-[11px] leading-tight mt-0.5"
+              style={{ color: 'hsl(var(--muted-foreground))' }}
+            >
               Bibliotheque d&apos;application
             </div>
           </div>
@@ -40,7 +46,10 @@ export default function Preferences() {
             <ArrowLeft size={18} style={{ color: 'hsl(var(--foreground))' }} />
           </button>
           <div>
-            <h1 className="text-[28px] font-extrabold font-heading leading-tight" style={{ color: 'hsl(var(--foreground))' }}>
+            <h1
+              className="text-[28px] font-extrabold font-heading leading-tight"
+              style={{ color: 'hsl(var(--foreground))' }}
+            >
               Préférences
             </h1>
             <p className="text-[15px] mt-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
@@ -53,7 +62,10 @@ export default function Preferences() {
           <div className="px-6 py-5 border-b" style={{ borderColor: 'hsl(var(--border))' }}>
             <div className="flex items-center gap-2">
               <Palette size={18} style={{ color: 'hsl(var(--muted-foreground))' }} />
-              <h2 className="text-[16px] font-bold font-heading" style={{ color: 'hsl(var(--foreground))' }}>
+              <h2
+                className="text-[16px] font-bold font-heading"
+                style={{ color: 'hsl(var(--foreground))' }}
+              >
                 Couleur d&apos;accentuation
               </h2>
             </div>
@@ -70,8 +82,10 @@ export default function Preferences() {
                   onClick={() => setColorTheme(t.id)}
                   className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all"
                   style={{
-                    borderColor: colorTheme.id === t.id ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                    backgroundColor: colorTheme.id === t.id ? 'hsl(var(--secondary))' : 'transparent',
+                    borderColor:
+                      colorTheme.id === t.id ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+                    backgroundColor:
+                      colorTheme.id === t.id ? 'hsl(var(--secondary))' : 'transparent',
                   }}
                 >
                   <div
@@ -83,7 +97,10 @@ export default function Preferences() {
                   <span
                     className="text-[12px] font-medium"
                     style={{
-                      color: colorTheme.id === t.id ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
+                      color:
+                        colorTheme.id === t.id
+                          ? 'hsl(var(--foreground))'
+                          : 'hsl(var(--muted-foreground))',
                     }}
                   >
                     {t.label}

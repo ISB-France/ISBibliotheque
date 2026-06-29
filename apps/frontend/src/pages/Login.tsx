@@ -64,7 +64,10 @@ export default function Login() {
           <div className="mb-5">
             <ISBLogo size={56} />
           </div>
-          <h1 className="text-[26px] font-extrabold font-heading tracking-tight" style={{ color: 'hsl(var(--foreground))' }}>
+          <h1
+            className="text-[26px] font-extrabold font-heading tracking-tight"
+            style={{ color: 'hsl(var(--foreground))' }}
+          >
             ISBibliotheque
           </h1>
           <p className="text-[14px] mt-1.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
@@ -76,8 +79,15 @@ export default function Login() {
           className="bg-white rounded-2xl shadow-sm border p-7"
           style={{ borderColor: 'rgba(59,40,0,0.08)' }}
         >
-          <p className="text-[13px] text-center mb-6 leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
-            Connectez-vous avec votre compte <span className="font-semibold" style={{ color: 'hsl(var(--foreground))' }}>ISB Group</span> pour accéder au catalogue d&apos;applications.
+          <p
+            className="text-[13px] text-center mb-6 leading-relaxed"
+            style={{ color: 'hsl(var(--muted-foreground))' }}
+          >
+            Connectez-vous avec votre compte{' '}
+            <span className="font-semibold" style={{ color: 'hsl(var(--foreground))' }}>
+              ISB Group
+            </span>{' '}
+            pour accéder au catalogue d&apos;applications.
           </p>
 
           <button
@@ -94,7 +104,13 @@ export default function Login() {
             {authLoading ? (
               <Loader2 size={20} className="animate-spin" />
             ) : (
-              <svg width="20" height="20" viewBox="0 0 21 21" aria-hidden="true" className="shrink-0">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 21 21"
+                aria-hidden="true"
+                className="shrink-0"
+              >
                 <rect x="1" y="1" width="8.5" height="8.5" fill="#F25022" rx="1.5" />
                 <rect x="11.5" y="1" width="8.5" height="8.5" fill="#7FBA00" rx="1.5" />
                 <rect x="1" y="11.5" width="8.5" height="8.5" fill="#00A4EF" rx="1.5" />

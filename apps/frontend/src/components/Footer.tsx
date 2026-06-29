@@ -2,10 +2,7 @@ import { ISBLogo } from './ISBLogo'
 
 export function Footer() {
   return (
-    <footer
-      className="border-t mt-auto"
-      style={{ borderColor: 'hsl(var(--border))' }}
-    >
+    <footer className="border-t mt-auto" style={{ borderColor: 'hsl(var(--border))' }}>
       <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <ISBLogo size={22} />

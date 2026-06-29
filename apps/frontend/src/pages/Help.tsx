@@ -41,10 +41,16 @@ export default function Help() {
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center gap-4">
           <ISBLogo size={36} />
           <div className="text-left">
-            <div className="text-[16px] font-bold leading-tight font-heading" style={{ color: 'hsl(var(--foreground))' }}>
+            <div
+              className="text-[16px] font-bold leading-tight font-heading"
+              style={{ color: 'hsl(var(--foreground))' }}
+            >
               ISBibliotheque
             </div>
-            <div className="text-[11px] leading-tight mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <div
+              className="text-[11px] leading-tight mt-0.5"
+              style={{ color: 'hsl(var(--muted-foreground))' }}
+            >
               Bibliotheque d&apos;application
             </div>
           </div>
@@ -60,9 +66,7 @@ export default function Help() {
             <h1 className="text-[28px] font-extrabold font-heading leading-tight text-isb-brown">
               Aide & support
             </h1>
-            <p className="text-[15px] mt-1.5 text-isb-muted">
-              Ressources pour vous accompagner
-            </p>
+            <p className="text-[15px] mt-1.5 text-isb-muted">Ressources pour vous accompagner</p>
           </div>
         </div>
 
@@ -78,12 +82,8 @@ export default function Help() {
                   <Icon size={18} className="text-isb-brown" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-[14px] font-semibold text-isb-brown">
-                    {label}
-                  </div>
-                  <div className="text-[12px] text-isb-muted">
-                    {description}
-                  </div>
+                  <div className="text-[14px] font-semibold text-isb-brown">{label}</div>
+                  <div className="text-[12px] text-isb-muted">{description}</div>
                 </div>
                 <ExternalLink size={15} className="text-isb-muted" />
               </a>

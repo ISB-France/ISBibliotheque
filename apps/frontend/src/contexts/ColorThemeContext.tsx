@@ -48,7 +48,6 @@ function applyTheme(hue: number, dark: boolean) {
   const satBg = dark ? 40 : 100
   const satSec = dark ? 40 : 100
   const satAcc = dark ? 30 : 16
-  const satMut = dark ? 20 : 16
   const satMutFg = dark ? 30 : 18
   const satBorder = dark ? 30 : 100
   const priHue = dark ? hue : hue

@@ -54,7 +54,30 @@ export interface AppDockerAccess {
   composeFile: string
   serviceName: string
   internalPort: number
+  host?: string
   healthUrl?: string
+}
+
+export interface DiscoveredContainer {
+  id: string
+  name: string
+  image: string
+  status: string
+  ports: Array<{
+    containerPort: number
+    hostPort: number | null
+    protocol: string
+  }>
+  created: string
+  labels: Record<string, string>
+  env: string[]
+  mounts: Array<{
+    source: string
+    destination: string
+    mode: string
+  }>
+  network: string
+  command: string
 }
 
 export interface AppResponse {
@@ -83,13 +106,16 @@ export interface DockerStatus {
 
 export const api = {
   groups: {
-    list: () => request<{ groups: Array<{ name: string; description: string }> }>('/groups').then(r => r.groups),
+    list: () =>
+      request<{ groups: Array<{ name: string; description: string }> }>('/groups').then(
+        (r) => r.groups,
+      ),
   },
   auth: {
-    me: () => request<{ user: AuthUser }>('/auth/me').then(r => r.user),
-    logout: () => request<{ message: string; logoutUrl?: string }>('/auth/logout', { method: 'POST' }),
-    profile: () =>
-      request<{ profile: UserProfile }>('/auth/profile').then(r => r.profile),
+    me: () => request<{ user: AuthUser }>('/auth/me').then((r) => r.user),
+    logout: () =>
+      request<{ message: string; logoutUrl?: string }>('/auth/logout', { method: 'POST' }),
+    profile: () => request<{ profile: UserProfile }>('/auth/profile').then((r) => r.profile),
     updateProfile: (data: { name?: string; icon?: string }) =>
       request<{ profile: UserProfile; user: AuthUser }>('/auth/profile', {
         method: 'PUT',
@@ -102,38 +128,87 @@ export const api = {
       ),
   },
   apps: {
-    list: () => request<{ apps: AppResponse[] }>('/apps').then(r => r.apps),
-    categories: () => request<{ categories: string[] }>('/apps/categories').then(r => r.categories),
+    list: () => request<{ apps: AppResponse[] }>('/apps').then((r) => r.apps),
+    categories: () =>
+      request<{ categories: string[] }>('/apps/categories').then((r) => r.categories),
   },
   admin: {
-    listApps: () => request<{ apps: AppResponse[] }>('/admin/apps').then(r => r.apps),
+    listApps: () => request<{ apps: AppResponse[] }>('/admin/apps').then((r) => r.apps),
     createApp: (data: Partial<AppManifest>) =>
-      request<{ app: AppManifest }>('/admin/apps', { method: 'POST', body: JSON.stringify(data) }).then(r => r.app),
+      request<{ app: AppManifest }>('/admin/apps', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }).then((r) => r.app),
     updateApp: (id: string, data: Partial<AppManifest>) =>
-      request<{ app: AppManifest }>(`/admin/apps/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.app),
+      request<{ app: AppManifest }>(`/admin/apps/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }).then((r) => r.app),
     deleteApp: (id: string) => request<void>(`/admin/apps/${id}`, { method: 'DELETE' }),
-    listGroups: () => request<{ groups: Array<{ name: string; description: string; members: string[] }> }>('/admin/groups').then(r => r.groups),
+    listGroups: () =>
+      request<{ groups: Array<{ name: string; description: string; members: string[] }> }>(
+        '/admin/groups',
+      ).then((r) => r.groups),
     createGroup: (data: { name: string; description: string; members?: string[] }) =>
-      request<{ group: { name: string; description: string; members: string[] } }>('/admin/groups', { method: 'POST', body: JSON.stringify(data) }).then(r => r.group),
-    updateGroup: (name: string, data: { name?: string; description?: string; members?: string[] }) =>
-      request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.group),
-    deleteGroup: (name: string) => request<void>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+      request<{ group: { name: string; description: string; members: string[] } }>(
+        '/admin/groups',
+        { method: 'POST', body: JSON.stringify(data) },
+      ).then((r) => r.group),
+    updateGroup: (
+      name: string,
+      data: { name?: string; description?: string; members?: string[] },
+    ) =>
+      request<{ group: { name: string; description: string; members: string[] } }>(
+        `/admin/groups/${encodeURIComponent(name)}`,
+        { method: 'PUT', body: JSON.stringify(data) },
+      ).then((r) => r.group),
+    deleteGroup: (name: string) =>
+      request<void>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'DELETE' }),
     addGroupMember: (groupName: string, email: string) =>
-      request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(groupName)}/members`, { method: 'POST', body: JSON.stringify({ email }) }).then(r => r.group),
+      request<{ group: { name: string; description: string; members: string[] } }>(
+        `/admin/groups/${encodeURIComponent(groupName)}/members`,
+        { method: 'POST', body: JSON.stringify({ email }) },
+      ).then((r) => r.group),
     removeGroupMember: (groupName: string, email: string) =>
-      request<{ group: { name: string; description: string; members: string[] } }>(`/admin/groups/${encodeURIComponent(groupName)}/members/${encodeURIComponent(email)}`, { method: 'DELETE' }).then(r => r.group),
+      request<{ group: { name: string; description: string; members: string[] } }>(
+        `/admin/groups/${encodeURIComponent(groupName)}/members/${encodeURIComponent(email)}`,
+        { method: 'DELETE' },
+      ).then((r) => r.group),
     listProfiles: () =>
-      request<{ profiles: UserProfile[] }>('/admin/profiles').then(r => r.profiles),
+      request<{ profiles: UserProfile[] }>('/admin/profiles').then((r) => r.profiles),
     updateProfile: (email: string, data: { name?: string; icon?: string; email?: string }) =>
       request<{ profile: UserProfile }>(`/admin/profiles/${encodeURIComponent(email)}`, {
         method: 'PUT',
         body: JSON.stringify(data),
-      }).then(r => r.profile),
+      }).then((r) => r.profile),
   },
   docker: {
     start: (id: string) =>
       request<{ status: DockerStatus }>(`/apps/${id}/start`, { method: 'POST' }),
     stop: (id: string) => request<{ status: DockerStatus }>(`/apps/${id}/stop`, { method: 'POST' }),
     status: (id: string) => request<{ status: DockerStatus }>(`/apps/${id}/status`),
+  },
+  discovery: {
+    scan: (host?: string) =>
+      request<{ containers: DiscoveredContainer[] }>('/admin/discover', {
+        method: 'POST',
+        body: JSON.stringify({ host }),
+      }).then((r) => r.containers),
+    import: (data: {
+      host?: string
+      containerId: string
+      manifest: {
+        id: string
+        name: string
+        description: string
+        category: string
+        icon: string
+        roles?: string[]
+      }
+    }) =>
+      request<{ app: AppManifest }>('/admin/discover/import', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }).then((r) => r.app),
   },
 }

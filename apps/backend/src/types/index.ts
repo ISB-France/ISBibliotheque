@@ -20,6 +20,7 @@ export interface AppDockerAccess {
   composeFile: string
   serviceName: string
   internalPort: number
+  host?: string
   healthUrl?: string
 }
 

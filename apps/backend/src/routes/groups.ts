@@ -11,7 +11,9 @@ router.get('/groups', async (_req: Request, res: Response, next: NextFunction) =
       select: { name: true, description: true },
     })
     res.json({ groups })
-  } catch (err) { next(err) }
+  } catch (err) {
+    next(err)
+  }
 })
 
 export default router

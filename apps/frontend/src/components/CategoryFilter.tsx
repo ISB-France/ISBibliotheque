@@ -29,7 +29,8 @@ export function CategoryFilter({ active, count, onSelect }: CategoryFilterProps)
           style={{
             fontWeight: active === cat ? 600 : 400,
             backgroundColor: active === cat ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
-            color: active === cat ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+            color:
+              active === cat ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
           }}
         >
           {cat}

@@ -12,10 +12,30 @@ function isImageUrl(str: string): boolean {
 }
 
 const EMOJIS = [
-  '👤', '👨', '👩', '🧑', '👨‍💻', '👩‍💻',
-  '😀', '😎', '🤓', '🦊', '🐱', '🐶',
-  '🌟', '🔥', '💡', '🎯', '🚀', '🌈',
-  '🎨', '🎵', '📚', '⚡', '🌺', '🍀',
+  '👤',
+  '👨',
+  '👩',
+  '🧑',
+  '👨‍💻',
+  '👩‍💻',
+  '😀',
+  '😎',
+  '🤓',
+  '🦊',
+  '🐱',
+  '🐶',
+  '🌟',
+  '🔥',
+  '💡',
+  '🎯',
+  '🚀',
+  '🌈',
+  '🎨',
+  '🎵',
+  '📚',
+  '⚡',
+  '🌺',
+  '🍀',
 ]
 
 interface Group {
@@ -143,9 +163,7 @@ export function GroupManager() {
       {showCreate && (
         <Card className="p-6 mb-6">
           <form onSubmit={handleCreate} className="flex flex-col gap-4">
-            <h3 className="text-[16px] font-bold font-heading text-isb-brown">
-              Nouveau groupe
-            </h3>
+            <h3 className="text-[16px] font-bold font-heading text-isb-brown">Nouveau groupe</h3>
             <Input
               placeholder="Nom du groupe (ex: logistics.viewer)"
               value={newName}
@@ -164,7 +182,10 @@ export function GroupManager() {
               {profiles.length === 0 ? (
                 <p className="text-[13px] text-isb-muted">Aucun profil disponible</p>
               ) : (
-                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto p-3 rounded-xl border" style={{ borderColor: 'hsl(var(--border))' }}>
+                <div
+                  className="flex flex-col gap-1 max-h-40 overflow-y-auto p-3 rounded-xl border"
+                  style={{ borderColor: 'hsl(var(--border))' }}
+                >
                   {profiles.map((p) => (
                     <label
                       key={p.email}
@@ -176,7 +197,9 @@ export function GroupManager() {
                         onChange={() => toggleNewMember(p.email)}
                         className="accent-primary"
                       />
-                      <span className="text-isb-brown font-medium">{p.name || p.email.split('@')[0]}</span>
+                      <span className="text-isb-brown font-medium">
+                        {p.name || p.email.split('@')[0]}
+                      </span>
                       <span className="text-[12px] text-isb-muted">{p.email}</span>
                     </label>
                   ))}
@@ -198,17 +221,12 @@ export function GroupManager() {
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-24 bg-card rounded-2xl border animate-pulse"
-            />
+            <div key={i} className="h-24 bg-card rounded-2xl border animate-pulse" />
           ))}
         </div>
       ) : groups.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <p className="text-[16px] font-semibold text-isb-brown">
-            Aucun groupe
-          </p>
+          <p className="text-[16px] font-semibold text-isb-brown">Aucun groupe</p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -314,13 +332,9 @@ function GroupCard({
           </div>
         ) : (
           <div>
-            <div className="text-[16px] font-bold font-heading text-isb-brown">
-              {group.name}
-            </div>
+            <div className="text-[16px] font-bold font-heading text-isb-brown">{group.name}</div>
             {group.description && (
-              <div className="text-[13px] mt-0.5 text-isb-muted">
-                {group.description}
-              </div>
+              <div className="text-[13px] mt-0.5 text-isb-muted">{group.description}</div>
             )}
           </div>
         )}
@@ -362,15 +376,15 @@ function GroupCard({
             required
             autoFocus
           />
-          <Button type="submit" size="sm">Ajouter</Button>
+          <Button type="submit" size="sm">
+            Ajouter
+          </Button>
         </form>
       )}
 
       {group.members.length === 0 ? (
         <div className="px-6 py-6 text-center">
-          <p className="text-[13px] text-isb-muted">
-            Aucun membre dans ce groupe
-          </p>
+          <p className="text-[13px] text-isb-muted">Aucun membre dans ce groupe</p>
         </div>
       ) : (
         <div className="divide-y">
@@ -403,16 +417,18 @@ function GroupCard({
                     <div className="text-[14px] font-medium text-isb-brown truncate">
                       {getProfileForEmail(member)?.name || member.split('@')[0]}
                     </div>
-                    <div className="text-[11px] text-isb-muted truncate">
-                      {member}
-                    </div>
+                    <div className="text-[11px] text-isb-muted truncate">{member}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button variant="ghost" size="icon" onClick={() => setEditingMember(member)}>
                     <Pencil size={13} className="text-isb-muted" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setConfirmRemoveMember(member)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setConfirmRemoveMember(member)}
+                  >
                     <Trash2 size={13} className="text-destructive" />
                   </Button>
                 </div>
@@ -506,9 +522,7 @@ function MemberEditForm({
   return (
     <div className="px-6 py-4 bg-accent/30">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-[13px] font-semibold text-isb-brown">
-          Modifier le profil
-        </span>
+        <span className="text-[13px] font-semibold text-isb-brown">Modifier le profil</span>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X size={14} />
         </Button>

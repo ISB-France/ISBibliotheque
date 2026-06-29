@@ -37,9 +37,12 @@ export function Header({ search, onSearchChange }: HeaderProps) {
 
   useEffect(() => {
     if (!user) return
-    api.auth.profile().then((p) => {
-      if (isImageUrl(p.icon)) setAvatarUrl(p.icon)
-    }).catch(() => {})
+    api.auth
+      .profile()
+      .then((p) => {
+        if (isImageUrl(p.icon)) setAvatarUrl(p.icon)
+      })
+      .catch(() => {})
   }, [user])
 
   return (
@@ -64,7 +67,10 @@ export function Header({ search, onSearchChange }: HeaderProps) {
             >
               ISBibliotheque
             </div>
-            <div className="text-[11px] leading-tight mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <div
+              className="text-[11px] leading-tight mt-0.5"
+              style={{ color: 'hsl(var(--muted-foreground))' }}
+            >
               Bibliotheque d&apos;application
             </div>
           </div>
@@ -137,12 +143,8 @@ export function Header({ search, onSearchChange }: HeaderProps) {
               <div className="fixed inset-0 z-30" onClick={() => setUserMenuOpen(false)} />
               <div className="absolute right-0 top-full mt-2 w-52 bg-card rounded-2xl border shadow-lg py-2 z-50">
                 <div className="px-4 py-2 border-b">
-                  <div className="text-[13px] font-semibold text-isb-brown">
-                    {user?.name}
-                  </div>
-                  <div className="text-[12px] text-isb-muted">
-                    {user?.email}
-                  </div>
+                  <div className="text-[13px] font-semibold text-isb-brown">{user?.name}</div>
+                  <div className="text-[12px] text-isb-muted">{user?.email}</div>
                 </div>
                 {[
                   { icon: User, label: 'Mon profil', onClick: () => navigate('/profile') },

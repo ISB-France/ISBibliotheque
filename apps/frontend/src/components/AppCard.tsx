@@ -21,7 +21,12 @@ const categoryColors: Record<string, { color: string; bgColor: string }> = {
 }
 
 export function getAppStyle(category: string) {
-  return categoryColors[category] ?? { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--secondary))' }
+  return (
+    categoryColors[category] ?? {
+      color: 'hsl(var(--muted-foreground))',
+      bgColor: 'hsl(var(--secondary))',
+    }
+  )
 }
 
 export { categoryColors }
@@ -53,15 +58,24 @@ export function AppCard({
         <div className="flex items-start justify-between gap-2 mb-1">
           <span
             className="text-[13px] font-medium px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: 'hsl(var(--secondary))', color: 'hsl(var(--muted-foreground))' }}
+            style={{
+              backgroundColor: 'hsl(var(--secondary))',
+              color: 'hsl(var(--muted-foreground))',
+            }}
           >
             {category}
           </span>
         </div>
-        <h3 className="text-[15px] font-semibold mt-1.5 leading-tight" style={{ color: 'hsl(var(--foreground))' }}>
+        <h3
+          className="text-[15px] font-semibold mt-1.5 leading-tight"
+          style={{ color: 'hsl(var(--foreground))' }}
+        >
           {name}
         </h3>
-        <p className="text-[13px] mt-1 leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
+        <p
+          className="text-[13px] mt-1 leading-relaxed"
+          style={{ color: 'hsl(var(--muted-foreground))' }}
+        >
           {description}
         </p>
       </div>

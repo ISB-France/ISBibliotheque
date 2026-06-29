@@ -19,6 +19,7 @@ Ce guide explique comment configurer Microsoft Entra ID (Azure AD) comme fournis
 5. Cliquez **Register**
 
 > **Important** : Le Redirect URI doit correspondre exactement à l'URL d'accès au backend.
+>
 > - Dev (Docker) : `http://localhost:3001/api/auth/callback`
 > - Dev (sans Docker) : `http://localhost:4000/api/auth/callback`
 > - Production : `https://votre-domaine.fr/api/auth/callback`
@@ -27,10 +28,10 @@ Ce guide explique comment configurer Microsoft Entra ID (Azure AD) comme fournis
 
 Sur la page de l'application créée, notez :
 
-| Champ | Emplacement |
-|---|---|
+| Champ                       | Emplacement                               |
+| --------------------------- | ----------------------------------------- |
 | **Application (client) ID** | Page Overview → `Application (client) ID` |
-| **Directory (tenant) ID** | Page Overview → `Directory (tenant) ID` |
+| **Directory (tenant) ID**   | Page Overview → `Directory (tenant) ID`   |
 
 ## 3. Générer le Client Secret
 
@@ -59,11 +60,11 @@ OIDC_REDIRECT_URI=http://localhost:3001/api/auth/callback
 
 ### Valeurs par défaut selon l'environnement
 
-| Environnement | `OIDC_REDIRECT_URI` |
-|---|---|
-| Docker (dev) | `http://localhost:3001/api/auth/callback` |
-| Sans Docker (dev) | `http://localhost:4000/api/auth/callback` |
-| Production | `https://portail.isb-group.fr/api/auth/callback` |
+| Environnement     | `OIDC_REDIRECT_URI`                              |
+| ----------------- | ------------------------------------------------ |
+| Docker (dev)      | `http://localhost:3001/api/auth/callback`        |
+| Sans Docker (dev) | `http://localhost:4000/api/auth/callback`        |
+| Production        | `https://portail.isb-group.fr/api/auth/callback` |
 
 ## 5. Redémarrer le backend
 
@@ -100,18 +101,21 @@ Avec Entra ID, plus aucun mot de passe n'est géré par l'application. L'authent
 ### Erreur 503 "Entra ID non configuré"
 
 Les variables OIDC sont vides ou mal formatées :
+
 - Vérifiez que `OIDC_ISSUER` commence par `https://`
 - Vérifiez que `OIDC_CLIENT_SECRET` est la **Value** du secret, pas le Secret ID
 
 ### Erreur "Invalid redirect URI"
 
 Le Redirect URI dans Azure ne correspond pas exactement à `OIDC_REDIRECT_URI` :
+
 - Vérifiez l'URL dans Azure Portal → App Registration → Authentication
 - Pas de slash final, pas de faute de frappe
 
 ### Callback échoué
 
 Vérifiez les logs backend :
+
 ```bash
 docker compose logs backend
 ```
