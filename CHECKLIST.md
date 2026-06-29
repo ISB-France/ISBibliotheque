@@ -17,6 +17,7 @@
 **Statut** : ✅ Complété
 
 Ce qui a été fait :
+
 - ✅ Interface React responsive (design ISB Group)
 - ✅ Grille d'applications avec recherche/filtrage
 - ✅ Modal d'ajout d'applications
@@ -30,6 +31,7 @@ Ce qui a été fait :
 **Statut** : 🔄 À démarrer
 
 Tâches principales :
+
 - [ ] Backend Node.js/Express minimal
   - [ ] Routes API (GET /apps, POST /apps/start)
   - [ ] Middleware d'authentification (MSAL stub)
@@ -52,6 +54,7 @@ Tâches principales :
 **Statut** : 🔄 À configurer
 
 Tâches principales :
+
 - [ ] GitHub Actions workflows
   - [ ] Build frontend (npm run build)
   - [ ] Build backend (tests, linting)
@@ -71,6 +74,7 @@ Tâches principales :
 **Statut** : 🔄 À planifier
 
 Tâches optionnelles/futures :
+
 - [ ] Performance optimization
 - [ ] Caching stratégie
 - [ ] Rate limiting
@@ -82,32 +86,35 @@ Tâches optionnelles/futures :
 
 ## 📊 Tableau de Bord Rapide
 
-| Phase | Composant | Statut | Propriétaire | Échéance |
-|-------|-----------|--------|--------------|----------|
-| 1 | Frontend React | ✅ | Stage | ✅ Fait |
-| 1 | Docker Setup | ✅ | Stage | ✅ Fait |
-| 1 | Documentation | ✅ | Stage | ✅ Fait |
-| 2 | Backend Express | 🔄 | À assigner | TBD |
-| 2 | MSAL Integration | 🔄 | À assigner | TBD |
-| 2 | Orchestration Docker | 🔄 | À assigner | TBD |
-| 3 | GitHub Actions | 🔄 | À assigner | TBD |
-| 3 | Self-hosted Runner | 🔄 | À assigner | TBD |
+| Phase | Composant            | Statut | Propriétaire | Échéance |
+| ----- | -------------------- | ------ | ------------ | -------- |
+| 1     | Frontend React       | ✅     | Stage        | ✅ Fait  |
+| 1     | Docker Setup         | ✅     | Stage        | ✅ Fait  |
+| 1     | Documentation        | ✅     | Stage        | ✅ Fait  |
+| 2     | Backend Express      | 🔄     | À assigner   | TBD      |
+| 2     | MSAL Integration     | 🔄     | À assigner   | TBD      |
+| 2     | Orchestration Docker | 🔄     | À assigner   | TBD      |
+| 3     | GitHub Actions       | 🔄     | À assigner   | TBD      |
+| 3     | Self-hosted Runner   | 🔄     | À assigner   | TBD      |
 
 ---
 
 ## 🎯 Priorités Immédiates (Next Sprint)
 
 ### Semaine 1-2
+
 1. **Backend minimal** : Express server avec routes statiques
 2. **MSAL testing** : Intégrer Microsoft Entra ID en dev
 3. **Orchestration prototype** : Script Python/Node pour docker start
 
 ### Semaine 3-4
+
 1. **Logging** : Format structuré JSON
 2. **Tests** : Jest/Vitest pour backend
 3. **GitHub Actions** : Workflow build principal
 
 ### Semaine 5+
+
 1. **Production deployment**
 2. **Monitoring setup**
 3. **Documentation finale**
@@ -116,13 +123,13 @@ Tâches optionnelles/futures :
 
 ## 🔗 Liens Importants
 
-| Resource | Lien |
-|----------|------|
-| **Checklist Notion** | [Notion](https://artistic-selenium-fb0.notion.site/Checklist-Portail-applicatif-interne-ISBibliotheque-37d8a8bce16080839df9d48dd4d926fb) |
-| **GitHub Repository** | [ISBibliotheque](https://github.com/ISB-France/ISBibliotheque) |
-| **Documentation** | [README.md](./README.md) |
-| **Architecture** | [DOC_ARCHITECTURE.md](./doc/DOC_ARCHITECTURE_ISBibliotheque.md) |
-| **Frontend Docs** | [doc/Figma/Maquettes/README.md](./doc/Figma/Maquettes/README.md) |
+| Resource              | Lien                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Checklist Notion**  | [Notion](https://artistic-selenium-fb0.notion.site/Checklist-Portail-applicatif-interne-ISBibliotheque-37d8a8bce16080839df9d48dd4d926fb) |
+| **GitHub Repository** | [ISBibliotheque](https://github.com/ISB-France/ISBibliotheque)                                                                           |
+| **Documentation**     | [README.md](./README.md)                                                                                                                 |
+| **Architecture**      | [DOC_ARCHITECTURE.md](./doc/DOC_ARCHITECTURE_ISBibliotheque.md)                                                                          |
+| **Frontend Docs**     | [doc/Figma/Maquettes/README.md](./doc/Figma/Maquettes/README.md)                                                                         |
 
 ---
 
@@ -141,4 +148,3 @@ Tâches optionnelles/futures :
 🔗 [Checklist - Portail Applicatif ISBibliotheque](https://artistic-selenium-fb0.notion.site/Checklist-Portail-applicatif-interne-ISBibliotheque-37d8a8bce16080839df9d48dd4d926fb)
 
 </div>
-

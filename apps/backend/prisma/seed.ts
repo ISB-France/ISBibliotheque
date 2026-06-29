@@ -12,7 +12,10 @@ const { PrismaClient } = require(resolve(__dirname, '../src/generated/prisma/ind
 const prisma = new PrismaClient()
 
 const DEFAULT_GROUPS = [
-  { name: 'admin', description: 'Administrateurs SI — accès à toutes les applications et à la gestion du portail' },
+  {
+    name: 'admin',
+    description: 'Administrateurs SI — accès à toutes les applications et à la gestion du portail',
+  },
 ]
 
 // Try loading existing groups from JSON for migration
@@ -20,7 +23,10 @@ function loadExistingGroupsMembers(): Map<string, string[]> {
   const groupsPath = resolve(process.cwd(), '../../infra/auth/groups.json')
   if (!existsSync(groupsPath)) return new Map()
   try {
-    const data = JSON.parse(readFileSync(groupsPath, 'utf-8')) as Array<{ name: string; members: string[] }>
+    const data = JSON.parse(readFileSync(groupsPath, 'utf-8')) as Array<{
+      name: string
+      members: string[]
+    }>
     const map = new Map<string, string[]>()
     for (const g of data) map.set(g.name, g.members)
     return map

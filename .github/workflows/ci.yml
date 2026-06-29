@@ -42,7 +42,7 @@ jobs:
           version: 10.10.0
           run_install: true
       - name: Prisma generate
-        run: pnpm --filter @isbibliotheque/backend prisma generate
+        run: pnpm --filter @isbibliotheque/backend prisma:generate
       - name: Typecheck
         run: pnpm --filter @isbibliotheque/backend typecheck
       - name: Build

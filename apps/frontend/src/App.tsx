@@ -15,7 +15,10 @@ export default function App() {
     <BrowserRouter>
       <ColorThemeProvider>
         <AuthProvider>
-          <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))' }}>
+          <div
+            className="min-h-screen flex flex-col"
+            style={{ backgroundColor: 'hsl(var(--background))' }}
+          >
             <div className="flex-1">
               <Routes>
                 <Route path="/" element={<Home />} />

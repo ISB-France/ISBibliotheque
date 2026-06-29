@@ -2,16 +2,12 @@
   {
     "name": "admin",
     "description": "Administrateurs SI — accès à toutes les applications et à la gestion du portail",
-    "members": [
-      "admin@isb-group.fr"
-    ]
+    "members": ["admin@isb-group.fr"]
   },
   {
     "name": "production.manager",
     "description": "Responsables de production",
-    "members": [
-      "valentin.rousseau@groupe-isb.fr"
-    ]
+    "members": ["valentin.rousseau@groupe-isb.fr"]
   },
   {
     "name": "production.operator",

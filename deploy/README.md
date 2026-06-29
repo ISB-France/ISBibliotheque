@@ -18,10 +18,10 @@
 
 ## Dossiers
 
-| Environnement | Code source | Fichier .env | Branche |
-|---|---|---|---|
-| Production | `/var/www/isbibliotheque-prod` | `/etc/isbibliotheque/prod.env` | `main` |
-| Recette | `/var/www/isbibliotheque-recette` | `/etc/isbibliotheque/recette.env` | `recette` |
+| Environnement | Code source                       | Fichier .env                      | Branche   |
+| ------------- | --------------------------------- | --------------------------------- | --------- |
+| Production    | `/var/www/isbibliotheque-prod`    | `/etc/isbibliotheque/prod.env`    | `main`    |
+| Recette       | `/var/www/isbibliotheque-recette` | `/etc/isbibliotheque/recette.env` | `recette` |
 
 ## Workflow Git
 
@@ -43,12 +43,12 @@ nano /etc/isbibliotheque/recette.env
 
 ## Secrets GitHub requis
 
-| Secret | Description |
-|---|---|
-| `SSH_HOST` | IP du serveur |
-| `SSH_USER` | Utilisateur SSH |
-| `SSH_PRIVATE_KEY` | Clé privée SSH |
-| `DEPLOY_PATH_PROD` | `/var/www/isbibliotheque-prod` |
+| Secret                | Description                       |
+| --------------------- | --------------------------------- |
+| `SSH_HOST`            | IP du serveur                     |
+| `SSH_USER`            | Utilisateur SSH                   |
+| `SSH_PRIVATE_KEY`     | Clé privée SSH                    |
+| `DEPLOY_PATH_PROD`    | `/var/www/isbibliotheque-prod`    |
 | `DEPLOY_PATH_RECETTE` | `/var/www/isbibliotheque-recette` |
 
 ## Commandes utiles

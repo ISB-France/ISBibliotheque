@@ -15,7 +15,11 @@ export async function getProfile(email: string): Promise<UserProfile | null> {
 
 export async function listProfiles(): Promise<UserProfile[]> {
   const users = await prisma.user.findMany({ orderBy: { email: 'asc' } })
-  return users.map((u: { email: string; name: string; icon: string }) => ({ email: u.email, name: u.name, icon: u.icon }))
+  return users.map((u: { email: string; name: string; icon: string }) => ({
+    email: u.email,
+    name: u.name,
+    icon: u.icon,
+  }))
 }
 
 export async function upsertProfile(

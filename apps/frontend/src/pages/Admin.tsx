@@ -10,6 +10,7 @@ import { ErrorScreen } from '@/components/ErrorScreen'
 import { NotAuthorizedScreen } from '@/components/NotAuthorizedScreen'
 import { AddAppModal } from '@/components/AddAppModal'
 import { GroupManager } from '@/components/GroupManager'
+import { DockerDiscovery } from '@/components/DockerDiscovery'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -31,8 +32,10 @@ export default function Admin() {
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [editingApp, setEditingApp] = useState<AppResponse | null>(null)
-  const [tab, setTab] = useState<'apps' | 'groups'>('apps')
-  const [confirmDeleteApp, setConfirmDeleteApp] = useState<{ id: string; name: string } | null>(null)
+  const [tab, setTab] = useState<'apps' | 'groups' | 'discovery'>('apps')
+  const [confirmDeleteApp, setConfirmDeleteApp] = useState<{ id: string; name: string } | null>(
+    null,
+  )
 
   const fetchApps = useCallback(async () => {
     try {
@@ -96,7 +99,12 @@ export default function Admin() {
       <main className="max-w-5xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/')} aria-label="Retour au portail">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/')}
+              aria-label="Retour au portail"
+            >
               <ArrowLeft size={18} />
             </Button>
             <div>
@@ -104,7 +112,11 @@ export default function Admin() {
                 Administration
               </h1>
               <p className="text-[15px] mt-1.5 text-isb-muted">
-                {tab === 'apps' ? "Gestion des applications" : "Gestion des groupes d'accès"}
+                {tab === 'apps'
+                  ? 'Gestion des applications'
+                  : tab === 'groups'
+                    ? "Gestion des groupes d'accès"
+                    : 'Découverte de conteneurs Docker'}
               </p>
             </div>
           </div>
@@ -123,22 +135,24 @@ export default function Admin() {
         </div>
 
         <div className="flex items-center gap-1 mb-8">
-          <Button
-            variant={tab === 'apps' ? 'default' : 'ghost'}
-            onClick={() => setTab('apps')}
-          >
+          <Button variant={tab === 'apps' ? 'default' : 'ghost'} onClick={() => setTab('apps')}>
             Applications
           </Button>
-          <Button
-            variant={tab === 'groups' ? 'default' : 'ghost'}
-            onClick={() => setTab('groups')}
-          >
+          <Button variant={tab === 'groups' ? 'default' : 'ghost'} onClick={() => setTab('groups')}>
             Groupes
+          </Button>
+          <Button
+            variant={tab === 'discovery' ? 'default' : 'ghost'}
+            onClick={() => setTab('discovery')}
+          >
+            Découverte Docker
           </Button>
         </div>
 
         {tab === 'groups' ? (
           <GroupManager />
+        ) : tab === 'discovery' ? (
+          <DockerDiscovery />
         ) : loading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -151,9 +165,7 @@ export default function Admin() {
           </div>
         ) : apps.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <p className="text-[16px] font-semibold text-isb-brown">
-              Aucune application
-            </p>
+            <p className="text-[16px] font-semibold text-isb-brown">Aucune application</p>
             <Button onClick={() => setShowModal(true)}>
               <Plus size={16} />
               Ajouter la première application
@@ -174,12 +186,8 @@ export default function Admin() {
                 {apps.map((app) => (
                   <TableRow key={app.id}>
                     <TableCell>
-                      <div className="text-[14px] font-medium text-isb-brown">
-                        {app.name}
-                      </div>
-                      <div className="text-[12px] text-isb-muted">
-                        {app.id}
-                      </div>
+                      <div className="text-[14px] font-medium text-isb-brown">{app.name}</div>
+                      <div className="text-[12px] text-isb-muted">{app.id}</div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">{app.accessType}</Badge>

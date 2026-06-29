@@ -10,6 +10,7 @@ const dockerAccessSchema = z.object({
   composeFile: z.string().min(1),
   serviceName: z.string().min(1),
   internalPort: z.number().int().min(1).max(65535),
+  host: z.string().optional(),
   healthUrl: z.string().url().optional(),
 })
 

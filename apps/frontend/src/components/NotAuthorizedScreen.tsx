@@ -30,7 +30,10 @@ export function NotAuthorizedScreen({
               >
                 ISBibliotheque
               </div>
-              <div className="text-[11px] leading-tight mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              <div
+                className="text-[11px] leading-tight mt-0.5"
+                style={{ color: 'hsl(var(--muted-foreground))' }}
+              >
                 Bibliotheque d&apos;application
               </div>
             </div>
@@ -47,13 +50,19 @@ export function NotAuthorizedScreen({
             <LockKeyhole size={36} style={{ color: 'hsl(var(--destructive))' }} strokeWidth={1.5} />
           </div>
           <div className="text-center max-w-md">
-            <h1 className="text-[22px] font-bold font-heading" style={{ color: 'hsl(var(--foreground))' }}>
+            <h1
+              className="text-[22px] font-bold font-heading"
+              style={{ color: 'hsl(var(--foreground))' }}
+            >
               Accès non autorisé
             </h1>
-            <p className="text-[14px] mt-2 leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
-              <span style={{ color: 'hsl(var(--foreground))', fontWeight: 600 }}>{userName}</span>, vous ne
-              disposez pas des droits n&eacute;cessaires pour acc&eacute;der &agrave; cette section
-              du portail.
+            <p
+              className="text-[14px] mt-2 leading-relaxed"
+              style={{ color: 'hsl(var(--muted-foreground))' }}
+            >
+              <span style={{ color: 'hsl(var(--foreground))', fontWeight: 600 }}>{userName}</span>,
+              vous ne disposez pas des droits n&eacute;cessaires pour acc&eacute;der &agrave; cette
+              section du portail.
             </p>
             <p className="text-[13px] mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
               Contactez votre administrateur ISB si vous pensez qu{"'"}il s{"'"}agit d{"'"}une

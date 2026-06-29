@@ -25,13 +25,12 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    Promise.all([
-      api.apps.categories(),
-      api.groups.list(),
-    ]).then(([cats, grps]) => {
-      setCategories(cats)
-      setGroups(grps)
-    }).catch(() => {})
+    Promise.all([api.apps.categories(), api.groups.list()])
+      .then(([cats, grps]) => {
+        setCategories(cats)
+        setGroups(grps)
+      })
+      .catch(() => {})
   }, [])
 
   function toggleGroup(name: string) {
@@ -47,8 +46,14 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
     e.preventDefault()
     setError(null)
 
-    if (!name.trim()) { setError('Le nom est requis.'); return }
-    if (!category) { setError('La catégorie est requise.'); return }
+    if (!name.trim()) {
+      setError('Le nom est requis.')
+      return
+    }
+    if (!category) {
+      setError('La catégorie est requise.')
+      return
+    }
 
     const roles = Array.from(selectedGroups)
     const rolesField = roles.length > 0 ? { roles } : { roles: [] }
@@ -78,11 +83,20 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       return
     }
 
-    const id = name.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/\s+/g, '-')
+    const id = name
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/\s+/g, '-')
 
-    const access = accessType === 'redirect'
-      ? { type: 'redirect' as const, url: validUrl ? redirectUrl : 'https://placeholder.com' }
-      : { type: 'docker' as const, composeFile: 'docker-compose.yml', serviceName: 'app', internalPort: 8080 }
+    const access =
+      accessType === 'redirect'
+        ? { type: 'redirect' as const, url: validUrl ? redirectUrl : 'https://placeholder.com' }
+        : {
+            type: 'docker' as const,
+            composeFile: 'docker-compose.yml',
+            serviceName: 'app',
+            internalPort: 8080,
+          }
 
     const manifest = {
       id,
@@ -115,7 +129,9 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
               {isEdit ? "Modifier l'application" : 'Ajouter une application'}
             </h2>
             <p className="text-[13px] mt-0.5 text-isb-muted">
-              {isEdit ? 'Modifier les acces et la categorie' : 'Nouvelle application - ID genere automatiquement'}
+              {isEdit
+                ? 'Modifier les acces et la categorie'
+                : 'Nouvelle application - ID genere automatiquement'}
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer">
@@ -125,9 +141,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
-              Nom
-            </label>
+            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">Nom</label>
             <Input
               placeholder="Mon application"
               value={name}
@@ -161,7 +175,9 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
             >
               <option value="">Selectionner une categorie</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
             </select>
           </div>
@@ -182,16 +198,12 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
           </div>
 
           {accessType === 'redirect' && (
-          <div>
-            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
-              URL de redirection
-            </label>
-            <Input
-              placeholder="https://"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
-          </div>
+            <div>
+              <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
+                URL de redirection
+              </label>
+              <Input placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} />
+            </div>
           )}
 
           <div>
@@ -201,7 +213,10 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
             {groups.length === 0 ? (
               <p className="text-[13px] text-isb-muted">Aucun groupe disponible</p>
             ) : (
-              <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto p-3 rounded-xl border" style={{ borderColor: 'hsl(var(--border))' }}>
+              <div
+                className="flex flex-col gap-1.5 max-h-48 overflow-y-auto p-3 rounded-xl border"
+                style={{ borderColor: 'hsl(var(--border))' }}
+              >
                 {groups.map((g) => (
                   <label
                     key={g.name}
@@ -223,11 +238,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
             )}
           </div>
 
-          {error && (
-            <p className="text-[13px] font-medium text-destructive">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-[13px] font-medium text-destructive">{error}</p>}
 
           <div className="flex gap-3 mt-2">
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
@@ -239,7 +250,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
               ) : (
                 <Plus size={16} />
               )}
-              {isEdit ? "Enregistrer" : "Creer l'application"}
+              {isEdit ? 'Enregistrer' : "Creer l'application"}
             </Button>
           </div>
         </form>

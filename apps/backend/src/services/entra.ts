@@ -42,7 +42,7 @@ async function getConfig(): Promise<Configuration | null> {
     _oidcConfig = await discovery(
       new URL(config.oidcIssuer),
       config.oidcClientId,
-      { redirect_uris: [config.oidcRedirectUri], [clockTolerance]: 30 },
+      { redirect_uris: [config.oidcRedirectUri], [clockTolerance]: 120 },
       clientAuth,
     )
     return _oidcConfig

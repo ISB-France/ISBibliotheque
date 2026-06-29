@@ -27,7 +27,7 @@ const upload = multer({
     if (allowed.includes(file.mimetype)) {
       cb(null, true)
     } else {
-      cb(new Error('Format d\'image non supporté. Utilisez JPG, PNG, WebP, GIF ou SVG.'))
+      cb(new Error("Format d'image non supporté. Utilisez JPG, PNG, WebP, GIF ou SVG."))
     }
   },
 })
@@ -126,15 +126,19 @@ router.get('/auth/callback', async (req: Request, res: Response, next: NextFunct
   }
 })
 
-router.post('/auth/logout', optionalAuth, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    clearTokenCookie(res)
-    const url = await getLogoutUrl(req.user?.email)
-    res.json({ message: 'Déconnecté', logoutUrl: url ?? undefined })
-  } catch (err) {
-    next(err)
-  }
-})
+router.post(
+  '/auth/logout',
+  optionalAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      clearTokenCookie(res)
+      const url = await getLogoutUrl(req.user?.email)
+      res.json({ message: 'Déconnecté', logoutUrl: url ?? undefined })
+    } catch (err) {
+      next(err)
+    }
+  },
+)
 
 router.get('/auth/me', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -146,76 +150,92 @@ router.get('/auth/me', requireAuth, async (req: Request, res: Response, next: Ne
         icon: profile?.icon ?? '',
       },
     })
-  } catch (err) { next(err) }
-})
-
-// ── Profil utilisateur ──
-
-router.get('/auth/profile', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    if (!req.user) return
-    const profile = await getProfile(req.user.email)
-    res.json({
-      profile: {
-        email: req.user.email,
-        name: profile?.name ?? req.user.name,
-        icon: profile?.icon ?? '',
-      },
-    })
-  } catch (err) { next(err) }
-})
-
-router.put('/auth/profile', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    if (!req.user) return
-    const { name, icon } = req.body
-    const updated = await upsertProfile(req.user.email, { name, icon })
-    const token = createToken({
-      sub: req.user.email,
-      email: req.user.email,
-      name: updated.name,
-      roles: req.user.roles,
-      isAdmin: req.user.isAdmin,
-    })
-    setTokenCookie(res, token)
-    res.json({
-      profile: updated,
-      token,
-      user: {
-        email: req.user.email,
-        name: updated.name,
-        roles: req.user.roles,
-        isAdmin: req.user.isAdmin,
-      },
-    })
   } catch (err) {
     next(err)
   }
 })
 
-router.post('/auth/profile/avatar', requireAuth, (req: Request, res: Response, next: NextFunction) => {
-  upload.single('avatar')(req, res, (err) => {
-    if (err) {
-      if (err instanceof multer.MulterError) {
-        res.status(400).json({ error: { message: 'Fichier trop volumineux (max 2 Mo)' } })
-        return
-      }
-      res.status(400).json({ error: { message: err.message } })
-      return
-    }
+// ── Profil utilisateur ──
+
+router.get(
+  '/auth/profile',
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user || !req.file) {
-        res.status(400).json({ error: { message: 'Aucun fichier fourni' } })
+      if (!req.user) return
+      const profile = await getProfile(req.user.email)
+      res.json({
+        profile: {
+          email: req.user.email,
+          name: profile?.name ?? req.user.name,
+          icon: profile?.icon ?? '',
+        },
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.put(
+  '/auth/profile',
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) return
+      const { name, icon } = req.body
+      const updated = await upsertProfile(req.user.email, { name, icon })
+      const token = createToken({
+        sub: req.user.email,
+        email: req.user.email,
+        name: updated.name,
+        roles: req.user.roles,
+        isAdmin: req.user.isAdmin,
+      })
+      setTokenCookie(res, token)
+      res.json({
+        profile: updated,
+        token,
+        user: {
+          email: req.user.email,
+          name: updated.name,
+          roles: req.user.roles,
+          isAdmin: req.user.isAdmin,
+        },
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.post(
+  '/auth/profile/avatar',
+  requireAuth,
+  (req: Request, res: Response, next: NextFunction) => {
+    upload.single('avatar')(req, res, (err) => {
+      if (err) {
+        if (err instanceof multer.MulterError) {
+          res.status(400).json({ error: { message: 'Fichier trop volumineux (max 2 Mo)' } })
+          return
+        }
+        res.status(400).json({ error: { message: err.message } })
         return
       }
-      const avatarUrl = `/uploads/avatars/${req.file.filename}`
-      const updated = upsertProfile(req.user.email, { icon: avatarUrl })
-      logger.info({ email: req.user.email, avatarUrl }, 'Avatar mis à jour')
-      res.json({ profile: updated, url: avatarUrl })
-    } catch (error) {
-      next(error)
-    }
-  })
-})
+      try {
+        if (!req.user || !req.file) {
+          res.status(400).json({ error: { message: 'Aucun fichier fourni' } })
+          return
+        }
+        const avatarUrl = `/uploads/avatars/${req.file.filename}`
+        const updated = upsertProfile(req.user.email, { icon: avatarUrl })
+        logger.info({ email: req.user.email, avatarUrl }, 'Avatar mis à jour')
+        res.json({ profile: updated, url: avatarUrl })
+      } catch (error) {
+        next(error)
+      }
+    })
+  },
+)
 
 export default router

@@ -9,7 +9,7 @@ import { NotFoundError } from '../utils/errors.js'
 
 const router: Router = Router()
 
-router.use(requireAuth, requireAction('admin_manage_apps'))
+router.use('/admin', requireAuth, requireAction('admin_manage_apps'))
 
 router.post('/admin/apps', validate(appManifestSchema), (req: Request, res: Response) => {
   const manifest = writeManifest(req.body)

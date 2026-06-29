@@ -29,16 +29,12 @@ export function ConfirmDialog({
       <div className="absolute inset-0 bg-isb-brown/30 backdrop-blur-sm" onClick={onCancel} />
       <div className="relative bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[16px] font-bold font-heading text-isb-brown">
-            {title}
-          </h3>
+          <h3 className="text-[16px] font-bold font-heading text-isb-brown">{title}</h3>
           <Button variant="ghost" size="icon" onClick={onCancel} aria-label="Fermer">
             <X size={16} />
           </Button>
         </div>
-        <p className="text-[14px] text-isb-muted mb-6">
-          {message}
-        </p>
+        <p className="text-[14px] text-isb-muted mb-6">{message}</p>
         <div className="flex gap-3">
           <Button variant="outline" onClick={onCancel} className="flex-1">
             {cancelLabel}

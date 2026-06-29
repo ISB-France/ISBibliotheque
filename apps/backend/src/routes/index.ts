@@ -7,6 +7,7 @@ import adminRouter from './admin.js'
 import appsAdminRouter from './apps-admin.js'
 import dockerRouter from './docker.js'
 import groupsRouter from './groups.js'
+import discoveryRouter from './discovery.js'
 
 const router: Router = Router()
 
@@ -18,5 +19,6 @@ router.use(adminRouter)
 router.use(appsAdminRouter)
 router.use(dockerRouter)
 router.use(groupsRouter)
+router.use(discoveryRouter)
 
 export default router

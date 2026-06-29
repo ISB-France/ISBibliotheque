@@ -21,7 +21,10 @@ export function LoadingScreen() {
               >
                 ISBibliotheque
               </div>
-              <div className="text-[11px] leading-tight mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              <div
+                className="text-[11px] leading-tight mt-0.5"
+                style={{ color: 'hsl(var(--muted-foreground))' }}
+              >
                 Bibliotheque d&apos;application
               </div>
             </div>

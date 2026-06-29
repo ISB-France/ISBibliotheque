@@ -33,10 +33,7 @@ export default function Home() {
     try {
       setLoading(true)
       setError(null)
-      const [data, groupsData] = await Promise.all([
-        api.apps.list(),
-        api.groups.list(),
-      ])
+      const [data, groupsData] = await Promise.all([api.apps.list(), api.groups.list()])
       setApps(data)
       setGroups(groupsData)
     } catch (err) {
@@ -111,8 +108,6 @@ export default function Home() {
               Retrouvez et lancez toutes vos applications métier ISB
             </p>
           </div>
-
-
         </div>
 
         <div className="flex items-center gap-2 mb-6 flex-wrap" role="tablist" aria-label="Groupes">
@@ -124,7 +119,9 @@ export default function Home() {
             style={{
               fontWeight: !activeGroup ? 600 : 400,
               backgroundColor: !activeGroup ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
-              color: !activeGroup ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+              color: !activeGroup
+                ? 'hsl(var(--primary-foreground))'
+                : 'hsl(var(--muted-foreground))',
             }}
           >
             Tous
@@ -138,8 +135,12 @@ export default function Home() {
               className="px-4 py-2 rounded-xl transition-all text-[13px]"
               style={{
                 fontWeight: activeGroup === g.name ? 600 : 400,
-                backgroundColor: activeGroup === g.name ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
-                color: activeGroup === g.name ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+                backgroundColor:
+                  activeGroup === g.name ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
+                color:
+                  activeGroup === g.name
+                    ? 'hsl(var(--primary-foreground))'
+                    : 'hsl(var(--muted-foreground))',
               }}
             >
               {g.name}
@@ -228,7 +229,6 @@ export default function Home() {
           </div>
         )}
       </main>
-
     </div>
   )
 }
