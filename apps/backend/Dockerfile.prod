@@ -17,7 +17,6 @@ RUN pnpm --filter @isbibliotheque/backend build
 FROM node:22-alpine
 
 RUN apk add --no-cache openssl
-RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
 WORKDIR /app
 
 COPY --from=builder /app/apps/backend/dist apps/backend/dist
@@ -28,8 +27,9 @@ COPY --from=builder /app/pnpm-lock.yaml pnpm-lock.yaml
 COPY --from=builder /app/pnpm-workspace.yaml pnpm-workspace.yaml
 COPY --from=builder /app/node_modules node_modules
 
-RUN pnpm --filter @isbibliotheque/backend prisma generate
+RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
+RUN cd apps/backend && npx prisma generate
 
 EXPOSE 4000
 
-CMD ["pnpm", "--filter", "@isbibliotheque/backend", "start"]
+CMD ["sh", "-c", "cd /app/apps/backend && npx prisma migrate deploy && node dist/index.js"]
