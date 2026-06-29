@@ -74,7 +74,7 @@ export default function Admin() {
 
   async function handleEditApp(id: string, json: string) {
     const data = JSON.parse(json) as Record<string, unknown>
-    const { id: _, ...patch } = data
+    const { id: _id, ...patch } = data
     await api.admin.updateApp(id, patch)
     toast.success('Application mise à jour')
     setEditingApp(null)

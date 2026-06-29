@@ -80,7 +80,8 @@ export async function updateGroup(
   const group = await prisma.group.findUnique({ where: { name } })
   if (!group) throw new Error(`Groupe "${name}" introuvable`)
 
-  const targetName = data.name ?? name
+  const patchData: Record<string, unknown> = {}
+  if (data.name !== undefined) patchData.name = data.name
 
   if (data.members !== undefined) {
     await prisma.userGroup.deleteMany({ where: { groupId: group.id } })

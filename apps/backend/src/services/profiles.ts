@@ -1,5 +1,4 @@
 import { prisma } from './db.js'
-import type { User } from '../generated/prisma/index.js'
 
 export interface UserProfile {
   email: string

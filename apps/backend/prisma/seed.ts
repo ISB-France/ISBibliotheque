@@ -1,5 +1,4 @@
 import { createRequire } from 'node:module'
-import { execSync } from 'node:child_process'
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'

@@ -3,8 +3,6 @@ import {
   Server,
   Search,
   Download,
-  RefreshCw,
-  Globe,
   Container,
   Check,
   X,
@@ -203,7 +201,7 @@ export function DockerDiscovery() {
           <Server size={40} className="text-isb-muted" />
           <p className="text-[16px] font-semibold text-isb-brown">Aucun conteneur trouvé</p>
           <p className="text-[14px] text-isb-muted">
-            Vérifiez que l'hôte est accessible et que Docker est en cours d'exécution.
+            Vérifiez que l&apos;hôte est accessible et que Docker est en cours d&apos;exécution.
           </p>
         </div>
       )}
@@ -377,7 +375,7 @@ export function DockerDiscovery() {
                           <div className="flex items-center gap-2 pt-1">
                             <Button size="sm" onClick={() => handleImport(c)}>
                               <Check size={14} />
-                              Confirmer l'import
+                              Confirmer l&apos;import
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => cancelImport(c.id)}>
                               Annuler
