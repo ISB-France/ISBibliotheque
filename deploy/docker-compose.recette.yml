@@ -20,7 +20,7 @@ services:
     build:
       context: ..
       dockerfile: apps/backend/Dockerfile.prod
-    env_file: /etc/isbibliotheque/recette.env
+    env_file: /etc/isbibliotheque/.recette.env
     depends_on:
       db:
         condition: service_healthy
