@@ -164,10 +164,10 @@ export const api = {
       ).then((r) => r.group),
     deleteGroup: (name: string) =>
       request<void>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'DELETE' }),
-    addGroupMember: (groupName: string, email: string) =>
+    addGroupMember: (groupName: string, email: string, name?: string) =>
       request<{ group: { name: string; description: string; members: string[] } }>(
         `/admin/groups/${encodeURIComponent(groupName)}/members`,
-        { method: 'POST', body: JSON.stringify({ email }) },
+        { method: 'POST', body: JSON.stringify({ email, name }) },
       ).then((r) => r.group),
     removeGroupMember: (groupName: string, email: string) =>
       request<{ group: { name: string; description: string; members: string[] } }>(
