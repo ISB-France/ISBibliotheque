@@ -114,14 +114,18 @@ export async function deleteGroup(name: string): Promise<void> {
   await prisma.group.delete({ where: { name } })
 }
 
-export async function addMember(groupName: string, email: string): Promise<GroupWithMembers> {
+export async function addMember(
+  groupName: string,
+  email: string,
+  name?: string,
+): Promise<GroupWithMembers> {
   const group = await prisma.group.findUnique({ where: { name: groupName } })
   if (!group) throw new Error(`Groupe "${groupName}" introuvable`)
 
   const user = await prisma.user.upsert({
     where: { email },
-    update: {},
-    create: { email, name: email.split('@')[0] },
+    update: name ? { name } : {},
+    create: { email, name: name ?? email.split('@')[0] },
   })
 
   const existing = await prisma.userGroup.findUnique({

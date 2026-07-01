@@ -77,12 +77,12 @@ router.post(
   '/admin/groups/:name/members',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email } = req.body
+      const { email, name } = req.body
       if (!email) {
         res.status(400).json({ error: { message: 'Email requis' } })
         return
       }
-      const group = await addMember(String(req.params.name), email)
+      const group = await addMember(String(req.params.name), email, name)
       res.json({ group })
     } catch (err) {
       next(err)
