@@ -18,7 +18,7 @@ services:
 
   backend:
     build:
-      context: .
+      context: ..
       dockerfile: apps/backend/Dockerfile.prod
     env_file: /etc/isbibliotheque/recette.env
     depends_on:
@@ -28,7 +28,7 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ..
       dockerfile: apps/frontend/Dockerfile.prod
     ports:
       - "3003:80"
