@@ -37,7 +37,7 @@ async function loadApp(): Promise<express.Application> {
 
 describe('Auth Profile Routes', () => {
   let app: express.Application
-  let request: SuperTest<Test>
+  let request: ReturnType<typeof supertest>
   let authToken: string
 
   beforeAll(async () => {

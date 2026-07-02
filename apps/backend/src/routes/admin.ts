@@ -12,7 +12,7 @@ import {
   removeMember,
   renameMemberInAllGroups,
 } from '../services/groups.js'
-import { listProfiles, upsertProfile, updateProfileEmail } from '../services/profiles.js'
+import { listProfiles, upsertProfile, updateProfileEmail, deleteProfile } from '../services/profiles.js'
 
 const router: Router = Router()
 
@@ -116,7 +116,7 @@ router.get('/admin/profiles', async (_req: Request, res: Response, next: NextFun
 router.put('/admin/profiles/:email', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const oldEmail = String(req.params.email)
-    const { name, icon, email: newEmail } = req.body
+    const { name, icon, email: newEmail, isAdmin } = req.body
 
     if (newEmail && newEmail !== oldEmail) {
       await updateProfileEmail(oldEmail, newEmail)
@@ -124,8 +124,18 @@ router.put('/admin/profiles/:email', async (req: Request, res: Response, next: N
     }
 
     const targetEmail = newEmail ?? oldEmail
-    const updated = await upsertProfile(targetEmail, { name, icon })
+    const updated = await upsertProfile(targetEmail, { name, icon, isAdmin })
     res.json({ profile: updated })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.delete('/admin/profiles/:email', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const email = String(req.params.email)
+    await deleteProfile(email)
+    res.status(204).end()
   } catch (err) {
     next(err)
   }

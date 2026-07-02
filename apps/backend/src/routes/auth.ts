@@ -69,7 +69,7 @@ router.post('/auth/login-admin', async (req: Request, res: Response, next: NextF
       return
     }
 
-    const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase()
+    const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase() || user.isAdmin
 
     let roles: string[] = []
     if (isAdmin) {

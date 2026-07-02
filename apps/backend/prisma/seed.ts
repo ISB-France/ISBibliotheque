@@ -49,10 +49,15 @@ async function main() {
         email: adminEmail,
         name: adminName,
         passwordHash: hashPassword(adminPassword),
+        isAdmin: true,
       },
     })
     console.log(`  ✓ Admin user created: ${adminEmail}`)
   } else {
+    await prisma.user.update({
+      where: { email: adminEmail },
+      data: { isAdmin: true },
+    })
     console.log(`  ○ Admin user exists: ${adminEmail}`)
   }
 
