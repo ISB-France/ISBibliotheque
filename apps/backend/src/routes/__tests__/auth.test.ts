@@ -6,7 +6,7 @@ vi.hoisted(() => {
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import supertest from 'supertest'
 import type express from 'express'
-import type { Test } from 'supertest'
+import type { SuperTest, Test } from 'supertest'
 import { createToken } from '../../utils/jwt.js'
 
 // Prisma mock — hoisted so factory can reference the spies.
