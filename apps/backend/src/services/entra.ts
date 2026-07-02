@@ -14,6 +14,7 @@ import {
 import { config } from '../config/index.js'
 import { createToken } from '../utils/jwt.js'
 import { logger } from '../utils/logger.js'
+import { prisma } from './db.js'
 
 export interface AuthResult {
   token: string
@@ -106,7 +107,8 @@ export async function handleCallback(params: Record<string, string>): Promise<Au
     const name = (claims.name as string) ?? email.split('@')[0]
     const entraRoles: string[] = (claims.roles as string[]) ?? []
 
-    const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase()
+    const dbUser = await prisma.user.findUnique({ where: { email }, select: { isAdmin: true } })
+    const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase() || !!dbUser?.isAdmin
     const roles = isAdmin ? ['admin'] : entraRoles
 
     const rawIdToken = (tokens as unknown as { id_token?: string }).id_token

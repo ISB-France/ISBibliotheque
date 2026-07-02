@@ -96,6 +96,8 @@ export interface UserProfile {
   email: string
   name: string
   icon: string
+  groups: string[]
+  isAdmin: boolean
 }
 
 export interface DockerStatus {
@@ -175,12 +177,16 @@ export const api = {
         { method: 'DELETE' },
       ).then((r) => r.group),
     listProfiles: () =>
-      request<{ profiles: UserProfile[] }>('/admin/profiles').then((r) => r.profiles),
-    updateProfile: (email: string, data: { name?: string; icon?: string; email?: string }) =>
+      request<{ profiles: UserProfile[] }>('/admin/profiles').then(
+        (r) => r.profiles,
+      ),
+    updateProfile: (email: string, data: { name?: string; icon?: string; email?: string; isAdmin?: boolean }) =>
       request<{ profile: UserProfile }>(`/admin/profiles/${encodeURIComponent(email)}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }).then((r) => r.profile),
+    deleteProfile: (email: string) =>
+      request<void>(`/admin/profiles/${encodeURIComponent(email)}`, { method: 'DELETE' }),
   },
   docker: {
     start: (id: string) =>
