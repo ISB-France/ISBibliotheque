@@ -134,6 +134,18 @@ export const api = {
     categories: () =>
       request<{ categories: string[] }>('/apps/categories').then((r) => r.categories),
   },
+  categories: {
+    list: () => request<{ categories: string[] }>('/categories').then((r) => r.categories),
+    create: (name: string) =>
+      request<{ categories: string[] }>('/admin/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      }).then((r) => r.categories),
+    delete: (name: string) =>
+      request<{ categories: string[] }>(`/admin/categories/${encodeURIComponent(name)}`, {
+        method: 'DELETE',
+      }).then((r) => r.categories),
+  },
   admin: {
     listApps: () => request<{ apps: AppResponse[] }>('/admin/apps').then((r) => r.apps),
     createApp: (data: Partial<AppManifest>) =>

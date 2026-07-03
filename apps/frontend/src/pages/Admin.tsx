@@ -133,7 +133,7 @@ export default function Admin() {
                   : tab === 'groups'
                     ? "Gestion des groupes d'accès"
                     : tab === 'profiles'
-                      ? "Gestion des profils utilisateurs"
+                      ? 'Gestion des profils utilisateurs'
                       : 'Découverte de conteneurs Docker'}
               </p>
             </div>
@@ -534,3 +534,4 @@ function ProfileManager() {
     </div>
   )
 }
+

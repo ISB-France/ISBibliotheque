@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, Plus } from 'lucide-react'
+import { X, Plus, Loader2 } from 'lucide-react'
 import type { AppResponse } from '@/lib/api'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -21,17 +21,37 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
   const [categories, setCategories] = useState<string[]>([])
   const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set(app?.roles ?? []))
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [creatingCategory, setCreatingCategory] = useState(false)
+  const [categoryError, setCategoryError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    Promise.all([api.apps.categories(), api.groups.list()])
+    Promise.all([api.categories.list(), api.groups.list()])
       .then(([cats, grps]) => {
         setCategories(cats)
         setGroups(grps)
       })
       .catch(() => {})
   }, [])
+
+  async function handleCreateCategory() {
+    const trimmed = newCategoryName.trim()
+    if (!trimmed) return
+    try {
+      setCreatingCategory(true)
+      setCategoryError(null)
+      const updated = await api.categories.create(trimmed)
+      setCategories(updated)
+      setCategory(trimmed)
+      setNewCategoryName('')
+    } catch (err) {
+      setCategoryError(err instanceof Error ? err.message : 'Erreur')
+    } finally {
+      setCreatingCategory(false)
+    }
+  }
 
   function toggleGroup(name: string) {
     setSelectedGroups((prev) => {
@@ -164,7 +184,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
 
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
-              Categorie
+              Catégorie
             </label>
             <select
               value={category}
@@ -173,13 +193,37 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
               className="w-full h-10 px-3 rounded-xl border bg-background text-[14px] text-foreground outline-none focus:ring-2 focus:ring-primary"
               style={{ borderColor: 'hsl(var(--border))' }}
             >
-              <option value="">Selectionner une categorie</option>
+              <option value="">Sélectionner une catégorie</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
+            <div className="flex items-center gap-2 mt-2">
+              <Input
+                placeholder="Nouvelle catégorie..."
+                value={newCategoryName}
+                onChange={(e) => { setNewCategoryName(e.target.value); setCategoryError(null) }}
+                className="h-8 text-[13px]"
+                onKeyDown={async (e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    await handleCreateCategory()
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                disabled={creatingCategory || !newCategoryName.trim()}
+                onClick={handleCreateCategory}
+              >
+                {creatingCategory ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
+              </Button>
+            </div>
+            {categoryError && (
+              <p className="text-[12px] text-destructive mt-1">{categoryError}</p>
+            )}
           </div>
 
           <div>
