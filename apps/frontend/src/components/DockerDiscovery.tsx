@@ -116,7 +116,7 @@ export function DockerDiscovery() {
     setImportingId((prev) => (prev === id ? null : prev))
   }
 
-  function updateFormField(containerId: string, field: string, value: string) {
+  function updateFormField(containerId: string, field: string, value: string | boolean) {
     setImportForm((prev) => ({
       ...prev,
       [containerId]: { ...prev[containerId], [field]: value },
@@ -387,7 +387,7 @@ export function DockerDiscovery() {
                                   type="button"
                                   role="switch"
                                   aria-checked={importForm[c.id].sso}
-                                  onClick={() => updateFormField(c.id, 'sso', String(!importForm[c.id].sso))}
+                                  onClick={() => updateFormField(c.id, 'sso', !importForm[c.id].sso)}
                                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${importForm[c.id].sso ? 'bg-primary' : 'bg-muted'}`}
                                 >
                                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${importForm[c.id].sso ? 'translate-x-6' : 'translate-x-1'}`} />

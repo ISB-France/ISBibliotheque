@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { X, Plus, Loader2 } from 'lucide-react'
-import type { AppResponse } from '@/lib/api'
-import { api } from '@/lib/api'
+import { api, ApiError, type AppResponse } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -71,6 +70,10 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       setError('Le nom est requis.')
       return
     }
+    if (!description.trim()) {
+      setError('La description est requise.')
+      return
+    }
     if (!category) {
       setError('La catégorie est requise.')
       return
@@ -98,7 +101,13 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
         await onAdd(JSON.stringify(patch, null, 2))
         onClose()
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erreur lors de la modification')
+        if (err instanceof ApiError && err.details) {
+          const d = err.details as { details?: Array<{ path: string; message: string }> }
+          const msgs = d.details?.map((e) => `${e.path}: ${e.message}`).join(', ')
+          setError(msgs ?? err.message)
+        } else {
+          setError(err instanceof Error ? err.message : 'Erreur lors de la modification')
+        }
       } finally {
         setSubmitting(false)
       }
@@ -136,7 +145,13 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       await onAdd(JSON.stringify(manifest, null, 2))
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la creation')
+      if (err instanceof ApiError && err.details) {
+        const d = err.details as { details?: Array<{ path: string; message: string }> }
+        const msgs = d.details?.map((e) => `${e.path}: ${e.message}`).join(', ')
+        setError(msgs ?? err.message)
+      } else {
+        setError(err instanceof Error ? err.message : 'Erreur lors de la creation')
+      }
     } finally {
       setSubmitting(false)
     }
