@@ -20,9 +20,11 @@ router.post('/admin/discover', async (req: Request, res: Response, next: NextFun
 
 router.post('/admin/discover/import', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { host, containerId, manifest } = req.body as {
+    const { host, containerId, accessType, redirectUrl, manifest } = req.body as {
       host?: string
       containerId: string
+      accessType?: 'redirect' | 'docker'
+      redirectUrl?: string
       manifest: {
         id: string
         name: string
@@ -38,7 +40,7 @@ router.post('/admin/discover/import', async (req: Request, res: Response, next: 
         .json({ error: { message: 'containerId, manifest.id et manifest.name requis' } })
       return
     }
-    const app = await importContainer({ host, containerId, manifest })
+    const app = await importContainer({ host, containerId, accessType, redirectUrl, manifest })
     res.status(201).json({ app })
   } catch (err) {
     next(err)
