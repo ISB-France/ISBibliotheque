@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import { logger } from '../utils/logger.js'
 
 const CATEGORIES_PATH = resolve(process.cwd(), '../../infra/categories.json')

@@ -327,7 +327,7 @@ export function DockerDiscovery() {
                             </div>
                             <div>
                               <label className="block text-[12px] font-medium text-isb-muted mb-1">
-                                Type d'accès
+                                 Type d&apos;accès
                               </label>
                               <Select
                                 value={importForm[c.id].accessType}
@@ -365,7 +365,7 @@ export function DockerDiscovery() {
                             {importForm[c.id].accessType === 'redirect' && (
                               <div className="col-span-2">
                                 <label className="block text-[12px] font-medium text-isb-muted mb-1">
-                                  URL d'accès
+                                  URL d&apos;accès
                                 </label>
                                 <Input
                                   value={importForm[c.id].redirectUrl}

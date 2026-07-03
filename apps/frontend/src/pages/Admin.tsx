@@ -30,7 +30,7 @@ export default function Admin() {
   const navigate = useNavigate()
 
   const [apps, setApps] = useState<AppResponse[]>([])
-  const [profiles, setProfiles] = useState<UserProfile[]>([])
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
@@ -53,18 +53,7 @@ export default function Admin() {
     }
   }, [])
 
-  const fetchProfiles = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const data = await api.admin.listProfiles()
-      setProfiles(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+
 
   useEffect(() => {
     if (!authLoading) fetchApps()
@@ -90,6 +79,7 @@ export default function Admin() {
 
   async function handleEditApp(id: string, json: string) {
     const data = JSON.parse(json) as Record<string, unknown>
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, ...patch } = data
     await api.admin.updateApp(id, patch)
     toast.success('Application mise à jour')
