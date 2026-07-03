@@ -215,6 +215,8 @@ export const api = {
     import: (data: {
       host?: string
       containerId: string
+      accessType?: 'redirect' | 'docker'
+      redirectUrl?: string
       manifest: {
         id: string
         name: string
