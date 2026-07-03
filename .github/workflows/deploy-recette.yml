@@ -26,8 +26,7 @@ jobs:
             cd ${{ secrets.DEPLOY_PATH_RECETTE }}
             git pull origin recette
             docker compose \
-              -f deploy/docker-compose.recette.yml \
-              --env-file /etc/isbibliotheque/recette.env \
+              --env-file /etc/isbibliotheque/.recette.env \
               -p isbibliotheque-recette \
               up -d --build
             docker image prune -f
