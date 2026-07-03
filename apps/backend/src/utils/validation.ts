@@ -22,8 +22,9 @@ export const appManifestSchema = z.object({
   icon: z.string().min(1),
   access: z.discriminatedUnion('type', [redirectAccessSchema, dockerAccessSchema]),
   roles: z.array(z.string()).optional().default([]),
+  sso: z.boolean().optional().default(false),
 })
 
-export const appManifestUpdateSchema = appManifestSchema.partial().required({ id: true })
+export const appManifestUpdateSchema = appManifestSchema.partial()
 
 export type AppManifestInput = z.infer<typeof appManifestSchema>

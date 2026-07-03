@@ -32,6 +32,7 @@ router.post('/admin/discover/import', async (req: Request, res: Response, next: 
         category: string
         icon: string
         roles?: string[]
+        sso?: boolean
       }
     }
     if (!containerId || !manifest?.id || !manifest?.name) {

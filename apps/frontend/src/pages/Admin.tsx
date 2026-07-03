@@ -79,8 +79,8 @@ export default function Admin() {
 
   async function handleEditApp(id: string, json: string) {
     const data = JSON.parse(json) as Record<string, unknown>
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, ...patch } = data
+    void _id
     await api.admin.updateApp(id, patch)
     toast.success('Application mise à jour')
     setEditingApp(null)

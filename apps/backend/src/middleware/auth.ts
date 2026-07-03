@@ -3,6 +3,7 @@ import { verifyToken } from '../utils/jwt.js'
 import { UnauthorizedError, ForbiddenError } from '../utils/errors.js'
 
 export interface AuthUser {
+  id?: string
   email: string
   name: string
   roles: string[]
