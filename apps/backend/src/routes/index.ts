@@ -9,6 +9,7 @@ import dockerRouter from './docker.js'
 import groupsRouter from './groups.js'
 import discoveryRouter from './discovery.js'
 import categoriesRouter from './categories.js'
+import ssoRouter from './sso.js'
 
 const router: Router = Router()
 
@@ -22,5 +23,6 @@ router.use(dockerRouter)
 router.use(groupsRouter)
 router.use(discoveryRouter)
 router.use(categoriesRouter)
+router.use(ssoRouter)
 
 export default router

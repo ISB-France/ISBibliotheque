@@ -38,6 +38,7 @@ export interface ImportInput {
     category: string
     icon: string
     roles?: string[]
+    sso?: boolean
   }
 }
 
@@ -232,6 +233,7 @@ export async function importContainer(input: ImportInput): Promise<AppManifest> 
     icon: input.manifest.icon,
     access,
     roles: input.manifest.roles ?? [],
+    sso: input.manifest.sso ?? false,
   }
 
   writeFileSync(join(appDir, 'metadata.json'), JSON.stringify(appManifest, null, 2), 'utf-8')

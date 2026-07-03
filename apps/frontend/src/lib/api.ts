@@ -90,6 +90,7 @@ export interface AppResponse {
   accessType: 'redirect' | 'docker'
   url: string | null
   status: string | null
+  sso: boolean
 }
 
 export interface UserProfile {
@@ -133,6 +134,9 @@ export const api = {
     list: () => request<{ apps: AppResponse[] }>('/apps').then((r) => r.apps),
     categories: () =>
       request<{ categories: string[] }>('/apps/categories').then((r) => r.categories),
+  },
+  sso: {
+    generate: () => request<{ token: string }>('/sso/generate', { method: 'POST' }).then((r) => r.token),
   },
   categories: {
     list: () => request<{ categories: string[] }>('/categories').then((r) => r.categories),
@@ -224,6 +228,7 @@ export const api = {
         category: string
         icon: string
         roles?: string[]
+        sso?: boolean
       }
     }) =>
       request<{ app: AppManifest }>('/admin/discover/import', {

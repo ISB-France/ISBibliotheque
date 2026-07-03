@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { X, Plus, Loader2 } from 'lucide-react'
-import type { AppResponse } from '@/lib/api'
-import { api } from '@/lib/api'
+import { api, ApiError, type AppResponse } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -18,6 +17,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
   const [category, setCategory] = useState(app?.category ?? '')
   const [accessType, setAccessType] = useState<'redirect' | 'docker'>(app?.accessType ?? 'redirect')
   const [url, setUrl] = useState(app?.url ?? '')
+  const [sso, setSso] = useState(app?.sso ?? false)
   const [categories, setCategories] = useState<string[]>([])
   const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set(app?.roles ?? []))
@@ -70,6 +70,10 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       setError('Le nom est requis.')
       return
     }
+    if (!description.trim()) {
+      setError('La description est requise.')
+      return
+    }
     if (!category) {
       setError('La catégorie est requise.')
       return
@@ -86,6 +90,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
         name: name.trim(),
         description: description.trim(),
         category,
+        sso: accessType === 'redirect' ? sso : false,
         ...rolesField,
       }
       if (accessType === 'redirect' && validUrl) {
@@ -96,7 +101,13 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
         await onAdd(JSON.stringify(patch, null, 2))
         onClose()
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erreur lors de la modification')
+        if (err instanceof ApiError && err.details) {
+          const d = err.details as { details?: Array<{ path: string; message: string }> }
+          const msgs = d.details?.map((e) => `${e.path}: ${e.message}`).join(', ')
+          setError(msgs ?? err.message)
+        } else {
+          setError(err instanceof Error ? err.message : 'Erreur lors de la modification')
+        }
       } finally {
         setSubmitting(false)
       }
@@ -125,6 +136,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       category,
       icon: 'LayoutGrid',
       access,
+      sso: accessType === 'redirect' ? sso : false,
       ...rolesField,
     }
 
@@ -133,7 +145,13 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       await onAdd(JSON.stringify(manifest, null, 2))
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la creation')
+      if (err instanceof ApiError && err.details) {
+        const d = err.details as { details?: Array<{ path: string; message: string }> }
+        const msgs = d.details?.map((e) => `${e.path}: ${e.message}`).join(', ')
+        setError(msgs ?? err.message)
+      } else {
+        setError(err instanceof Error ? err.message : 'Erreur lors de la creation')
+      }
     } finally {
       setSubmitting(false)
     }
@@ -242,12 +260,29 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
           </div>
 
           {accessType === 'redirect' && (
-            <div>
-              <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
-                URL de redirection
-              </label>
-              <Input placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} />
-            </div>
+            <>
+              <div>
+                <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
+                  URL de redirection
+                </label>
+                <Input placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl border" style={{ borderColor: 'hsl(var(--border))' }}>
+                <div>
+                  <p className="text-[13px] font-semibold text-isb-brown">SSO</p>
+                  <p className="text-[12px] text-isb-muted">Transmettre l&apos;identité de l&apos;utilisateur à l&apos;application</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={sso}
+                  onClick={() => setSso((v) => !v)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${sso ? 'bg-primary' : 'bg-muted'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${sso ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+            </>
           )}
 
           <div>

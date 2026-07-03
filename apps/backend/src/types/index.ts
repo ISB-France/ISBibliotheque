@@ -8,6 +8,7 @@ export interface AppManifest {
   icon: string
   access: AppRedirectAccess | AppDockerAccess
   roles: string[]
+  sso?: boolean
 }
 
 export interface AppRedirectAccess {
@@ -34,4 +35,5 @@ export interface AppResponse {
   accessType: AppAccessType
   url: string | null
   status: string | null
+  sso: boolean
 }
