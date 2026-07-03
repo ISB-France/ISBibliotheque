@@ -22,6 +22,7 @@ services:
     ports:
       - "3001:4000"
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./infra:/app/infra
       - ./apps/backend/src:/app/apps/backend/src
       - ./apps/backend/prisma:/app/apps/backend/prisma
