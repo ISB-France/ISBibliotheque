@@ -4,16 +4,12 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import pinoHttp from 'pino-http'
 import { resolve } from 'node:path'
-import { mkdirSync } from 'node:fs'
 import { logger } from './utils/logger.js'
 import { config } from './config/index.js'
 import routes from './routes/index.js'
 import { errorHandler } from './middleware/error-handler.js'
 import { notFoundHandler } from './middleware/not-found.js'
 
-
-// Ensure uploads directory exists at startup
-mkdirSync(resolve(process.cwd(), '../../infra/uploads/avatars'), { recursive: true })
 export function createApp(): express.Application {
   const app = express()
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { Plus, Trash2, UserPlus, RefreshCw, Pencil, Save, X, Search } from 'lucide-react'
+import { Plus, Trash2, UserPlus, RefreshCw, Pencil, Save, X, Search, UserRoundPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type UserProfile } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -275,8 +275,11 @@ function GroupCard({
   onProfileUpdated: () => void
 }) {
   const [showAdd, setShowAdd] = useState(false)
+  const [addMode, setAddMode] = useState<'search' | 'create'>('search')
   const [search, setSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
+  const [newEmail, setNewEmail] = useState('')
+  const [newName, setNewName] = useState('')
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState(group.name)
   const [editDesc, setEditDesc] = useState(group.description)
@@ -306,6 +309,15 @@ function GroupCard({
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearch(e.target.value)
     setShowDropdown(true)
+  }
+
+  function handleCreateUser(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newEmail.trim()) return
+    onAddMember(newEmail.trim(), newName.trim() || undefined)
+    setNewEmail('')
+    setNewName('')
+    setShowAdd(false)
   }
 
   async function handleSaveGroup() {
@@ -389,58 +401,101 @@ function GroupCard({
       {showAdd && (
         <div className="px-6 py-3 border-b">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-[13px] font-medium text-isb-brown">Ajouter un membre existant</span>
+            <button
+              type="button"
+              onClick={() => setAddMode('search')}
+              className={`text-[12px] px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                addMode === 'search'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-isb-muted hover:text-isb-brown'
+              }`}
+            >
+              Existants
+            </button>
+            <button
+              type="button"
+              onClick={() => setAddMode('create')}
+              className={`text-[12px] px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                addMode === 'create'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-isb-muted hover:text-isb-brown'
+              }`}
+            >
+              Nouveau
+            </button>
             <div className="flex-1" />
-            <Button variant="ghost" size="sm" onClick={() => { setShowAdd(false); setSearch(''); }}>
+            <Button variant="ghost" size="sm" onClick={() => { setShowAdd(false); setSearch(''); setNewEmail(''); setNewName(''); }}>
               <X size={14} />
             </Button>
           </div>
 
-          <div className="relative">
-            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-isb-muted" />
-            <Input
-              ref={inputRef}
-              placeholder="Rechercher un utilisateur…"
-              value={search}
-              onChange={handleSearchChange}
-              onFocus={() => setShowDropdown(true)}
-              onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-              className="pl-8 text-[14px]"
-              autoFocus
-            />
-            {showDropdown && filteredProfiles.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-popover border rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                {filteredProfiles.map((p) => (
-                  <button
-                    key={p.email}
-                    type="button"
-                    onMouseDown={() => handleSelect(p.email)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[13px] hover:bg-accent transition-colors"
-                  >
-                    <div className="w-6 h-6 rounded-md flex items-center justify-center bg-secondary text-[12px] shrink-0">
-                      {(() => {
-                        const mIcon = p.icon
-                        return mIcon && isImageUrl(mIcon) ? (
-                          <img src={mIcon} alt="" className="w-full h-full object-cover rounded-md" />
-                        ) : (
-                          mIcon || p.name[0].toUpperCase()
-                        )
-                      })()}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-medium text-isb-brown truncate">{p.name}</div>
-                      <div className="text-[11px] text-isb-muted truncate">{p.email}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-            {showDropdown && search && filteredProfiles.length === 0 && (
-              <p className="absolute left-0 right-0 top-full mt-1 z-50 bg-popover border rounded-xl p-3 text-[13px] text-isb-muted text-center">
-                Aucun utilisateur trouvé
-              </p>
-            )}
-          </div>
+          {addMode === 'search' ? (
+            <div className="relative">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-isb-muted" />
+              <Input
+                ref={inputRef}
+                placeholder="Rechercher un utilisateur…"
+                value={search}
+                onChange={handleSearchChange}
+                onFocus={() => setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                className="pl-8 text-[14px]"
+                autoFocus
+              />
+              {showDropdown && filteredProfiles.length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-popover border rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                  {filteredProfiles.map((p) => (
+                    <button
+                      key={p.email}
+                      type="button"
+                      onMouseDown={() => handleSelect(p.email)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[13px] hover:bg-accent transition-colors"
+                    >
+                      <div className="w-6 h-6 rounded-md flex items-center justify-center bg-secondary text-[12px] shrink-0">
+                        {(() => {
+                          const mIcon = p.icon
+                          return mIcon && isImageUrl(mIcon) ? (
+                            <img src={mIcon} alt="" className="w-full h-full object-cover rounded-md" />
+                          ) : (
+                            mIcon || p.name[0].toUpperCase()
+                          )
+                        })()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-isb-brown truncate">{p.name}</div>
+                        <div className="text-[11px] text-isb-muted truncate">{p.email}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {showDropdown && search && filteredProfiles.length === 0 && (
+                <p className="absolute left-0 right-0 top-full mt-1 z-50 bg-popover border rounded-xl p-3 text-[13px] text-isb-muted text-center">
+                  Aucun utilisateur trouvé
+                </p>
+              )}
+            </div>
+          ) : (
+            <form onSubmit={handleCreateUser} className="flex flex-col gap-2">
+              <Input
+                placeholder="Email du nouvel utilisateur"
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                required
+                autoFocus
+              />
+              <Input
+                placeholder="Nom (optionnel)"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+              <Button type="submit" size="sm" className="self-end">
+                <UserRoundPlus size={14} />
+                Ajouter
+              </Button>
+            </form>
+          )}
         </div>
       )}
 

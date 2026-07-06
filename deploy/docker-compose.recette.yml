@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: isbibliotheque_recette
+      POSTGRES_USER: isb
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
+    ports:
+      - "5437:5432"
+    volumes:
+      - pgdata-recette:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U isb -d isbibliotheque_recette"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile.prod
+    env_file: /etc/isbibliotheque/recette.env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile.prod
+    ports:
+      - "3003:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata-recette:

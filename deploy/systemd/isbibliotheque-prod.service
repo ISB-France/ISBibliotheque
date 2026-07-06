@@ -1,0 +1,15 @@
+[Unit]
+Description=ISBibliotheque Production
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/var/www/isbibliotheque-prod
+ExecStart=/usr/bin/docker compose -f deploy/docker-compose.prod.yml --env-file /etc/isbibliotheque/prod.env -p isbibliotheque-prod up -d
+ExecStop=/usr/bin/docker compose -f deploy/docker-compose.prod.yml -p isbibliotheque-prod down
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Server, Search, Download, Container, Check, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type DiscoveredContainer } from '@/lib/api'
@@ -21,6 +21,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+
+const CATEGORIES = [
+  'Gestion',
+  'Production',
+  'RH',
+  'Finance',
+  'Qualité',
+  'Logistique',
+  'Commercial',
+  'IT',
+]
 
 function slugify(text: string): string {
   return text
@@ -45,7 +56,6 @@ export function DockerDiscovery() {
   const [scanning, setScanning] = useState(false)
   const [scanned, setScanned] = useState(false)
   const [importingId, setImportingId] = useState<string | null>(null)
-  const [categories, setCategories] = useState<string[]>([])
   const [importForm, setImportForm] = useState<
     Record<
       string,
@@ -56,16 +66,9 @@ export function DockerDiscovery() {
         category: string
         icon: string
         roles: string
-        accessType: 'redirect' | 'docker'
-        redirectUrl: string
-        sso: boolean
       }
     >
   >({})
-
-  useEffect(() => {
-    api.categories.list().then(setCategories).catch(() => {})
-  }, [])
 
   async function handleScan() {
     try {
@@ -90,10 +93,7 @@ export function DockerDiscovery() {
     const name = c.name.replace(/[_-]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
     const description =
       c.labels['isb.description'] ?? c.labels['description'] ?? `Application ${name}`
-    const category = c.labels['isb.category'] ?? c.labels['category'] ?? ''
-    const isRunning = c.status === 'running'
-    const hostPort = c.ports.find((p) => p.hostPort)?.hostPort
-    const redirectUrl = hostPort ? `http://localhost:${hostPort}` : ''
+    const category = c.labels['isb.category'] ?? c.labels['category'] ?? 'IT'
 
     setImportForm((prev) => ({
       ...prev,
@@ -101,12 +101,9 @@ export function DockerDiscovery() {
         id,
         name,
         description,
-        category: categories.includes(category) ? category : '',
+        category: CATEGORIES.includes(category) ? category : 'IT',
         icon: 'Container',
         roles: c.labels['isb.roles'] ?? '',
-        accessType: isRunning ? 'redirect' : 'docker',
-        redirectUrl,
-        sso: false,
       },
     }))
     setImportingId(c.id)
@@ -116,7 +113,7 @@ export function DockerDiscovery() {
     setImportingId((prev) => (prev === id ? null : prev))
   }
 
-  function updateFormField(containerId: string, field: string, value: string | boolean) {
+  function updateFormField(containerId: string, field: string, value: string) {
     setImportForm((prev) => ({
       ...prev,
       [containerId]: { ...prev[containerId], [field]: value },
@@ -141,8 +138,6 @@ export function DockerDiscovery() {
       await api.discovery.import({
         host: host || undefined,
         containerId: c.id,
-        accessType: form.accessType,
-        redirectUrl: form.accessType === 'redirect' ? form.redirectUrl : undefined,
         manifest: {
           id: form.id,
           name: form.name,
@@ -150,7 +145,6 @@ export function DockerDiscovery() {
           category: form.category,
           icon: form.icon,
           roles,
-          sso: form.accessType === 'redirect' ? form.sso : false,
         },
       })
 
@@ -330,23 +324,6 @@ export function DockerDiscovery() {
                             </div>
                             <div>
                               <label className="block text-[12px] font-medium text-isb-muted mb-1">
-                                 Type d&apos;accès
-                              </label>
-                              <Select
-                                value={importForm[c.id].accessType}
-                                onValueChange={(v) => updateFormField(c.id, 'accessType', v)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="redirect">Redirection (déjà en cours)</SelectItem>
-                                  <SelectItem value="docker">Docker (démarrage à la demande)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <label className="block text-[12px] font-medium text-isb-muted mb-1">
                                 Catégorie
                               </label>
                               <Select
@@ -354,10 +331,10 @@ export function DockerDiscovery() {
                                 onValueChange={(v) => updateFormField(c.id, 'category', v)}
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Sélectionner" />
+                                  <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {categories.map((cat) => (
+                                  {CATEGORIES.map((cat) => (
                                     <SelectItem key={cat} value={cat}>
                                       {cat}
                                     </SelectItem>
@@ -365,35 +342,6 @@ export function DockerDiscovery() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            {importForm[c.id].accessType === 'redirect' && (
-                              <div className="col-span-2">
-                                <label className="block text-[12px] font-medium text-isb-muted mb-1">
-                                  URL d&apos;accès
-                                </label>
-                                <Input
-                                  value={importForm[c.id].redirectUrl}
-                                  onChange={(e) => updateFormField(c.id, 'redirectUrl', e.target.value)}
-                                  placeholder="http://localhost:3000"
-                                />
-                              </div>
-                            )}
-                            {importForm[c.id].accessType === 'redirect' && (
-                              <div className="col-span-2 flex items-center justify-between p-3 rounded-xl border" style={{ borderColor: 'hsl(var(--border))' }}>
-                                <div>
-                                  <p className="text-[12px] font-medium text-isb-muted">SSO</p>
-                                  <p className="text-[11px] text-isb-muted">Transmettre l&apos;identité de l&apos;utilisateur à l&apos;application</p>
-                                </div>
-                                <button
-                                  type="button"
-                                  role="switch"
-                                  aria-checked={importForm[c.id].sso}
-                                  onClick={() => updateFormField(c.id, 'sso', !importForm[c.id].sso)}
-                                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${importForm[c.id].sso ? 'bg-primary' : 'bg-muted'}`}
-                                >
-                                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${importForm[c.id].sso ? 'translate-x-6' : 'translate-x-1'}`} />
-                                </button>
-                              </div>
-                            )}
                             <div>
                               <label className="block text-[12px] font-medium text-isb-muted mb-1">
                                 Icône (Lucide)
