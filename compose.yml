@@ -32,9 +32,9 @@ services:
       - NODE_ENV=development
       - PORT=4000
       - LOG_LEVEL=debug
-      - CORS_ORIGIN=http://localhost:5173
-      - APP_URL=http://localhost:5173
-      - OIDC_REDIRECT_URI=http://localhost:3001/api/auth/callback
+      - CORS_ORIGIN=http://localhost:5176
+      - APP_URL=http://localhost:5176
+      - OIDC_REDIRECT_URI=http://localhost:3006/api/auth/callback
       - CHOKIDAR_USEPOLLING=1
     depends_on:
       db:
