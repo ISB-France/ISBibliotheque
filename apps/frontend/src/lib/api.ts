@@ -181,6 +181,13 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(data),
       }).then((r) => r.profile),
+    listUsers: () =>
+      request<{ users: UserProfile[] }>('/admin/users').then((r) => r.users),
+    createUser: (data: { firstName: string; lastName: string; email: string }) =>
+      request<{ user: UserProfile }>('/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }).then((r) => r.user),
   },
   docker: {
     start: (id: string) =>

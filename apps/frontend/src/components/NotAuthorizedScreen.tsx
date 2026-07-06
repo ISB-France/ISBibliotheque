@@ -15,9 +15,9 @@ export function NotAuthorizedScreen({
       <header
         className="sticky top-0 z-40 border-b"
         style={{
-          backgroundColor: 'rgba(253,250,245,0.96)',
+          backgroundColor: 'hsl(var(--card) / 0.96)',
           backdropFilter: 'blur(12px)',
-          borderColor: 'rgba(59,40,0,0.08)',
+          borderColor: 'hsl(var(--border))',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
@@ -72,8 +72,11 @@ export function NotAuthorizedScreen({
           {onBack && (
             <button
               onClick={onBack}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl hover:bg-[#FEEAD3] active:scale-95 transition-all font-heading font-semibold text-[14px]"
-              style={{ color: 'hsl(var(--foreground))' }}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl hover:brightness-95 active:scale-95 transition-all font-heading font-semibold text-[14px]"
+              style={{
+                backgroundColor: 'hsl(var(--secondary))',
+                color: 'hsl(var(--secondary-foreground))',
+              }}
             >
               <ArrowLeft size={16} strokeWidth={2.5} />
               Retour au portail

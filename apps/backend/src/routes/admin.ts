@@ -2,6 +2,7 @@ import { Router } from 'express'
 import type { Request, Response, NextFunction } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import { requireAction } from '../middleware/authorize.js'
+import { prisma } from '../services/db.js'
 import {
   listGroups,
   getGroup,
@@ -126,6 +127,47 @@ router.put('/admin/profiles/:email', async (req: Request, res: Response, next: N
     const targetEmail = newEmail ?? oldEmail
     const updated = await upsertProfile(targetEmail, { name, icon })
     res.json({ profile: updated })
+  } catch (err) {
+    next(err)
+  }
+})
+
+// ── Gestion des utilisateurs ──
+
+router.get('/admin/users', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: { email: 'asc' },
+      select: { id: true, email: true, name: true, icon: true, createdAt: true },
+    })
+    res.json({ users })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.post('/admin/users', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { firstName, lastName, email } = req.body
+    if (!firstName || !lastName || !email) {
+      res.status(400).json({ error: { message: 'Prénom, nom et email sont requis' } })
+      return
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } })
+    if (existing) {
+      res.status(409).json({ error: { message: 'Un utilisateur avec cet email existe déjà' } })
+      return
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        email: email.toLowerCase(),
+        name: `${firstName} ${lastName}`,
+      },
+    })
+
+    res.status(201).json({ user: { email: user.email, name: user.name, icon: user.icon } })
   } catch (err) {
     next(err)
   }

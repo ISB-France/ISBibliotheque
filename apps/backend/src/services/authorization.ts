@@ -7,9 +7,10 @@ export type Action =
   | 'admin_add_app'
   | 'admin_manage_apps'
   | 'admin_manage_groups'
+  | 'admin_manage_users'
 
 const roleActions: Record<string, Action[]> = {
-  admin: ['view_apps', 'launch_app', 'admin_add_app', 'admin_manage_apps', 'admin_manage_groups'],
+  admin: ['view_apps', 'launch_app', 'admin_add_app', 'admin_manage_apps', 'admin_manage_groups', 'admin_manage_users'],
   'production.manager': ['view_apps', 'launch_app'],
   'production.operator': ['view_apps', 'launch_app'],
   'logistics.manager': ['view_apps', 'launch_app'],
