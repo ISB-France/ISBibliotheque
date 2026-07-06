@@ -4,13 +4,13 @@ services:
     ports:
       - "5438:5432"
     environment:
-      POSTGRES_DB: isbibliotheque_recette
+      POSTGRES_DB: isbibliotheque
       POSTGRES_USER: isb
       POSTGRES_PASSWORD: isb-dev-password
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U isb -d isbibliotheque_recette"]
+      test: ["CMD-SHELL", "pg_isready -U isb -d isbibliotheque"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -25,6 +25,7 @@ services:
       - "3006:4000"
     volumes:
       - ./infra:/app/infra
+      - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - .env
     environment:
@@ -51,7 +52,6 @@ services:
       - backend
     networks:
       - internal
-      - coolify
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.isbibliotheque-recette.rule=Host(`recette.isbibliotheque.groupe-isb.fr`)"
@@ -61,8 +61,6 @@ services:
 networks:
   internal:
     driver: bridge
-  coolify:
-    external: true
 
 volumes:
   pgdata:
