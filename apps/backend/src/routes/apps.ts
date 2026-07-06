@@ -7,11 +7,11 @@ import type { AuthUser } from '../middleware/auth.js'
 
 function filterAppsByUser(user?: AuthUser) {
   const apps = listApps()
-  if (!user) return apps
-  if (user.isAdmin) return apps
+  if (user?.isAdmin) return apps
   return apps.filter((app) => {
     const roles = getManifestRoles(app.id)
-    if (roles.length === 0) return true
+    if (roles.length === 0) return false
+    if (!user) return false
     return user.roles.some((r) => roles.includes(r))
   })
 }
@@ -36,9 +36,12 @@ router.get('/apps/:id', optionalAuth, (req: Request, res: Response) => {
   if (!app) throw new NotFoundError('Application')
   const roles = getManifestRoles(app.id)
   const user = (req as Request & { user?: AuthUser }).user
-  if (user && !user.isAdmin && roles.length > 0) {
-    if (!user.roles.some((r) => roles.includes(r))) throw new NotFoundError('Application')
+  if (user?.isAdmin) {
+    res.json({ app })
+    return
   }
+  if (roles.length === 0) throw new NotFoundError('Application')
+  if (!user || !user.roles.some((r) => roles.includes(r))) throw new NotFoundError('Application')
   res.json({ app })
 })
 
