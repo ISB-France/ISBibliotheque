@@ -127,8 +127,9 @@ export default function Profile() {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file) return
-    handleAvatarUpload(file)
+    if (file) {
+      handleAvatarUpload(file)
+    }
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -188,7 +189,7 @@ export default function Profile() {
             <div className="relative group">
               <div className="w-14 h-14 rounded-xl flex items-center justify-center text-[24px] bg-primary text-primary-foreground font-bold overflow-hidden">
                 {icon && isImageUrl(icon) ? (
-                  <img src={icon} alt="" className="w-full h-full object-cover" onError={() => { if (icon !== initials) setIcon(''); }} />
+                  <img src={icon} alt="" className="w-full h-full object-cover" />
                 ) : (
                   icon || initials
                 )}

@@ -90,15 +90,12 @@ export interface AppResponse {
   accessType: 'redirect' | 'docker'
   url: string | null
   status: string | null
-  sso: boolean
 }
 
 export interface UserProfile {
   email: string
   name: string
   icon: string
-  groups: string[]
-  isAdmin: boolean
 }
 
 export interface DockerStatus {
@@ -134,21 +131,6 @@ export const api = {
     list: () => request<{ apps: AppResponse[] }>('/apps').then((r) => r.apps),
     categories: () =>
       request<{ categories: string[] }>('/apps/categories').then((r) => r.categories),
-  },
-  sso: {
-    generate: () => request<{ token: string }>('/sso/generate', { method: 'POST' }).then((r) => r.token),
-  },
-  categories: {
-    list: () => request<{ categories: string[] }>('/categories').then((r) => r.categories),
-    create: (name: string) =>
-      request<{ categories: string[] }>('/admin/categories', {
-        method: 'POST',
-        body: JSON.stringify({ name }),
-      }).then((r) => r.categories),
-    delete: (name: string) =>
-      request<{ categories: string[] }>(`/admin/categories/${encodeURIComponent(name)}`, {
-        method: 'DELETE',
-      }).then((r) => r.categories),
   },
   admin: {
     listApps: () => request<{ apps: AppResponse[] }>('/admin/apps').then((r) => r.apps),
@@ -193,16 +175,12 @@ export const api = {
         { method: 'DELETE' },
       ).then((r) => r.group),
     listProfiles: () =>
-      request<{ profiles: UserProfile[] }>('/admin/profiles').then(
-        (r) => r.profiles,
-      ),
-    updateProfile: (email: string, data: { name?: string; icon?: string; email?: string; isAdmin?: boolean }) =>
+      request<{ profiles: UserProfile[] }>('/admin/profiles').then((r) => r.profiles),
+    updateProfile: (email: string, data: { name?: string; icon?: string; email?: string }) =>
       request<{ profile: UserProfile }>(`/admin/profiles/${encodeURIComponent(email)}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }).then((r) => r.profile),
-    deleteProfile: (email: string) =>
-      request<void>(`/admin/profiles/${encodeURIComponent(email)}`, { method: 'DELETE' }),
   },
   docker: {
     start: (id: string) =>
@@ -219,8 +197,6 @@ export const api = {
     import: (data: {
       host?: string
       containerId: string
-      accessType?: 'redirect' | 'docker'
-      redirectUrl?: string
       manifest: {
         id: string
         name: string
@@ -228,7 +204,6 @@ export const api = {
         category: string
         icon: string
         roles?: string[]
-        sso?: boolean
       }
     }) =>
       request<{ app: AppManifest }>('/admin/discover/import', {

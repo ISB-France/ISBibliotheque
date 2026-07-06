@@ -29,8 +29,6 @@ export interface DiscoveredContainer {
 export interface ImportInput {
   host?: string
   containerId: string
-  accessType?: 'redirect' | 'docker'
-  redirectUrl?: string
   manifest: {
     id: string
     name: string
@@ -38,7 +36,6 @@ export interface ImportInput {
     category: string
     icon: string
     roles?: string[]
-    sso?: boolean
   }
 }
 
@@ -196,33 +193,23 @@ export async function importContainer(input: ImportInput): Promise<AppManifest> 
     mkdirSync(appDir, { recursive: true })
   }
 
-  const accessType = input.accessType ?? 'docker'
-  let access: AppManifest['access']
+  const internalPort = info.ports.length > 0 ? info.ports[0].containerPort : 80
+  const composeFile = 'docker-compose.yml'
+  const serviceName = 'app'
 
-  if (accessType === 'redirect') {
-    const url =
-      input.redirectUrl ||
-      (() => {
-        const port = info.ports.find((p) => p.hostPort)
-        return port ? `http://localhost:${port.hostPort}` : 'http://localhost'
-      })()
-    access = { type: 'redirect', url }
-  } else {
-    const internalPort = info.ports.length > 0 ? info.ports[0].containerPort : 80
-    const composeFile = 'docker-compose.yml'
-    const serviceName = 'app'
-    const compose = buildCompose(info, serviceName)
-    writeFileSync(join(appDir, composeFile), compose, 'utf-8')
-    access = {
-      type: 'docker',
-      composeFile,
-      serviceName,
-      internalPort,
-      healthUrl: info.labels['isb.healthUrl'] || undefined,
-    } as AppManifest['access']
-    if (input.host && !input.host.startsWith('unix://')) {
-      (access as { host?: string }).host = input.host
-    }
+  const compose = buildCompose(info, serviceName)
+  writeFileSync(join(appDir, composeFile), compose, 'utf-8')
+
+  const access: AppManifest['access'] = {
+    type: 'docker',
+    composeFile,
+    serviceName,
+    internalPort,
+    healthUrl: info.labels['isb.healthUrl'] || undefined,
+  }
+
+  if (input.host && !input.host.startsWith('unix://')) {
+    access.host = input.host
   }
 
   const appManifest: AppManifest = {
@@ -233,7 +220,6 @@ export async function importContainer(input: ImportInput): Promise<AppManifest> 
     icon: input.manifest.icon,
     access,
     roles: input.manifest.roles ?? [],
-    sso: input.manifest.sso ?? false,
   }
 
   writeFileSync(join(appDir, 'metadata.json'), JSON.stringify(appManifest, null, 2), 'utf-8')

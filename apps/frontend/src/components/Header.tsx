@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 
 function isImageUrl(str: string): boolean {
@@ -24,7 +24,6 @@ export function Header({ search, onSearchChange }: HeaderProps) {
   const location = useLocation()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState('')
-  const [avatarIcon, setAvatarIcon] = useState('')
   const isAdmin = user?.isAdmin ?? false
   const initials = user?.name
     ? user.name
@@ -35,12 +34,15 @@ export function Header({ search, onSearchChange }: HeaderProps) {
         .toUpperCase()
     : '??'
   const isHome = location.pathname === '/'
+
   useEffect(() => {
     if (!user) return
-    api.auth.profile().then((p) => {
-      if (isImageUrl(p.icon)) setAvatarUrl(p.icon)
-      else if (p.icon) setAvatarIcon(p.icon)
-    }).catch(() => {})
+    api.auth
+      .profile()
+      .then((p) => {
+        if (isImageUrl(p.icon)) setAvatarUrl(p.icon)
+      })
+      .catch(() => {})
   }, [user])
 
   return (
@@ -118,11 +120,17 @@ export function Header({ search, onSearchChange }: HeaderProps) {
             aria-expanded={userMenuOpen}
           >
             <Avatar className="w-7 h-7 rounded-lg">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt={user?.name ?? ''} className="aspect-square h-full w-full rounded-lg" />}
-              <AvatarFallback className="bg-primary text-primary-foreground text-[12px] font-bold rounded-lg">
-                {avatarIcon || initials}
-              </AvatarFallback>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" className="w-full h-full object-cover rounded-lg" />
+              ) : (
+                <AvatarFallback className="bg-primary text-primary-foreground text-[12px] font-bold rounded-lg">
+                  {initials}
+                </AvatarFallback>
+              )}
             </Avatar>
+            <span className="text-[13px] font-medium text-isb-brown">
+              {user?.name ?? 'Utilisateur'}
+            </span>
             <ChevronDown
               size={14}
               className="text-isb-muted transition-transform duration-200"

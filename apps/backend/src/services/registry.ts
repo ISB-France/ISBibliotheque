@@ -30,7 +30,6 @@ function manifestToResponse(m: AppManifest): AppResponse {
     category: m.category,
     icon: m.icon,
     roles: m.roles ?? [],
-    sso: m.sso ?? false,
   }
   if (m.access.type === 'redirect') {
     return { ...base, accessType: 'redirect' as const, url: m.access.url, status: null }

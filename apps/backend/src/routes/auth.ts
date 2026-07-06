@@ -69,7 +69,7 @@ router.post('/auth/login-admin', async (req: Request, res: Response, next: NextF
       return
     }
 
-    const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase() || user.isAdmin
+    const isAdmin = email.toLowerCase() === config.authAdminEmail.toLowerCase()
 
     let roles: string[] = []
     if (isAdmin) {
@@ -212,35 +212,29 @@ router.put(
 router.post(
   '/auth/profile/avatar',
   requireAuth,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { promise, resolve, reject } = Promise.withResolvers<void>()
-      upload.single('avatar')(req, res, (err) => {
-        if (err) reject(err)
-        else resolve()
-      })
-      await promise
-
-      if (!req.user || !req.file) {
-        res.status(400).json({ error: { message: 'Aucun fichier fourni' } })
+  (req: Request, res: Response, next: NextFunction) => {
+    upload.single('avatar')(req, res, (err) => {
+      if (err) {
+        if (err instanceof multer.MulterError) {
+          res.status(400).json({ error: { message: 'Fichier trop volumineux (max 2 Mo)' } })
+          return
+        }
+        res.status(400).json({ error: { message: err.message } })
         return
       }
-
-      const avatarUrl = `/uploads/avatars/${req.file.filename}`
-      const updated = await upsertProfile(req.user.email, { icon: avatarUrl })
-      logger.info({ email: req.user.email, avatarUrl }, 'Avatar mis à jour')
-      res.json({ profile: updated, url: avatarUrl })
-    } catch (error) {
-      if (error instanceof multer.MulterError) {
-        res.status(400).json({ error: { message: 'Fichier trop volumineux (max 2 Mo)' } })
-        return
+      try {
+        if (!req.user || !req.file) {
+          res.status(400).json({ error: { message: 'Aucun fichier fourni' } })
+          return
+        }
+        const avatarUrl = `/uploads/avatars/${req.file.filename}`
+        const updated = upsertProfile(req.user.email, { icon: avatarUrl })
+        logger.info({ email: req.user.email, avatarUrl }, 'Avatar mis à jour')
+        res.json({ profile: updated, url: avatarUrl })
+      } catch (error) {
+        next(error)
       }
-      if (error instanceof Error && error.message.startsWith("Format d'image")) {
-        res.status(400).json({ error: { message: error.message } })
-        return
-      }
-      next(error)
-    }
+    })
   },
 )
 
