@@ -147,7 +147,6 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              disabled={isEdit}
             />
           </div>
 
