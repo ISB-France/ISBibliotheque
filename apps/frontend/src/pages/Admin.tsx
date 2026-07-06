@@ -49,6 +49,12 @@ export default function Admin() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [submittingUser, setSubmittingUser] = useState(false)
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null)
+  const [editFirstName, setEditFirstName] = useState('')
+  const [editLastName, setEditLastName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [submittingEdit, setSubmittingEdit] = useState(false)
+  const [confirmDeleteUser, setConfirmDeleteUser] = useState<{ email: string; name: string } | null>(null)
 
   const fetchApps = useCallback(async () => {
     try {
@@ -123,6 +129,46 @@ export default function Admin() {
       toast.error(err instanceof Error ? err.message : 'Erreur lors de la création')
     } finally {
       setSubmittingUser(false)
+    }
+  }
+
+  function openEditUser(u: UserProfile) {
+    const parts = u.name.split(' ')
+    setEditFirstName(parts[0] ?? '')
+    setEditLastName(parts.slice(1).join(' '))
+    setEditEmail(u.email)
+    setEditingUser(u)
+  }
+
+  async function handleUpdateUser(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editingUser) return
+    if (!editFirstName.trim() || !editLastName.trim() || !editEmail.trim()) return
+    setSubmittingEdit(true)
+    try {
+      await api.admin.updateUser(editingUser.email, {
+        firstName: editFirstName.trim(),
+        lastName: editLastName.trim(),
+        email: editEmail.trim(),
+      })
+      toast.success('Utilisateur mis à jour')
+      setEditingUser(null)
+      fetchUsers()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur lors de la modification')
+    } finally {
+      setSubmittingEdit(false)
+    }
+  }
+
+  async function handleDeleteUser(email: string, name: string) {
+    try {
+      await api.admin.deleteUser(email)
+      toast.success(`"${name}" supprimé`)
+      setConfirmDeleteUser(null)
+      fetchUsers()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur lors de la suppression')
     }
   }
 
@@ -235,17 +281,41 @@ export default function Admin() {
                     <TableRow>
                       <TableHead>Nom</TableHead>
                       <TableHead>Email</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((u) => (
-                      <TableRow key={u.email}>
-                        <TableCell>
-                          <div className="text-[14px] font-medium text-isb-brown">{u.name}</div>
-                        </TableCell>
-                        <TableCell className="text-isb-muted">{u.email}</TableCell>
-                      </TableRow>
-                    ))}
+                    {users.map((u) => {
+                      const isAdmin = u.email === user?.email
+                      return (
+                        <TableRow key={u.email}>
+                          <TableCell>
+                            <div className="text-[14px] font-medium text-isb-brown">{u.name}</div>
+                          </TableCell>
+                          <TableCell className="text-isb-muted">{u.email}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={isAdmin}
+                              onClick={() => openEditUser(u)}
+                              aria-label={`Modifier ${u.name}`}
+                            >
+                              <Pencil size={14} className="text-isb-muted" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={isAdmin}
+                              onClick={() => setConfirmDeleteUser({ email: u.email, name: u.name })}
+                              aria-label={`Supprimer ${u.name}`}
+                            >
+                              <Trash2 size={15} className="text-destructive" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -325,6 +395,14 @@ export default function Admin() {
         onConfirm={() => handleDelete(confirmDeleteApp!.id, confirmDeleteApp!.name)}
         onCancel={() => setConfirmDeleteApp(null)}
       />
+      <ConfirmDialog
+        open={!!confirmDeleteUser}
+        title="Supprimer l'utilisateur"
+        message={`Supprimer l'utilisateur "${confirmDeleteUser?.name}" ? Cette action est irreversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={() => handleDeleteUser(confirmDeleteUser!.email, confirmDeleteUser!.name)}
+        onCancel={() => setConfirmDeleteUser(null)}
+      />
       {showModal && <AddAppModal onClose={() => setShowModal(false)} onAdd={handleAddApp} />}
       {editingApp && (
         <AddAppModal
@@ -374,6 +452,52 @@ export default function Admin() {
               </Button>
               <Button type="submit" disabled={submittingUser}>
                 {submittingUser ? 'Création…' : 'Créer'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingUser} onOpenChange={(open) => { if (!open) setEditingUser(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier l&apos;utilisateur</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdateUser} className="flex flex-col gap-4">
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Prénom</label>
+              <Input
+                value={editFirstName}
+                onChange={(e) => setEditFirstName(e.target.value)}
+                placeholder="Jean"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Nom</label>
+              <Input
+                value={editLastName}
+                onChange={(e) => setEditLastName(e.target.value)}
+                placeholder="Dupont"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Email</label>
+              <Input
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="jean.dupont@isb.fr"
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-2">
+              <Button type="button" variant="ghost" onClick={() => setEditingUser(null)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={submittingEdit}>
+                {submittingEdit ? 'Modification…' : 'Enregistrer'}
               </Button>
             </div>
           </form>

@@ -188,6 +188,13 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(data),
       }).then((r) => r.user),
+    updateUser: (email: string, data: { firstName?: string; lastName?: string; email?: string }) =>
+      request<{ user: UserProfile }>(`/admin/users/${encodeURIComponent(email)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }).then((r) => r.user),
+    deleteUser: (email: string) =>
+      request<void>(`/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' }),
   },
   docker: {
     start: (id: string) =>

@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import { requireAction } from '../middleware/authorize.js'
 import { prisma } from '../services/db.js'
+import { config } from '../config/index.js'
 import {
   listGroups,
   getGroup,
@@ -168,6 +169,71 @@ router.post('/admin/users', async (req: Request, res: Response, next: NextFuncti
     })
 
     res.status(201).json({ user: { email: user.email, name: user.name, icon: user.icon } })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.put('/admin/users/:email', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const oldEmail = String(req.params.email).toLowerCase()
+    const { firstName, lastName, email: newEmail } = req.body
+
+    if (oldEmail === config.authAdminEmail.toLowerCase()) {
+      res.status(403).json({ error: { message: "Impossible de modifier l'administrateur principal" } })
+      return
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email: oldEmail } })
+    if (!existing) {
+      res.status(404).json({ error: { message: 'Utilisateur introuvable' } })
+      return
+    }
+
+    const targetEmail = (newEmail ? String(newEmail).toLowerCase() : oldEmail)
+    const name = firstName && lastName ? `${firstName} ${lastName}` : undefined
+
+    if (newEmail && newEmail !== oldEmail) {
+      const emailTaken = await prisma.user.findUnique({ where: { email: targetEmail } })
+      if (emailTaken) {
+        res.status(409).json({ error: { message: 'Cet email est déjà utilisé' } })
+        return
+      }
+      await prisma.user.update({ where: { email: oldEmail }, data: { email: targetEmail } })
+      await renameMemberInAllGroups(oldEmail, targetEmail)
+    }
+
+    if (name) {
+      await prisma.user.update({ where: { email: targetEmail }, data: { name } })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: targetEmail },
+      select: { email: true, name: true, icon: true },
+    })
+    res.json({ user })
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.delete('/admin/users/:email', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const email = String(req.params.email).toLowerCase()
+
+    if (email === config.authAdminEmail.toLowerCase()) {
+      res.status(403).json({ error: { message: "Impossible de supprimer l'administrateur principal" } })
+      return
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email } })
+    if (!existing) {
+      res.status(404).json({ error: { message: 'Utilisateur introuvable' } })
+      return
+    }
+
+    await prisma.user.delete({ where: { email } })
+    res.status(204).end()
   } catch (err) {
     next(err)
   }
