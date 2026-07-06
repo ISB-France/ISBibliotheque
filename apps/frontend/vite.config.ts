@@ -12,16 +12,17 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0',
+    allowedHosts: ['recette.isbibliotheque.groupe-isb.fr'],
     watch: {
       usePolling: true,
     },
     proxy: {
       '/api': {
-        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:3001',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://backend:4000',
         changeOrigin: true,
       },
       '/uploads': {
-        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:3001',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://backend:4000',
         changeOrigin: true,
       },
     },

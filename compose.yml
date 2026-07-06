@@ -20,7 +20,7 @@ services:
       context: .
       dockerfile: apps/backend/Dockerfile
     ports:
-      - "3001:4000"
+      - "3006:4000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./infra:/app/infra
@@ -45,7 +45,7 @@ services:
       context: .
       dockerfile: apps/frontend/Dockerfile
     ports:
-      - "5173:5173"
+      - "5176:5173"
     volumes:
       - ./apps/frontend/src:/app/apps/frontend/src
     depends_on:
