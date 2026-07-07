@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, createElement } from 'react'
 import { X, Plus } from 'lucide-react'
-import * as Lucide from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import type { AppResponse } from '@/lib/api'
 import { api } from '@/lib/api'
+import { getLucideIcon, lookupLucideIcon } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -196,23 +195,25 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">Icône</label>
             <div className="flex items-center gap-3 mb-2">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent"
-              >
-                {(() => {
-                  const C = (Lucide as Record<string, unknown>)[icon]
-                  const Icon = typeof C === 'function' ? (C as LucideIcon) : Lucide.LayoutGrid
-                  return <Icon size={22} strokeWidth={1.5} className="text-foreground" />
-                })()}
-              </div>
-              <span className="text-[13px] text-isb-muted font-mono">{icon}</span>
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent"
+            >
+              {createElement(getLucideIcon(icon), {
+                size: 22,
+                strokeWidth: 1.5,
+                className: 'text-foreground',
+              })}
             </div>
-            <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 rounded-xl border" style={{ borderColor: 'hsl(var(--border))' }}>
-              {COMMON_ICONS.map((name) => {
-                const C = (Lucide as Record<string, unknown>)[name]
-                const Ic = typeof C === 'function' ? (C as LucideIcon) : null
-                if (!Ic) return null
-                return (
+            <span className="text-[13px] text-isb-muted font-mono">{icon}</span>
+          </div>
+          <div
+            className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 rounded-xl border"
+            style={{ borderColor: 'hsl(var(--border))' }}
+          >
+            {COMMON_ICONS.map((name) => {
+              const Ic = lookupLucideIcon(name)
+              if (!Ic) return null
+              return (
                   <button
                     key={name}
                     type="button"
