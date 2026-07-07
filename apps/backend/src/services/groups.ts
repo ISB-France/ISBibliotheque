@@ -162,7 +162,7 @@ export async function removeMember(groupName: string, email: string): Promise<Gr
 
 export async function getRolesForEmail(email: string): Promise<string[]> {
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { email: email.toLowerCase() },
     include: { groups: { include: { group: true } } },
   })
   if (!user) return []
