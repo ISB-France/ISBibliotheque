@@ -1,21 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Search } from 'lucide-react'
-import * as Lucide from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type AppResponse } from '@/lib/api'
+import { getLucideIcon } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from '@/components/Header'
 import { AppCard, getAppStyle } from '@/components/AppCard'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { ErrorScreen } from '@/components/ErrorScreen'
-
-function getLucideIcon(name: string): LucideIcon {
-  const icon = (Lucide as Record<string, unknown>)[name]
-  if (typeof icon === 'function') return icon as LucideIcon
-  return Lucide.LayoutGrid as LucideIcon
-}
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth()

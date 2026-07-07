@@ -33,6 +33,6 @@ export const appManifestSchema = z.object({
   roles: z.array(z.string()).optional().default([]),
 })
 
-export const appManifestUpdateSchema = appManifestSchema.partial().required({ id: true })
+export const appManifestUpdateSchema = appManifestSchema.partial()
 
 export type AppManifestInput = z.infer<typeof appManifestSchema>
