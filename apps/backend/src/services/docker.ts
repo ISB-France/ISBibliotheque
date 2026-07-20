@@ -98,7 +98,7 @@ export async function stopContainer(appId: string): Promise<DockerStatus> {
 
   try {
     logger.info({ appId, dir }, 'Arrêt du conteneur')
-    await exec('docker', ['compose', '-f', composeFile, 'down', serviceName], { cwd: dir })
+    await exec('docker', ['compose', '-f', composeFile, 'stop', serviceName], { cwd: dir })
     logger.info({ appId }, 'Conteneur arrêté')
     return { status: 'stopped', url: null, message: 'Conteneur arrêté' }
   } catch (err) {
