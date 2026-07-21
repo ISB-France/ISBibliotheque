@@ -3,7 +3,6 @@ import { promisify } from 'node:util'
 import { join } from 'node:path'
 import { logger } from '../utils/logger.js'
 import { getAppManifest, REGISTRY_PATH } from './registry.js'
-import { AppError } from '../utils/errors.js'
 
 const exec = promisify(execFile)
 
@@ -14,8 +13,6 @@ export interface DockerStatus {
 }
 
 const startingApps = new Map<string, Promise<DockerStatus>>()
-const healthCheckTimeout = 30_000
-const healthCheckInterval = 1_000
 
 function resolveHealthUrl(baseUrl: string, internalPort: number): string {
   if (baseUrl.startsWith('http://') || baseUrl.startsWith('https://')) return baseUrl
@@ -30,15 +27,6 @@ async function checkHealth(url: string): Promise<boolean> {
   } catch {
     return false
   }
-}
-
-async function waitForHealth(url: string): Promise<void> {
-  const deadline = Date.now() + healthCheckTimeout
-  while (Date.now() < deadline) {
-    if (await checkHealth(url)) return
-    await new Promise((r) => setTimeout(r, healthCheckInterval))
-  }
-  throw new AppError(504, `Health check timeout (${healthCheckTimeout}ms)`)
 }
 
 async function resolveServiceImage(
@@ -104,10 +92,6 @@ export async function startContainer(appId: string): Promise<DockerStatus> {
       logger.info({ appId, dir }, 'Démarrage du conteneur')
 
       await exec('docker', ['compose', '-f', composeFile, 'up', '-d', serviceName], { cwd: dir })
-
-      const fullUrl = healthUrl ? resolveHealthUrl(healthUrl, internalPort) : `http://localhost:${internalPort}`
-      logger.info({ appId, url: fullUrl }, 'Attente du health check')
-      await waitForHealth(fullUrl)
 
       logger.info({ appId }, 'Conteneur démarré avec succès')
       return {
