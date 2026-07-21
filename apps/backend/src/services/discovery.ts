@@ -161,7 +161,7 @@ function buildCompose(info: DiscoveredContainer, serviceName: string): string {
   if (filteredEnv.length > 0) {
     lines.push('    environment:')
     for (const e of filteredEnv) {
-      lines.push(`      ${e}`)
+      lines.push(`      - ${e}`)
     }
   }
 

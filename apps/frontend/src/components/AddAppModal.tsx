@@ -31,6 +31,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
   const [categories, setCategories] = useState<string[]>([])
   const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set(app?.roles ?? []))
+  const [sso, setSso] = useState(app?.sso ?? false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -77,6 +78,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
         description: description.trim(),
         category,
         icon,
+        sso,
         ...rolesField,
       }
       if (accessType === 'redirect' && validUrl) {
@@ -116,6 +118,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       category,
       icon,
       access,
+      sso,
       ...rolesField,
     }
 
@@ -255,6 +258,23 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
               <Input placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} />
             </div>
           )}
+
+          <div>
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={sso}
+                onChange={(e) => setSso(e.target.checked)}
+                className="accent-primary"
+              />
+              <span className="text-[13px] font-semibold text-isb-brown">
+                Connexion SSO
+              </span>
+            </label>
+            <p className="text-[12px] mt-1 text-isb-muted">
+              Ajoute un token d&rsquo;authentification unique a l&rsquo;URL au lancement
+            </p>
+          </div>
 
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">

@@ -42,6 +42,7 @@ export interface AppManifest {
   icon: string
   access: AppRedirectAccess | AppDockerAccess
   roles: string[]
+  sso?: boolean
 }
 
 export interface AppRedirectAccess {
