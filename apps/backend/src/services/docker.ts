@@ -58,6 +58,12 @@ export async function startContainer(appId: string): Promise<DockerStatus> {
 
   const promise = (async (): Promise<DockerStatus> => {
     try {
+      const currentStatus = await getContainerStatus(appId)
+      if (currentStatus.status === 'running') {
+        logger.info({ appId }, 'Conteneur déjà en cours, aucune action nécessaire')
+        return currentStatus
+      }
+
       logger.info({ appId, dir }, 'Démarrage du conteneur')
 
       await exec('docker', ['compose', '-f', composeFile, 'up', '-d', serviceName], { cwd: dir })
