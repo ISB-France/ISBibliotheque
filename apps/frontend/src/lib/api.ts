@@ -90,6 +90,7 @@ export interface AppResponse {
   accessType: 'redirect' | 'docker'
   url: string | null
   status: string | null
+  sso: boolean
 }
 
 export interface UserProfile {
@@ -105,6 +106,9 @@ export interface DockerStatus {
 }
 
 export const api = {
+  sso: {
+    generate: () => request<{ token: string }>('/sso/generate', { method: 'POST' }).then((r) => r.token),
+  },
   groups: {
     list: () =>
       request<{ groups: Array<{ name: string; description: string }> }>('/groups').then(

@@ -56,7 +56,14 @@ export default function Home() {
 
     try {
       if (app.accessType === 'redirect' && app.url) {
-        window.open(app.url, '_blank', 'noopener,noreferrer')
+        if (app.sso) {
+          const token = await api.sso.generate()
+          const url = new URL(app.url)
+          url.searchParams.set('sso_token', token)
+          window.open(url.toString(), '_blank', 'noopener,noreferrer')
+        } else {
+          window.open(app.url, '_blank', 'noopener,noreferrer')
+        }
         toast.success(`${app.name} ouvert`)
         return
       }

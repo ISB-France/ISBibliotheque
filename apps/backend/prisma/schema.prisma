@@ -35,3 +35,15 @@ model UserGroup {
 
   @@id([userId, groupId])
 }
+
+model SsoToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  name      String
+  roles     String[]
+  isAdmin   Boolean
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

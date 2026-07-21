@@ -2,10 +2,22 @@ import { Router } from 'express'
 import type { Request, Response, NextFunction } from 'express'
 import rateLimit from 'express-rate-limit'
 import { getApp, getManifestRoles } from '../services/registry.js'
-import { startContainer, stopContainer, getContainerStatus } from '../services/docker.js'
+import { startContainer, stopContainer, getContainerStatus, type DockerStatus } from '../services/docker.js'
+import { generateSsoToken } from '../services/sso.js'
 import { NotFoundError, ForbiddenError } from '../utils/errors.js'
 import { requireAuth } from '../middleware/auth.js'
 import { requireAction } from '../middleware/authorize.js'
+
+async function withSsoToken(req: Request, appId: string, status: DockerStatus): Promise<DockerStatus> {
+  if (status.status !== 'running' || !status.url || !req.user) return status
+  const manifest = getApp(appId)
+  if (!manifest?.sso) return status
+
+  const token = await generateSsoToken(req.user)
+  const url = new URL(status.url)
+  url.searchParams.set('sso_token', token)
+  return { ...status, url: url.toString() }
+}
 
 const launchLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -39,7 +51,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       checkAppAccess(req)
-      const status = await startContainer(String(req.params.id))
+      const status = await withSsoToken(req, String(req.params.id), await startContainer(String(req.params.id)))
       res.json({ status })
     } catch (err) {
       next(err)
@@ -70,7 +82,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       checkAppAccess(req)
-      const status = await getContainerStatus(String(req.params.id))
+      const status = await withSsoToken(req, String(req.params.id), await getContainerStatus(String(req.params.id)))
       res.json({ status })
     } catch (err) {
       next(err)
