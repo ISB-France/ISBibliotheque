@@ -76,6 +76,21 @@ export async function startContainer(appId: string): Promise<DockerStatus> {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur inconnue'
+
+      if (message.includes('port is already allocated')) {
+        const healthTarget = healthUrl
+          ? resolveHealthUrl(healthUrl, internalPort)
+          : `http://localhost:${internalPort}`
+        if (await checkHealth(healthTarget)) {
+          logger.info({ appId }, 'Port déjà occupé par un conteneur fonctionnel, considéré comme démarré')
+          return {
+            status: 'running',
+            url: `http://localhost:${internalPort}`,
+            message: 'Conteneur déjà en cours (démarré hors Compose)',
+          }
+        }
+      }
+
       logger.error({ err, appId }, 'Échec du démarrage du conteneur')
       return { status: 'error', url: null, message }
     } finally {
@@ -136,6 +151,15 @@ export async function getContainerStatus(appId: string): Promise<DockerStatus> {
         message: "Conteneur en cours d'exécution",
       }
     }
+
+    if (await checkHealth(`http://localhost:${internalPort}`)) {
+      return {
+        status: 'running',
+        url: `http://localhost:${internalPort}`,
+        message: 'Conteneur en cours (démarré hors Compose)',
+      }
+    }
+
     return { status: 'stopped', url: null, message: `Conteneur arrêté (${state})` }
   } catch {
     return { status: 'stopped', url: null, message: 'Conteneur arrêté' }
