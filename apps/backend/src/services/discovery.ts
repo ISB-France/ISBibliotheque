@@ -193,7 +193,8 @@ export async function importContainer(input: ImportInput): Promise<AppManifest> 
     mkdirSync(appDir, { recursive: true })
   }
 
-  const internalPort = info.ports.length > 0 ? info.ports[0].containerPort : 80
+  const internalPort =
+    info.ports.find((p) => p.hostPort)?.hostPort ?? info.ports[0]?.containerPort ?? 80
   const composeFile = 'docker-compose.yml'
   const serviceName = 'app'
 

@@ -28,16 +28,19 @@ function buildAppUrl(
   return `${origin.protocol}://${origin.hostname}:${internalPort}`
 }
 
-function resolveHealthUrl(baseUrl: string, internalPort: number): string {
-  if (baseUrl.startsWith('http://') || baseUrl.startsWith('https://')) return baseUrl
-  if (baseUrl.startsWith('/')) return `http://localhost:${internalPort}${baseUrl}`
-  return `http://localhost:${internalPort}/${baseUrl}`
-}
-
-async function checkHealth(url: string): Promise<boolean> {
+async function isPortPublishedAndRunning(hostPort: number): Promise<boolean> {
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(5_000) })
-    return response.ok
+    const { stdout } = await exec('docker', [
+      'ps',
+      '--filter',
+      `publish=${hostPort}`,
+      '--format',
+      '{{.State}}',
+    ])
+    return stdout
+      .trim()
+      .split('\n')
+      .some((state) => state.trim() === 'running')
   } catch {
     return false
   }
@@ -82,7 +85,7 @@ export async function startContainer(appId: string, origin: RequestOrigin): Prom
     return { status: 'error', url: null, message: 'Application introuvable ou type incorrect' }
   }
 
-  const { composeFile, serviceName, internalPort, healthUrl, host: accessHost } = manifest.access
+  const { composeFile, serviceName, internalPort, host: accessHost } = manifest.access
   const dir = join(REGISTRY_PATH, appId)
   const appUrl = buildAppUrl(internalPort, origin, accessHost)
 
@@ -118,10 +121,7 @@ export async function startContainer(appId: string, origin: RequestOrigin): Prom
       const message = err instanceof Error ? err.message : 'Erreur inconnue'
 
       if (message.includes('port is already allocated')) {
-        const healthTarget = healthUrl
-          ? resolveHealthUrl(healthUrl, internalPort)
-          : `http://localhost:${internalPort}`
-        if (await checkHealth(healthTarget)) {
+        if (await isPortPublishedAndRunning(internalPort)) {
           logger.info({ appId }, 'Port déjà occupé par un conteneur fonctionnel, considéré comme démarré')
           return {
             status: 'running',
@@ -193,7 +193,7 @@ export async function getContainerStatus(appId: string, origin: RequestOrigin): 
       }
     }
 
-    if (await checkHealth(`http://localhost:${internalPort}`)) {
+    if (await isPortPublishedAndRunning(internalPort)) {
       return {
         status: 'running',
         url: appUrl,
