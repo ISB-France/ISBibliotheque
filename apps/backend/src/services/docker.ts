@@ -91,10 +91,13 @@ export async function startContainer(appId: string, origin: RequestOrigin): Prom
 
   const promise = (async (): Promise<DockerStatus> => {
     try {
-      const currentStatus = await getContainerStatus(appId, origin)
-      if (currentStatus.status === 'running') {
-        logger.info({ appId }, 'Conteneur déjà en cours, aucune action nécessaire')
-        return currentStatus
+      if (await isPortPublishedAndRunning(internalPort)) {
+        logger.info({ appId }, 'Port déjà occupé par un conteneur fonctionnel, aucune action nécessaire')
+        return {
+          status: 'running',
+          url: appUrl,
+          message: 'Conteneur déjà en cours',
+        }
       }
 
       const image = await resolveServiceImage(dir, composeFile, serviceName)
@@ -177,31 +180,21 @@ export async function getContainerStatus(appId: string, origin: RequestOrigin): 
   const dir = join(REGISTRY_PATH, appId)
   const appUrl = buildAppUrl(internalPort, origin, accessHost)
 
+  if (await isPortPublishedAndRunning(internalPort)) {
+    return {
+      status: 'running',
+      url: appUrl,
+      message: "Conteneur en cours d'exécution",
+    }
+  }
+
   try {
     const { stdout } = await exec(
       'docker',
       ['compose', '-f', composeFile, 'ps', '--format', '{{.State}}', serviceName],
       { cwd: dir },
     )
-
-    const state = stdout.trim()
-    if (state === 'running') {
-      return {
-        status: 'running',
-        url: appUrl,
-        message: "Conteneur en cours d'exécution",
-      }
-    }
-
-    if (await isPortPublishedAndRunning(internalPort)) {
-      return {
-        status: 'running',
-        url: appUrl,
-        message: 'Conteneur en cours (démarré hors Compose)',
-      }
-    }
-
-    return { status: 'stopped', url: null, message: `Conteneur arrêté (${state})` }
+    return { status: 'stopped', url: null, message: `Conteneur arrêté (${stdout.trim()})` }
   } catch {
     return { status: 'stopped', url: null, message: 'Conteneur arrêté' }
   }
