@@ -12,7 +12,21 @@ export interface DockerStatus {
   message?: string
 }
 
+export interface RequestOrigin {
+  hostname: string
+  protocol: string
+}
+
 const startingApps = new Map<string, Promise<DockerStatus>>()
+
+function buildAppUrl(
+  internalPort: number,
+  origin: RequestOrigin,
+  accessHost?: string,
+): string {
+  if (accessHost) return `${origin.protocol}://${accessHost}:${internalPort}`
+  return `${origin.protocol}://${origin.hostname}:${internalPort}`
+}
 
 function resolveHealthUrl(baseUrl: string, internalPort: number): string {
   if (baseUrl.startsWith('http://') || baseUrl.startsWith('https://')) return baseUrl
@@ -56,7 +70,7 @@ async function imageExistsLocally(image: string): Promise<boolean> {
   }
 }
 
-export async function startContainer(appId: string): Promise<DockerStatus> {
+export async function startContainer(appId: string, origin: RequestOrigin): Promise<DockerStatus> {
   const existing = startingApps.get(appId)
   if (existing) {
     logger.info({ appId }, 'Démarrage déjà en cours')
@@ -68,12 +82,13 @@ export async function startContainer(appId: string): Promise<DockerStatus> {
     return { status: 'error', url: null, message: 'Application introuvable ou type incorrect' }
   }
 
-  const { composeFile, serviceName, internalPort, healthUrl } = manifest.access
+  const { composeFile, serviceName, internalPort, healthUrl, host: accessHost } = manifest.access
   const dir = join(REGISTRY_PATH, appId)
+  const appUrl = buildAppUrl(internalPort, origin, accessHost)
 
   const promise = (async (): Promise<DockerStatus> => {
     try {
-      const currentStatus = await getContainerStatus(appId)
+      const currentStatus = await getContainerStatus(appId, origin)
       if (currentStatus.status === 'running') {
         logger.info({ appId }, 'Conteneur déjà en cours, aucune action nécessaire')
         return currentStatus
@@ -96,7 +111,7 @@ export async function startContainer(appId: string): Promise<DockerStatus> {
       logger.info({ appId }, 'Conteneur démarré avec succès')
       return {
         status: 'running',
-        url: `http://localhost:${internalPort}`,
+        url: appUrl,
         message: 'Conteneur démarré',
       }
     } catch (err) {
@@ -110,7 +125,7 @@ export async function startContainer(appId: string): Promise<DockerStatus> {
           logger.info({ appId }, 'Port déjà occupé par un conteneur fonctionnel, considéré comme démarré')
           return {
             status: 'running',
-            url: `http://localhost:${internalPort}`,
+            url: appUrl,
             message: 'Conteneur déjà en cours (démarré hors Compose)',
           }
         }
@@ -148,7 +163,7 @@ export async function stopContainer(appId: string): Promise<DockerStatus> {
   }
 }
 
-export async function getContainerStatus(appId: string): Promise<DockerStatus> {
+export async function getContainerStatus(appId: string, origin: RequestOrigin): Promise<DockerStatus> {
   if (startingApps.has(appId)) {
     return { status: 'running', url: null, message: 'Démarrage en cours' }
   }
@@ -158,8 +173,9 @@ export async function getContainerStatus(appId: string): Promise<DockerStatus> {
     return { status: 'error', url: null, message: 'Application introuvable' }
   }
 
-  const { composeFile, serviceName, internalPort } = manifest.access
+  const { composeFile, serviceName, internalPort, host: accessHost } = manifest.access
   const dir = join(REGISTRY_PATH, appId)
+  const appUrl = buildAppUrl(internalPort, origin, accessHost)
 
   try {
     const { stdout } = await exec(
@@ -172,7 +188,7 @@ export async function getContainerStatus(appId: string): Promise<DockerStatus> {
     if (state === 'running') {
       return {
         status: 'running',
-        url: `http://localhost:${internalPort}`,
+        url: appUrl,
         message: "Conteneur en cours d'exécution",
       }
     }
@@ -180,7 +196,7 @@ export async function getContainerStatus(appId: string): Promise<DockerStatus> {
     if (await checkHealth(`http://localhost:${internalPort}`)) {
       return {
         status: 'running',
-        url: `http://localhost:${internalPort}`,
+        url: appUrl,
         message: 'Conteneur en cours (démarré hors Compose)',
       }
     }
