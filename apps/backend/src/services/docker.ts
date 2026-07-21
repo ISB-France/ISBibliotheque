@@ -19,12 +19,7 @@ export interface RequestOrigin {
 
 const startingApps = new Map<string, Promise<DockerStatus>>()
 
-function buildAppUrl(
-  internalPort: number,
-  origin: RequestOrigin,
-  accessHost?: string,
-): string {
-  if (accessHost) return `${origin.protocol}://${accessHost}:${internalPort}`
+function buildAppUrl(internalPort: number, origin: RequestOrigin): string {
   return `${origin.protocol}://${origin.hostname}:${internalPort}`
 }
 
@@ -85,9 +80,9 @@ export async function startContainer(appId: string, origin: RequestOrigin): Prom
     return { status: 'error', url: null, message: 'Application introuvable ou type incorrect' }
   }
 
-  const { composeFile, serviceName, internalPort, host: accessHost } = manifest.access
+  const { composeFile, serviceName, internalPort } = manifest.access
   const dir = join(REGISTRY_PATH, appId)
-  const appUrl = buildAppUrl(internalPort, origin, accessHost)
+  const appUrl = buildAppUrl(internalPort, origin)
 
   const promise = (async (): Promise<DockerStatus> => {
     try {
@@ -176,9 +171,9 @@ export async function getContainerStatus(appId: string, origin: RequestOrigin): 
     return { status: 'error', url: null, message: 'Application introuvable' }
   }
 
-  const { composeFile, serviceName, internalPort, host: accessHost } = manifest.access
+  const { composeFile, serviceName, internalPort } = manifest.access
   const dir = join(REGISTRY_PATH, appId)
-  const appUrl = buildAppUrl(internalPort, origin, accessHost)
+  const appUrl = buildAppUrl(internalPort, origin)
 
   if (await isPortPublishedAndRunning(internalPort)) {
     return {
