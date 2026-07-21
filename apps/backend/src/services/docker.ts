@@ -41,6 +41,33 @@ async function waitForHealth(url: string): Promise<void> {
   throw new AppError(504, `Health check timeout (${healthCheckTimeout}ms)`)
 }
 
+async function resolveServiceImage(
+  dir: string,
+  composeFile: string,
+  serviceName: string,
+): Promise<string | null> {
+  try {
+    const { stdout } = await exec(
+      'docker',
+      ['compose', '-f', composeFile, 'config', '--images', serviceName],
+      { cwd: dir },
+    )
+    const image = stdout.trim().split('\n')[0]?.trim()
+    return image || null
+  } catch {
+    return null
+  }
+}
+
+async function imageExistsLocally(image: string): Promise<boolean> {
+  try {
+    await exec('docker', ['image', 'inspect', image])
+    return true
+  } catch {
+    return false
+  }
+}
+
 export async function startContainer(appId: string): Promise<DockerStatus> {
   const existing = startingApps.get(appId)
   if (existing) {
@@ -64,15 +91,23 @@ export async function startContainer(appId: string): Promise<DockerStatus> {
         return currentStatus
       }
 
+      const image = await resolveServiceImage(dir, composeFile, serviceName)
+      if (image && !(await imageExistsLocally(image))) {
+        logger.error({ appId, image }, 'Image Docker introuvable localement')
+        return {
+          status: 'error',
+          url: null,
+          message: `Image Docker "${image}" introuvable localement. Importez-la ou construisez-la avant de démarrer cette application.`,
+        }
+      }
+
       logger.info({ appId, dir }, 'Démarrage du conteneur')
 
       await exec('docker', ['compose', '-f', composeFile, 'up', '-d', serviceName], { cwd: dir })
 
-      if (healthUrl) {
-        const fullUrl = resolveHealthUrl(healthUrl, internalPort)
-        logger.info({ appId, url: fullUrl }, 'Attente du health check')
-        await waitForHealth(fullUrl)
-      }
+      const fullUrl = healthUrl ? resolveHealthUrl(healthUrl, internalPort) : `http://localhost:${internalPort}`
+      logger.info({ appId, url: fullUrl }, 'Attente du health check')
+      await waitForHealth(fullUrl)
 
       logger.info({ appId }, 'Conteneur démarré avec succès')
       return {
