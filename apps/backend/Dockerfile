@@ -1,6 +1,6 @@
 FROM node:22-alpine
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl docker-cli docker-cli-compose
 
 RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
 WORKDIR /app
