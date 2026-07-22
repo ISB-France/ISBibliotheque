@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Plus, Trash2, Pencil, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Plus, Trash2, Pencil, ArrowLeft, RefreshCw, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { api, type AppResponse } from '@/lib/api'
+import { api, type AppResponse, type UserProfile } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from '@/components/Header'
 import { LoadingScreen } from '@/components/LoadingScreen'
@@ -14,6 +14,8 @@ import { DockerDiscovery } from '@/components/DockerDiscovery'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -32,10 +34,25 @@ export default function Admin() {
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [editingApp, setEditingApp] = useState<AppResponse | null>(null)
-  const [tab, setTab] = useState<'apps' | 'groups' | 'discovery'>('apps')
+  const [tab, setTab] = useState<'apps' | 'groups' | 'discovery' | 'users'>('apps')
   const [confirmDeleteApp, setConfirmDeleteApp] = useState<{ id: string; name: string } | null>(
     null,
   )
+  const [users, setUsers] = useState<UserProfile[]>([])
+  const [showUserModal, setShowUserModal] = useState(false)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [submittingUser, setSubmittingUser] = useState(false)
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null)
+  const [editFirstName, setEditFirstName] = useState('')
+  const [editLastName, setEditLastName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [submittingEdit, setSubmittingEdit] = useState(false)
+  const [confirmDeleteUser, setConfirmDeleteUser] = useState<{
+    email: string
+    name: string
+  } | null>(null)
 
   const fetchApps = useCallback(async () => {
     try {
@@ -50,9 +67,22 @@ export default function Admin() {
     }
   }, [])
 
+  const fetchUsers = useCallback(async () => {
+    try {
+      const data = await api.admin.listUsers()
+      setUsers(data)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur lors du chargement des utilisateurs')
+    }
+  }, [])
+
   useEffect(() => {
     if (!authLoading) fetchApps()
   }, [authLoading, fetchApps])
+
+  useEffect(() => {
+    if (!authLoading && tab === 'users') fetchUsers()
+  }, [authLoading, tab, fetchUsers])
 
   async function handleDelete(id: string, name: string) {
     try {
@@ -79,6 +109,69 @@ export default function Admin() {
     toast.success('Application mise à jour')
     setEditingApp(null)
     fetchApps()
+  }
+
+  async function handleCreateUser(e: React.FormEvent) {
+    e.preventDefault()
+    if (!firstName.trim() || !lastName.trim() || !email.trim()) return
+    setSubmittingUser(true)
+    try {
+      await api.admin.createUser({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+      })
+      toast.success('Utilisateur créé')
+      setShowUserModal(false)
+      setFirstName('')
+      setLastName('')
+      setEmail('')
+      fetchUsers()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur lors de la création')
+    } finally {
+      setSubmittingUser(false)
+    }
+  }
+
+  function openEditUser(u: UserProfile) {
+    const parts = u.name.split(' ')
+    setEditFirstName(parts[0] ?? '')
+    setEditLastName(parts.slice(1).join(' '))
+    setEditEmail(u.email)
+    setEditingUser(u)
+  }
+
+  async function handleUpdateUser(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editingUser) return
+    if (!editFirstName.trim() || !editLastName.trim() || !editEmail.trim()) return
+    setSubmittingEdit(true)
+    try {
+      await api.admin.updateUser(editingUser.email, {
+        firstName: editFirstName.trim(),
+        lastName: editLastName.trim(),
+        email: editEmail.trim(),
+      })
+      toast.success('Utilisateur mis à jour')
+      setEditingUser(null)
+      fetchUsers()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur lors de la modification')
+    } finally {
+      setSubmittingEdit(false)
+    }
+  }
+
+  async function handleDeleteUser(email: string, name: string) {
+    try {
+      await api.admin.deleteUser(email)
+      toast.success(`"${name}" supprimé`)
+      setConfirmDeleteUser(null)
+      fetchUsers()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur lors de la suppression')
+    }
   }
 
   if (authLoading) return <LoadingScreen />
@@ -116,7 +209,9 @@ export default function Admin() {
                   ? 'Gestion des applications'
                   : tab === 'groups'
                     ? "Gestion des groupes d'accès"
-                    : 'Découverte de conteneurs Docker'}
+                    : tab === 'discovery'
+                      ? 'Découverte de conteneurs Docker'
+                      : 'Gestion des utilisateurs'}
               </p>
             </div>
           </div>
@@ -129,6 +224,18 @@ export default function Admin() {
               <Button onClick={() => setShowModal(true)}>
                 <Plus size={16} />
                 Ajouter
+              </Button>
+            </div>
+          )}
+          {tab === 'users' && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={fetchUsers}>
+                <RefreshCw size={15} />
+                Actualiser
+              </Button>
+              <Button onClick={() => setShowUserModal(true)}>
+                <UserPlus size={16} />
+                Ajouter un utilisateur
               </Button>
             </div>
           )}
@@ -147,12 +254,72 @@ export default function Admin() {
           >
             Découverte Docker
           </Button>
+          <Button variant={tab === 'users' ? 'default' : 'ghost'} onClick={() => setTab('users')}>
+            Utilisateurs
+          </Button>
         </div>
 
         {tab === 'groups' ? (
           <GroupManager />
         ) : tab === 'discovery' ? (
           <DockerDiscovery />
+        ) : tab === 'users' ? (
+          <div>
+            {users.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <p className="text-[16px] font-semibold text-isb-brown">Aucun utilisateur</p>
+                <Button onClick={() => setShowUserModal(true)}>
+                  <UserPlus size={16} />
+                  Ajouter le premier utilisateur
+                </Button>
+              </div>
+            ) : (
+              <div className="bg-card rounded-2xl border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((u) => {
+                      const isAdmin = u.email === user?.email
+                      return (
+                        <TableRow key={u.email}>
+                          <TableCell>
+                            <div className="text-[14px] font-medium text-isb-brown">{u.name}</div>
+                          </TableCell>
+                          <TableCell className="text-isb-muted">{u.email}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={isAdmin}
+                              onClick={() => openEditUser(u)}
+                              aria-label={`Modifier ${u.name}`}
+                            >
+                              <Pencil size={14} className="text-isb-muted" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={isAdmin}
+                              onClick={() => setConfirmDeleteUser({ email: u.email, name: u.name })}
+                              aria-label={`Supprimer ${u.name}`}
+                            >
+                              <Trash2 size={15} className="text-destructive" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
         ) : loading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -227,6 +394,14 @@ export default function Admin() {
         onConfirm={() => handleDelete(confirmDeleteApp!.id, confirmDeleteApp!.name)}
         onCancel={() => setConfirmDeleteApp(null)}
       />
+      <ConfirmDialog
+        open={!!confirmDeleteUser}
+        title="Supprimer l'utilisateur"
+        message={`Supprimer l'utilisateur "${confirmDeleteUser?.name}" ? Cette action est irreversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={() => handleDeleteUser(confirmDeleteUser!.email, confirmDeleteUser!.name)}
+        onCancel={() => setConfirmDeleteUser(null)}
+      />
       {showModal && <AddAppModal onClose={() => setShowModal(false)} onAdd={handleAddApp} />}
       {editingApp && (
         <AddAppModal
@@ -235,6 +410,103 @@ export default function Admin() {
           onAdd={(json) => handleEditApp(editingApp.id, json)}
         />
       )}
+
+      <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter un utilisateur</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateUser} className="flex flex-col gap-4">
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Prénom</label>
+              <Input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Jean"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Nom</label>
+              <Input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Dupont"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Email</label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="jean.dupont@isb.fr"
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-2">
+              <Button type="button" variant="ghost" onClick={() => setShowUserModal(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={submittingUser}>
+                {submittingUser ? 'Création…' : 'Créer'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!editingUser}
+        onOpenChange={(open) => {
+          if (!open) setEditingUser(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier l&apos;utilisateur</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdateUser} className="flex flex-col gap-4">
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Prénom</label>
+              <Input
+                value={editFirstName}
+                onChange={(e) => setEditFirstName(e.target.value)}
+                placeholder="Jean"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Nom</label>
+              <Input
+                value={editLastName}
+                onChange={(e) => setEditLastName(e.target.value)}
+                placeholder="Dupont"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-[13px] font-medium text-isb-brown mb-1 block">Email</label>
+              <Input
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="jean.dupont@isb.fr"
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-2">
+              <Button type="button" variant="ghost" onClick={() => setEditingUser(null)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={submittingEdit}>
+                {submittingEdit ? 'Modification…' : 'Enregistrer'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

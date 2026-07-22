@@ -3,7 +3,6 @@ import { promisify } from 'node:util'
 import { join } from 'node:path'
 import { logger } from '../utils/logger.js'
 import { getAppManifest, REGISTRY_PATH } from './registry.js'
-import { AppError } from '../utils/errors.js'
 
 const exec = promisify(execFile)
 
@@ -13,35 +12,63 @@ export interface DockerStatus {
   message?: string
 }
 
-const startingApps = new Map<string, Promise<DockerStatus>>()
-const healthCheckTimeout = 30_000
-const healthCheckInterval = 1_000
-
-function resolveHealthUrl(baseUrl: string, internalPort: number): string {
-  if (baseUrl.startsWith('http://') || baseUrl.startsWith('https://')) return baseUrl
-  if (baseUrl.startsWith('/')) return `http://localhost:${internalPort}${baseUrl}`
-  return `http://localhost:${internalPort}/${baseUrl}`
+export interface RequestOrigin {
+  hostname: string
+  protocol: string
 }
 
-async function checkHealth(url: string): Promise<boolean> {
+const startingApps = new Map<string, Promise<DockerStatus>>()
+
+function buildAppUrl(internalPort: number, origin: RequestOrigin): string {
+  return `${origin.protocol}://${origin.hostname}:${internalPort}`
+}
+
+async function isPortPublishedAndRunning(hostPort: number): Promise<boolean> {
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(5_000) })
-    return response.ok
+    const { stdout } = await exec('docker', [
+      'ps',
+      '--filter',
+      `publish=${hostPort}`,
+      '--format',
+      '{{.State}}',
+    ])
+    return stdout
+      .trim()
+      .split('\n')
+      .some((state) => state.trim() === 'running')
   } catch {
     return false
   }
 }
 
-async function waitForHealth(url: string): Promise<void> {
-  const deadline = Date.now() + healthCheckTimeout
-  while (Date.now() < deadline) {
-    if (await checkHealth(url)) return
-    await new Promise((r) => setTimeout(r, healthCheckInterval))
+async function resolveServiceImage(
+  dir: string,
+  composeFile: string,
+  serviceName: string,
+): Promise<string | null> {
+  try {
+    const { stdout } = await exec(
+      'docker',
+      ['compose', '-f', composeFile, 'config', '--images', serviceName],
+      { cwd: dir },
+    )
+    const image = stdout.trim().split('\n')[0]?.trim()
+    return image || null
+  } catch {
+    return null
   }
-  throw new AppError(504, `Health check timeout (${healthCheckTimeout}ms)`)
 }
 
-export async function startContainer(appId: string): Promise<DockerStatus> {
+async function imageExistsLocally(image: string): Promise<boolean> {
+  try {
+    await exec('docker', ['image', 'inspect', image])
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function startContainer(appId: string, origin: RequestOrigin): Promise<DockerStatus> {
   const existing = startingApps.get(appId)
   if (existing) {
     logger.info({ appId }, 'Démarrage déjà en cours')
@@ -53,29 +80,61 @@ export async function startContainer(appId: string): Promise<DockerStatus> {
     return { status: 'error', url: null, message: 'Application introuvable ou type incorrect' }
   }
 
-  const { composeFile, serviceName, internalPort, healthUrl } = manifest.access
+  const { composeFile, serviceName, internalPort } = manifest.access
   const dir = join(REGISTRY_PATH, appId)
+  const appUrl = buildAppUrl(internalPort, origin)
 
   const promise = (async (): Promise<DockerStatus> => {
     try {
+      if (await isPortPublishedAndRunning(internalPort)) {
+        logger.info(
+          { appId },
+          'Port déjà occupé par un conteneur fonctionnel, aucune action nécessaire',
+        )
+        return {
+          status: 'running',
+          url: appUrl,
+          message: 'Conteneur déjà en cours',
+        }
+      }
+
+      const image = await resolveServiceImage(dir, composeFile, serviceName)
+      if (image && !(await imageExistsLocally(image))) {
+        logger.error({ appId, image }, 'Image Docker introuvable localement')
+        return {
+          status: 'error',
+          url: null,
+          message: `Image Docker "${image}" introuvable localement. Importez-la ou construisez-la avant de démarrer cette application.`,
+        }
+      }
+
       logger.info({ appId, dir }, 'Démarrage du conteneur')
 
       await exec('docker', ['compose', '-f', composeFile, 'up', '-d', serviceName], { cwd: dir })
 
-      if (healthUrl) {
-        const fullUrl = resolveHealthUrl(healthUrl, internalPort)
-        logger.info({ appId, url: fullUrl }, 'Attente du health check')
-        await waitForHealth(fullUrl)
-      }
-
       logger.info({ appId }, 'Conteneur démarré avec succès')
       return {
         status: 'running',
-        url: `http://localhost:${internalPort}`,
+        url: appUrl,
         message: 'Conteneur démarré',
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur inconnue'
+
+      if (message.includes('port is already allocated')) {
+        if (await isPortPublishedAndRunning(internalPort)) {
+          logger.info(
+            { appId },
+            'Port déjà occupé par un conteneur fonctionnel, considéré comme démarré',
+          )
+          return {
+            status: 'running',
+            url: appUrl,
+            message: 'Conteneur déjà en cours (démarré hors Compose)',
+          }
+        }
+      }
+
       logger.error({ err, appId }, 'Échec du démarrage du conteneur')
       return { status: 'error', url: null, message }
     } finally {
@@ -98,7 +157,7 @@ export async function stopContainer(appId: string): Promise<DockerStatus> {
 
   try {
     logger.info({ appId, dir }, 'Arrêt du conteneur')
-    await exec('docker', ['compose', '-f', composeFile, 'down', serviceName], { cwd: dir })
+    await exec('docker', ['compose', '-f', composeFile, 'stop', serviceName], { cwd: dir })
     logger.info({ appId }, 'Conteneur arrêté')
     return { status: 'stopped', url: null, message: 'Conteneur arrêté' }
   } catch (err) {
@@ -108,7 +167,10 @@ export async function stopContainer(appId: string): Promise<DockerStatus> {
   }
 }
 
-export async function getContainerStatus(appId: string): Promise<DockerStatus> {
+export async function getContainerStatus(
+  appId: string,
+  origin: RequestOrigin,
+): Promise<DockerStatus> {
   if (startingApps.has(appId)) {
     return { status: 'running', url: null, message: 'Démarrage en cours' }
   }
@@ -120,6 +182,15 @@ export async function getContainerStatus(appId: string): Promise<DockerStatus> {
 
   const { composeFile, serviceName, internalPort } = manifest.access
   const dir = join(REGISTRY_PATH, appId)
+  const appUrl = buildAppUrl(internalPort, origin)
+
+  if (await isPortPublishedAndRunning(internalPort)) {
+    return {
+      status: 'running',
+      url: appUrl,
+      message: "Conteneur en cours d'exécution",
+    }
+  }
 
   try {
     const { stdout } = await exec(
@@ -127,16 +198,7 @@ export async function getContainerStatus(appId: string): Promise<DockerStatus> {
       ['compose', '-f', composeFile, 'ps', '--format', '{{.State}}', serviceName],
       { cwd: dir },
     )
-
-    const state = stdout.trim()
-    if (state === 'running') {
-      return {
-        status: 'running',
-        url: `http://localhost:${internalPort}`,
-        message: "Conteneur en cours d'exécution",
-      }
-    }
-    return { status: 'stopped', url: null, message: `Conteneur arrêté (${state})` }
+    return { status: 'stopped', url: null, message: `Conteneur arrêté (${stdout.trim()})` }
   } catch {
     return { status: 'stopped', url: null, message: 'Conteneur arrêté' }
   }

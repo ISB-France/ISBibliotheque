@@ -1,9 +1,43 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, createElement } from 'react'
 import { X, Plus } from 'lucide-react'
 import type { AppResponse } from '@/lib/api'
 import { api } from '@/lib/api'
+import { getLucideIcon, lookupLucideIcon } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+
+const COMMON_ICONS = [
+  'LayoutGrid',
+  'Globe',
+  'Box',
+  'FileText',
+  'Users',
+  'Settings',
+  'Shield',
+  'Activity',
+  'BarChart3',
+  'Database',
+  'Server',
+  'Cloud',
+  'Mail',
+  'Calendar',
+  'Clock',
+  'Image',
+  'BookOpen',
+  'Code',
+  'Terminal',
+  'Smartphone',
+  'Monitor',
+  'Printer',
+  'Map',
+  'Package',
+  'Palette',
+  'Wrench',
+  'Link',
+  'Star',
+  'Heart',
+  'Bell',
+]
 
 interface AddAppModalProps {
   app?: AppResponse
@@ -16,11 +50,13 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
   const [name, setName] = useState(app?.name ?? '')
   const [description, setDescription] = useState(app?.description ?? '')
   const [category, setCategory] = useState(app?.category ?? '')
+  const [icon, setIcon] = useState(app?.icon ?? 'LayoutGrid')
   const [accessType, setAccessType] = useState<'redirect' | 'docker'>(app?.accessType ?? 'redirect')
   const [url, setUrl] = useState(app?.url ?? '')
   const [categories, setCategories] = useState<string[]>([])
   const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set(app?.roles ?? []))
+  const [sso, setSso] = useState(app?.sso ?? false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -66,6 +102,8 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
         name: name.trim(),
         description: description.trim(),
         category,
+        icon,
+        sso,
         ...rolesField,
       }
       if (accessType === 'redirect' && validUrl) {
@@ -103,8 +141,9 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       name: name.trim(),
       description: description.trim(),
       category,
-      icon: 'LayoutGrid',
+      icon,
       access,
+      sso,
       ...rolesField,
     }
 
@@ -147,7 +186,6 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              disabled={isEdit}
             />
           </div>
 
@@ -183,6 +221,44 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
           </div>
 
           <div>
+            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">Icône</label>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent">
+                {createElement(getLucideIcon(icon), {
+                  size: 22,
+                  strokeWidth: 1.5,
+                  className: 'text-foreground',
+                })}
+              </div>
+              <span className="text-[13px] text-isb-muted font-mono">{icon}</span>
+            </div>
+            <div
+              className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 rounded-xl border"
+              style={{ borderColor: 'hsl(var(--border))' }}
+            >
+              {COMMON_ICONS.map((name) => {
+                const Ic = lookupLucideIcon(name)
+                if (!Ic) return null
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setIcon(name)}
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
+                      icon === name
+                        ? 'bg-primary text-primary-foreground shadow-sm ring-2 ring-primary'
+                        : 'bg-accent text-foreground hover:bg-accent/80'
+                    }`}
+                    title={name}
+                  >
+                    <Ic size={16} strokeWidth={1.5} />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
               Type d&rsquo;acces
             </label>
@@ -205,6 +281,21 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
               <Input placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} />
             </div>
           )}
+
+          <div>
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={sso}
+                onChange={(e) => setSso(e.target.checked)}
+                className="accent-primary"
+              />
+              <span className="text-[13px] font-semibold text-isb-brown">Connexion SSO</span>
+            </label>
+            <p className="text-[12px] mt-1 text-isb-muted">
+              Ajoute un token d&rsquo;authentification unique a l&rsquo;URL au lancement
+            </p>
+          </div>
 
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">

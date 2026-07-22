@@ -45,7 +45,7 @@ export function AppCard({
     <button
       onClick={onClick}
       disabled={isLaunching}
-      className="group relative flex flex-col items-start gap-4 p-6 bg-white rounded-2xl border border-[rgba(59,40,0,0.08)] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 text-left w-full cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+      className="group relative flex flex-col items-start gap-4 p-6 bg-white rounded-2xl border border-[rgba(59,40,0,0.08)] shadow-sm hover:shadow-[0_0_24px_-4px_hsl(var(--primary-foreground)/0.45)] hover:-translate-y-0.5 active:scale-[0.97] active:shadow-sm transition-all duration-200 text-left w-full cursor-pointer disabled:opacity-60 disabled:cursor-wait"
     >
       <div
         className="flex items-center justify-center w-14 h-14 rounded-xl transition-transform duration-200 group-hover:scale-105"
@@ -85,11 +85,6 @@ export function AppCard({
           <div className="w-6 h-6 border-2 border-isb-yellow border-t-transparent rounded-full animate-spin" />
         </div>
       )}
-
-      <div
-        className="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-        style={{ backgroundColor: 'hsl(var(--primary-foreground))' }}
-      />
     </button>
   )
 }

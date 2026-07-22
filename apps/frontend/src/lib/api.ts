@@ -42,6 +42,7 @@ export interface AppManifest {
   icon: string
   access: AppRedirectAccess | AppDockerAccess
   roles: string[]
+  sso?: boolean
 }
 
 export interface AppRedirectAccess {
@@ -90,6 +91,7 @@ export interface AppResponse {
   accessType: 'redirect' | 'docker'
   url: string | null
   status: string | null
+  sso: boolean
 }
 
 export interface UserProfile {
@@ -105,6 +107,10 @@ export interface DockerStatus {
 }
 
 export const api = {
+  sso: {
+    generate: () =>
+      request<{ token: string }>('/sso/generate', { method: 'POST' }).then((r) => r.token),
+  },
   groups: {
     list: () =>
       request<{ groups: Array<{ name: string; description: string }> }>('/groups').then(
@@ -164,10 +170,10 @@ export const api = {
       ).then((r) => r.group),
     deleteGroup: (name: string) =>
       request<void>(`/admin/groups/${encodeURIComponent(name)}`, { method: 'DELETE' }),
-    addGroupMember: (groupName: string, email: string) =>
+    addGroupMember: (groupName: string, email: string, name?: string) =>
       request<{ group: { name: string; description: string; members: string[] } }>(
         `/admin/groups/${encodeURIComponent(groupName)}/members`,
-        { method: 'POST', body: JSON.stringify({ email }) },
+        { method: 'POST', body: JSON.stringify({ email, name }) },
       ).then((r) => r.group),
     removeGroupMember: (groupName: string, email: string) =>
       request<{ group: { name: string; description: string; members: string[] } }>(
@@ -181,6 +187,19 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(data),
       }).then((r) => r.profile),
+    listUsers: () => request<{ users: UserProfile[] }>('/admin/users').then((r) => r.users),
+    createUser: (data: { firstName: string; lastName: string; email: string }) =>
+      request<{ user: UserProfile }>('/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }).then((r) => r.user),
+    updateUser: (email: string, data: { firstName?: string; lastName?: string; email?: string }) =>
+      request<{ user: UserProfile }>(`/admin/users/${encodeURIComponent(email)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }).then((r) => r.user),
+    deleteUser: (email: string) =>
+      request<void>(`/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' }),
   },
   docker: {
     start: (id: string) =>

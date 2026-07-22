@@ -1,15 +1,21 @@
-import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { AlertTriangle, RefreshCw, type LucideIcon } from 'lucide-react'
 import { ISBLogo } from './ISBLogo'
 
 interface ErrorScreenProps {
+  code?: string
+  icon?: LucideIcon
   title?: string
   message?: string
+  retryLabel?: string
   onRetry?: () => void
 }
 
 export function ErrorScreen({
+  code,
+  icon: Icon = AlertTriangle,
   title = 'Une erreur est survenue',
-  message = "Le portail applicatif n'a pas pu charger la liste des applications. Veuillez réessayer.",
+  message = "Une erreur inattendue s'est produite. Veuillez réessayer.",
+  retryLabel = 'Réessayer',
   onRetry,
 }: ErrorScreenProps) {
   return (
@@ -17,9 +23,9 @@ export function ErrorScreen({
       <header
         className="sticky top-0 z-40 border-b"
         style={{
-          backgroundColor: 'rgba(253,250,245,0.96)',
+          backgroundColor: 'hsl(var(--card) / 0.96)',
           backdropFilter: 'blur(12px)',
-          borderColor: 'rgba(59,40,0,0.08)',
+          borderColor: 'hsl(var(--border))',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
@@ -49,12 +55,21 @@ export function ErrorScreen({
             className="w-20 h-20 rounded-2xl flex items-center justify-center"
             style={{ backgroundColor: 'hsl(var(--accent))' }}
           >
-            <AlertTriangle
-              size={36}
-              style={{ color: 'hsl(var(--destructive))' }}
-              strokeWidth={1.5}
-            />
+            <Icon size={36} style={{ color: 'hsl(var(--destructive))' }} strokeWidth={1.5} />
           </div>
+
+          {code && (
+            <span
+              className="text-[11px] font-bold font-heading uppercase tracking-wider px-3 py-1 rounded-full"
+              style={{
+                backgroundColor: 'hsl(var(--secondary))',
+                color: 'hsl(var(--secondary-foreground))',
+              }}
+            >
+              {code}
+            </span>
+          )}
+
           <div className="text-center max-w-md">
             <h1
               className="text-[22px] font-bold font-heading"
@@ -69,17 +84,18 @@ export function ErrorScreen({
               {message}
             </p>
           </div>
+
           {onRetry && (
             <button
               onClick={onRetry}
               className="flex items-center gap-2 px-6 py-3 rounded-xl hover:brightness-95 active:scale-95 transition-all shadow-sm font-heading font-bold text-[14px]"
               style={{
-                backgroundColor: 'hsl(var(--primary-foreground))',
-                color: 'hsl(var(--foreground))',
+                backgroundColor: 'hsl(var(--primary))',
+                color: 'hsl(var(--primary-foreground))',
               }}
             >
               <RefreshCw size={16} strokeWidth={2.5} />
-              Réessayer
+              {retryLabel}
             </button>
           )}
         </div>
