@@ -31,21 +31,6 @@ router.get('/apps', optionalAuth, async (req: Request, res: Response, next: Next
   }
 })
 
-router.get(
-  '/apps/categories',
-  optionalAuth,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const user = (req as Request & { user?: AuthUser }).user
-      const apps = await filterAppsByUser(user)
-      const categories = [...new Set(apps.map((a) => a.category))].sort()
-      res.json({ categories })
-    } catch (err) {
-      next(err)
-    }
-  },
-)
-
 router.get('/apps/:id', optionalAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const app = getApp(String(req.params.id))

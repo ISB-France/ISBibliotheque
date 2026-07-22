@@ -2,45 +2,13 @@ interface AppCardProps {
   name: string
   description: string
   icon: React.ComponentType<{ size?: number; strokeWidth?: number; style?: React.CSSProperties }>
-  color: string
-  bgColor: string
-  category: string
   isLaunching?: boolean
   onClick?: () => void
 }
 
-const categoryColors: Record<string, { color: string; bgColor: string }> = {
-  Gestion: { color: 'hsl(var(--foreground))', bgColor: 'hsl(var(--muted))' },
-  Production: { color: 'hsl(var(--destructive))', bgColor: 'hsl(var(--accent))' },
-  RH: { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--secondary))' },
-  Finance: { color: 'hsl(var(--destructive))', bgColor: 'hsl(var(--accent))' },
-  Qualité: { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--secondary))' },
-  Logistique: { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--muted))' },
-  Commercial: { color: 'hsl(var(--muted-foreground))', bgColor: 'hsl(var(--muted))' },
-  IT: { color: 'hsl(var(--foreground))', bgColor: 'hsl(var(--muted))' },
-}
-
-export function getAppStyle(category: string) {
-  return (
-    categoryColors[category] ?? {
-      color: 'hsl(var(--muted-foreground))',
-      bgColor: 'hsl(var(--secondary))',
-    }
-  )
-}
-
-export { categoryColors }
-
-export function AppCard({
-  name,
-  description,
-  icon: Icon,
-  color,
-  bgColor,
-  category,
-  isLaunching,
-  onClick,
-}: AppCardProps) {
+export function AppCard({ name, description, icon: Icon, isLaunching, onClick }: AppCardProps) {
+  const color = 'hsl(var(--foreground))'
+  const bgColor = 'hsl(var(--muted))'
   return (
     <button
       onClick={onClick}
@@ -55,19 +23,8 @@ export function AppCard({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <span
-            className="text-[13px] font-medium px-2 py-0.5 rounded-full"
-            style={{
-              backgroundColor: 'hsl(var(--secondary))',
-              color: 'hsl(var(--muted-foreground))',
-            }}
-          >
-            {category}
-          </span>
-        </div>
         <h3
-          className="text-[15px] font-semibold mt-1.5 leading-tight"
+          className="text-[15px] font-semibold leading-tight"
           style={{ color: 'hsl(var(--foreground))' }}
         >
           {name}

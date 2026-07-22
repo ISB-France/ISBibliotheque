@@ -7,13 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   Table,
   TableBody,
   TableCell,
@@ -21,17 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-
-const CATEGORIES = [
-  'Gestion',
-  'Production',
-  'RH',
-  'Finance',
-  'Qualité',
-  'Logistique',
-  'Commercial',
-  'IT',
-]
 
 function slugify(text: string): string {
   return text
@@ -63,7 +45,6 @@ export function DockerDiscovery() {
         id: string
         name: string
         description: string
-        category: string
         icon: string
         roles: string
       }
@@ -93,7 +74,6 @@ export function DockerDiscovery() {
     const name = c.name.replace(/[_-]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
     const description =
       c.labels['isb.description'] ?? c.labels['description'] ?? `Application ${name}`
-    const category = c.labels['isb.category'] ?? c.labels['category'] ?? 'IT'
 
     setImportForm((prev) => ({
       ...prev,
@@ -101,7 +81,6 @@ export function DockerDiscovery() {
         id,
         name,
         description,
-        category: CATEGORIES.includes(category) ? category : 'IT',
         icon: 'Container',
         roles: c.labels['isb.roles'] ?? '',
       },
@@ -142,7 +121,6 @@ export function DockerDiscovery() {
           id: form.id,
           name: form.name,
           description: form.description,
-          category: form.category,
           icon: form.icon,
           roles,
         },
@@ -321,26 +299,6 @@ export function DockerDiscovery() {
                                 }
                                 placeholder="Description de l'application"
                               />
-                            </div>
-                            <div>
-                              <label className="block text-[12px] font-medium text-isb-muted mb-1">
-                                Catégorie
-                              </label>
-                              <Select
-                                value={importForm[c.id].category}
-                                onValueChange={(v) => updateFormField(c.id, 'category', v)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {CATEGORIES.map((cat) => (
-                                    <SelectItem key={cat} value={cat}>
-                                      {cat}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
                             </div>
                             <div>
                               <label className="block text-[12px] font-medium text-isb-muted mb-1">

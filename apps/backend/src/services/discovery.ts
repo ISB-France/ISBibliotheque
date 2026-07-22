@@ -33,7 +33,6 @@ export interface ImportInput {
     id: string
     name: string
     description: string
-    category: string
     icon: string
     roles?: string[]
   }
@@ -217,7 +216,6 @@ export async function importContainer(input: ImportInput): Promise<AppManifest> 
     id: input.manifest.id,
     name: input.manifest.name,
     description: input.manifest.description,
-    category: input.manifest.category,
     icon: input.manifest.icon,
     access,
     roles: input.manifest.roles ?? [],

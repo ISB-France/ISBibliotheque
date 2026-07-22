@@ -27,7 +27,6 @@ router.post('/admin/discover/import', async (req: Request, res: Response, next: 
         id: string
         name: string
         description: string
-        category: string
         icon: string
         roles?: string[]
       }

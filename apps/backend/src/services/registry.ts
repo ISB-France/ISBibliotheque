@@ -27,7 +27,6 @@ function manifestToResponse(m: AppManifest): AppResponse {
     id: m.id,
     name: m.name,
     description: m.description,
-    category: m.category,
     icon: m.icon,
     roles: m.roles ?? [],
     sso: m.sso ?? false,
@@ -64,11 +63,6 @@ export function getApp(id: string): AppResponse | undefined {
   if (!existsSync(dir)) return undefined
   const manifest = parseManifest(dir)
   return manifest ? manifestToResponse(manifest) : undefined
-}
-
-export function listCategories(): string[] {
-  const apps = listApps()
-  return [...new Set(apps.map((a) => a.category))].sort()
 }
 
 export function getManifestRoles(id: string): string[] {

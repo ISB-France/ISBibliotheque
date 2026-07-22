@@ -2,7 +2,6 @@
   "id": "isboard-frontend-1",
   "name": "Isboard Frontend 1",
   "description": "Application Isboard Frontend 1",
-  "category": "tets",
   "icon": "Container",
   "access": {
     "type": "redirect",

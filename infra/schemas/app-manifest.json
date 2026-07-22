@@ -2,24 +2,11 @@
   "$schema": "https://json-schema.org/draft-07/schema#",
   "title": "App Manifest",
   "type": "object",
-  "required": ["id", "name", "description", "category", "icon", "access"],
+  "required": ["id", "name", "description", "icon", "access"],
   "properties": {
     "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
     "name": { "type": "string", "minLength": 1 },
     "description": { "type": "string", "minLength": 1 },
-    "category": {
-      "type": "string",
-      "enum": [
-        "Gestion",
-        "Production",
-        "RH",
-        "Finance",
-        "Qualité",
-        "Logistique",
-        "Commercial",
-        "IT"
-      ]
-    },
     "icon": { "type": "string", "minLength": 1 },
     "access": {
       "type": "object",
