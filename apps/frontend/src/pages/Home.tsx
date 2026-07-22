@@ -6,7 +6,7 @@ import { api, type AppResponse } from '@/lib/api'
 import { getLucideIcon } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from '@/components/Header'
-import { AppCard, getAppStyle } from '@/components/AppCard'
+import { AppCard } from '@/components/AppCard'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { ErrorScreen } from '@/components/ErrorScreen'
 
@@ -44,8 +44,7 @@ export default function Home() {
     const matchSearch =
       !search ||
       app.name.toLowerCase().includes(search.toLowerCase()) ||
-      app.description.toLowerCase().includes(search.toLowerCase()) ||
-      app.category.toLowerCase().includes(search.toLowerCase())
+      app.description.toLowerCase().includes(search.toLowerCase())
     const matchGroup = !activeGroup || app.roles.length === 0 || app.roles.includes(activeGroup)
     return matchSearch && matchGroup
   })
@@ -183,7 +182,6 @@ export default function Home() {
             style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}
           >
             {filtered.map((app) => {
-              const style = getAppStyle(app.category)
               const Icon = getLucideIcon(app.icon)
               return (
                 <AppCard
@@ -191,9 +189,6 @@ export default function Home() {
                   name={app.name}
                   description={app.description}
                   icon={Icon}
-                  color={style.color}
-                  bgColor={style.bgColor}
-                  category={app.category}
                   isLaunching={launching === app.id}
                   onClick={() => handleLaunch(app)}
                 />

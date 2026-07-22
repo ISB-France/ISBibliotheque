@@ -18,7 +18,6 @@ export const appManifestSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/, 'id must be lowercase alphanumeric with dashes'),
   name: z.string().min(1),
   description: z.string().min(1),
-  category: z.string().min(1),
   icon: z.string().min(1),
   access: z.discriminatedUnion('type', [redirectAccessSchema, dockerAccessSchema]),
   roles: z.array(z.string()).optional().default([]),

@@ -345,7 +345,6 @@ export default function Admin() {
                 <TableRow>
                   <TableHead>Nom</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Catégorie</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -359,7 +358,6 @@ export default function Admin() {
                     <TableCell>
                       <Badge variant="outline">{app.accessType}</Badge>
                     </TableCell>
-                    <TableCell className="text-isb-muted">{app.category}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

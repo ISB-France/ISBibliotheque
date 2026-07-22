@@ -49,11 +49,9 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
   const isEdit = !!app
   const [name, setName] = useState(app?.name ?? '')
   const [description, setDescription] = useState(app?.description ?? '')
-  const [category, setCategory] = useState(app?.category ?? '')
   const [icon, setIcon] = useState(app?.icon ?? 'LayoutGrid')
   const [accessType, setAccessType] = useState<'redirect' | 'docker'>(app?.accessType ?? 'redirect')
   const [url, setUrl] = useState(app?.url ?? '')
-  const [categories, setCategories] = useState<string[]>([])
   const [groups, setGroups] = useState<Array<{ name: string; description: string }>>([])
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set(app?.roles ?? []))
   const [sso, setSso] = useState(app?.sso ?? false)
@@ -61,11 +59,9 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    Promise.all([api.apps.categories(), api.groups.list()])
-      .then(([cats, grps]) => {
-        setCategories(cats)
-        setGroups(grps)
-      })
+    api.groups
+      .list()
+      .then(setGroups)
       .catch(() => {})
   }, [])
 
@@ -86,10 +82,6 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       setError('Le nom est requis.')
       return
     }
-    if (!category) {
-      setError('La catégorie est requise.')
-      return
-    }
 
     const roles = Array.from(selectedGroups)
     const rolesField = roles.length > 0 ? { roles } : { roles: [] }
@@ -101,7 +93,6 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       const patch: Record<string, unknown> = {
         name: name.trim(),
         description: description.trim(),
-        category,
         icon,
         sso,
         ...rolesField,
@@ -140,7 +131,6 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
       id,
       name: name.trim(),
       description: description.trim(),
-      category,
       icon,
       access,
       sso,
@@ -169,7 +159,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
             </h2>
             <p className="text-[13px] mt-0.5 text-isb-muted">
               {isEdit
-                ? 'Modifier les acces et la categorie'
+                ? "Modifier les acces de l'application"
                 : 'Nouvelle application - ID genere automatiquement'}
             </p>
           </div>
@@ -198,26 +188,6 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-          </div>
-
-          <div>
-            <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">
-              Categorie
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-              className="w-full h-10 px-3 rounded-xl border bg-background text-[14px] text-foreground outline-none focus:ring-2 focus:ring-primary"
-              style={{ borderColor: 'hsl(var(--border))' }}
-            >
-              <option value="">Selectionner une categorie</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>

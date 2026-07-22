@@ -4,7 +4,6 @@ export interface AppManifest {
   id: string
   name: string
   description: string
-  category: string
   icon: string
   access: AppRedirectAccess | AppDockerAccess
   roles: string[]
@@ -29,7 +28,6 @@ export interface AppResponse {
   id: string
   name: string
   description: string
-  category: string
   icon: string
   roles: string[]
   accessType: AppAccessType

@@ -38,7 +38,6 @@ export interface AppManifest {
   id: string
   name: string
   description: string
-  category: string
   icon: string
   access: AppRedirectAccess | AppDockerAccess
   roles: string[]
@@ -85,7 +84,6 @@ export interface AppResponse {
   id: string
   name: string
   description: string
-  category: string
   icon: string
   roles: string[]
   accessType: 'redirect' | 'docker'
@@ -135,8 +133,6 @@ export const api = {
   },
   apps: {
     list: () => request<{ apps: AppResponse[] }>('/apps').then((r) => r.apps),
-    categories: () =>
-      request<{ categories: string[] }>('/apps/categories').then((r) => r.categories),
   },
   admin: {
     listApps: () => request<{ apps: AppResponse[] }>('/admin/apps').then((r) => r.apps),
@@ -220,7 +216,6 @@ export const api = {
         id: string
         name: string
         description: string
-        category: string
         icon: string
         roles?: string[]
       }
