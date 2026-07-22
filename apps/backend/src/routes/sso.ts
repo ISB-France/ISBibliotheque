@@ -10,14 +10,18 @@ const router: Router = Router()
  * Génère un token SSO à usage unique valable 30 secondes.
  * Nécessite d'être connecté à ISBibliotheque.
  */
-router.post('/sso/generate', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const token = await generateSsoToken(req.user!)
-    res.json({ token })
-  } catch (err) {
-    next(err)
-  }
-})
+router.post(
+  '/sso/generate',
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const token = await generateSsoToken(req.user!)
+      res.json({ token })
+    } catch (err) {
+      next(err)
+    }
+  },
+)
 
 /**
  * POST /api/sso/consume

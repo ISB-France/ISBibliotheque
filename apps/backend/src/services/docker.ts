@@ -87,7 +87,10 @@ export async function startContainer(appId: string, origin: RequestOrigin): Prom
   const promise = (async (): Promise<DockerStatus> => {
     try {
       if (await isPortPublishedAndRunning(internalPort)) {
-        logger.info({ appId }, 'Port déjà occupé par un conteneur fonctionnel, aucune action nécessaire')
+        logger.info(
+          { appId },
+          'Port déjà occupé par un conteneur fonctionnel, aucune action nécessaire',
+        )
         return {
           status: 'running',
           url: appUrl,
@@ -120,7 +123,10 @@ export async function startContainer(appId: string, origin: RequestOrigin): Prom
 
       if (message.includes('port is already allocated')) {
         if (await isPortPublishedAndRunning(internalPort)) {
-          logger.info({ appId }, 'Port déjà occupé par un conteneur fonctionnel, considéré comme démarré')
+          logger.info(
+            { appId },
+            'Port déjà occupé par un conteneur fonctionnel, considéré comme démarré',
+          )
           return {
             status: 'running',
             url: appUrl,
@@ -161,7 +167,10 @@ export async function stopContainer(appId: string): Promise<DockerStatus> {
   }
 }
 
-export async function getContainerStatus(appId: string, origin: RequestOrigin): Promise<DockerStatus> {
+export async function getContainerStatus(
+  appId: string,
+  origin: RequestOrigin,
+): Promise<DockerStatus> {
   if (startingApps.has(appId)) {
     return { status: 'running', url: null, message: 'Démarrage en cours' }
   }

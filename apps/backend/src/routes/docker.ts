@@ -14,7 +14,11 @@ import { NotFoundError, ForbiddenError } from '../utils/errors.js'
 import { requireAuth } from '../middleware/auth.js'
 import { requireAction } from '../middleware/authorize.js'
 
-async function withSsoToken(req: Request, appId: string, status: DockerStatus): Promise<DockerStatus> {
+async function withSsoToken(
+  req: Request,
+  appId: string,
+  status: DockerStatus,
+): Promise<DockerStatus> {
   if (status.status !== 'running' || !status.url || !req.user) return status
   const manifest = getApp(appId)
   if (!manifest?.sso) return status

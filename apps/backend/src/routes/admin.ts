@@ -180,7 +180,9 @@ router.put('/admin/users/:email', async (req: Request, res: Response, next: Next
     const { firstName, lastName, email: newEmail } = req.body
 
     if (oldEmail === config.authAdminEmail.toLowerCase()) {
-      res.status(403).json({ error: { message: "Impossible de modifier l'administrateur principal" } })
+      res
+        .status(403)
+        .json({ error: { message: "Impossible de modifier l'administrateur principal" } })
       return
     }
 
@@ -190,7 +192,7 @@ router.put('/admin/users/:email', async (req: Request, res: Response, next: Next
       return
     }
 
-    const targetEmail = (newEmail ? String(newEmail).toLowerCase() : oldEmail)
+    const targetEmail = newEmail ? String(newEmail).toLowerCase() : oldEmail
     const name = firstName && lastName ? `${firstName} ${lastName}` : undefined
 
     if (newEmail && newEmail !== oldEmail) {
@@ -222,7 +224,9 @@ router.delete('/admin/users/:email', async (req: Request, res: Response, next: N
     const email = String(req.params.email).toLowerCase()
 
     if (email === config.authAdminEmail.toLowerCase()) {
-      res.status(403).json({ error: { message: "Impossible de supprimer l'administrateur principal" } })
+      res
+        .status(403)
+        .json({ error: { message: "Impossible de supprimer l'administrateur principal" } })
       return
     }
 

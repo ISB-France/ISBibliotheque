@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { Plus, Trash2, UserPlus, RefreshCw, Pencil, Save, X, Search, UserRoundPlus } from 'lucide-react'
+import {
+  Plus,
+  Trash2,
+  UserPlus,
+  RefreshCw,
+  Pencil,
+  Save,
+  X,
+  Search,
+  UserRoundPlus,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type UserProfile } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -287,9 +297,7 @@ function GroupCard({
   const [confirmRemoveMember, setConfirmRemoveMember] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const availableProfiles = profiles.filter(
-    (p) => !group.members.includes(p.email),
-  )
+  const availableProfiles = profiles.filter((p) => !group.members.includes(p.email))
 
   const filteredProfiles = search
     ? availableProfiles.filter(
@@ -424,14 +432,26 @@ function GroupCard({
               Nouveau
             </button>
             <div className="flex-1" />
-            <Button variant="ghost" size="sm" onClick={() => { setShowAdd(false); setSearch(''); setNewEmail(''); setNewName(''); }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowAdd(false)
+                setSearch('')
+                setNewEmail('')
+                setNewName('')
+              }}
+            >
               <X size={14} />
             </Button>
           </div>
 
           {addMode === 'search' ? (
             <div className="relative">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-isb-muted" />
+              <Search
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-isb-muted"
+              />
               <Input
                 ref={inputRef}
                 placeholder="Rechercher un utilisateur…"
@@ -455,7 +475,11 @@ function GroupCard({
                         {(() => {
                           const mIcon = p.icon
                           return mIcon && isImageUrl(mIcon) ? (
-                            <img src={mIcon} alt="" className="w-full h-full object-cover rounded-md" />
+                            <img
+                              src={mIcon}
+                              alt=""
+                              className="w-full h-full object-cover rounded-md"
+                            />
                           ) : (
                             mIcon || p.name[0].toUpperCase()
                           )
@@ -529,11 +553,7 @@ function GroupCard({
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setConfirmRemoveMember(member)}
-                >
+                <Button variant="ghost" size="icon" onClick={() => setConfirmRemoveMember(member)}>
                   <Trash2 size={13} className="text-destructive" />
                 </Button>
               </div>
@@ -556,5 +576,3 @@ function GroupCard({
     </Card>
   )
 }
-
-

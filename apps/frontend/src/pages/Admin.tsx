@@ -15,12 +15,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -54,7 +49,10 @@ export default function Admin() {
   const [editLastName, setEditLastName] = useState('')
   const [editEmail, setEditEmail] = useState('')
   const [submittingEdit, setSubmittingEdit] = useState(false)
-  const [confirmDeleteUser, setConfirmDeleteUser] = useState<{ email: string; name: string } | null>(null)
+  const [confirmDeleteUser, setConfirmDeleteUser] = useState<{
+    email: string
+    name: string
+  } | null>(null)
 
   const fetchApps = useCallback(async () => {
     try {
@@ -118,7 +116,11 @@ export default function Admin() {
     if (!firstName.trim() || !lastName.trim() || !email.trim()) return
     setSubmittingUser(true)
     try {
-      await api.admin.createUser({ firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim() })
+      await api.admin.createUser({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+      })
       toast.success('Utilisateur créé')
       setShowUserModal(false)
       setFirstName('')
@@ -209,7 +211,7 @@ export default function Admin() {
                     ? "Gestion des groupes d'accès"
                     : tab === 'discovery'
                       ? 'Découverte de conteneurs Docker'
-                      : "Gestion des utilisateurs"}
+                      : 'Gestion des utilisateurs'}
               </p>
             </div>
           </div>
@@ -252,10 +254,7 @@ export default function Admin() {
           >
             Découverte Docker
           </Button>
-          <Button
-            variant={tab === 'users' ? 'default' : 'ghost'}
-            onClick={() => setTab('users')}
-          >
+          <Button variant={tab === 'users' ? 'default' : 'ghost'} onClick={() => setTab('users')}>
             Utilisateurs
           </Button>
         </div>
@@ -458,7 +457,12 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!editingUser} onOpenChange={(open) => { if (!open) setEditingUser(null) }}>
+      <Dialog
+        open={!!editingUser}
+        onOpenChange={(open) => {
+          if (!open) setEditingUser(null)
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Modifier l&apos;utilisateur</DialogTitle>

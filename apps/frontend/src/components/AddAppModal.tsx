@@ -7,11 +7,36 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 const COMMON_ICONS = [
-  'LayoutGrid', 'Globe', 'Box', 'FileText', 'Users', 'Settings',
-  'Shield', 'Activity', 'BarChart3', 'Database', 'Server', 'Cloud',
-  'Mail', 'Calendar', 'Clock', 'Image', 'BookOpen', 'Code',
-  'Terminal', 'Smartphone', 'Monitor', 'Printer', 'Map', 'Package',
-  'Palette', 'Wrench', 'Link', 'Star', 'Heart', 'Bell',
+  'LayoutGrid',
+  'Globe',
+  'Box',
+  'FileText',
+  'Users',
+  'Settings',
+  'Shield',
+  'Activity',
+  'BarChart3',
+  'Database',
+  'Server',
+  'Cloud',
+  'Mail',
+  'Calendar',
+  'Clock',
+  'Image',
+  'BookOpen',
+  'Code',
+  'Terminal',
+  'Smartphone',
+  'Monitor',
+  'Printer',
+  'Map',
+  'Package',
+  'Palette',
+  'Wrench',
+  'Link',
+  'Star',
+  'Heart',
+  'Bell',
 ]
 
 interface AddAppModalProps {
@@ -198,25 +223,23 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
           <div>
             <label className="text-[13px] font-semibold block mb-1.5 text-isb-brown">Icône</label>
             <div className="flex items-center gap-3 mb-2">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent"
-            >
-              {createElement(getLucideIcon(icon), {
-                size: 22,
-                strokeWidth: 1.5,
-                className: 'text-foreground',
-              })}
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent">
+                {createElement(getLucideIcon(icon), {
+                  size: 22,
+                  strokeWidth: 1.5,
+                  className: 'text-foreground',
+                })}
+              </div>
+              <span className="text-[13px] text-isb-muted font-mono">{icon}</span>
             </div>
-            <span className="text-[13px] text-isb-muted font-mono">{icon}</span>
-          </div>
-          <div
-            className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 rounded-xl border"
-            style={{ borderColor: 'hsl(var(--border))' }}
-          >
-            {COMMON_ICONS.map((name) => {
-              const Ic = lookupLucideIcon(name)
-              if (!Ic) return null
-              return (
+            <div
+              className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 rounded-xl border"
+              style={{ borderColor: 'hsl(var(--border))' }}
+            >
+              {COMMON_ICONS.map((name) => {
+                const Ic = lookupLucideIcon(name)
+                if (!Ic) return null
+                return (
                   <button
                     key={name}
                     type="button"
@@ -267,9 +290,7 @@ export function AddAppModal({ app, onClose, onAdd }: AddAppModalProps) {
                 onChange={(e) => setSso(e.target.checked)}
                 className="accent-primary"
               />
-              <span className="text-[13px] font-semibold text-isb-brown">
-                Connexion SSO
-              </span>
+              <span className="text-[13px] font-semibold text-isb-brown">Connexion SSO</span>
             </label>
             <p className="text-[12px] mt-1 text-isb-muted">
               Ajoute un token d&rsquo;authentification unique a l&rsquo;URL au lancement

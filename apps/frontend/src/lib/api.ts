@@ -108,7 +108,8 @@ export interface DockerStatus {
 
 export const api = {
   sso: {
-    generate: () => request<{ token: string }>('/sso/generate', { method: 'POST' }).then((r) => r.token),
+    generate: () =>
+      request<{ token: string }>('/sso/generate', { method: 'POST' }).then((r) => r.token),
   },
   groups: {
     list: () =>
@@ -186,8 +187,7 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(data),
       }).then((r) => r.profile),
-    listUsers: () =>
-      request<{ users: UserProfile[] }>('/admin/users').then((r) => r.users),
+    listUsers: () => request<{ users: UserProfile[] }>('/admin/users').then((r) => r.users),
     createUser: (data: { firstName: string; lastName: string; email: string }) =>
       request<{ user: UserProfile }>('/admin/users', {
         method: 'POST',
