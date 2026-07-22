@@ -86,10 +86,7 @@ export function AppCard({
         </div>
       )}
 
-      <div
-        className="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-        style={{ backgroundColor: 'hsl(var(--primary-foreground))' }}
-      />
+      <div className="pointer-events-none absolute -bottom-3 left-6 right-6 h-6 rounded-full bg-isb-yellow blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-200" />
     </button>
   )
 }
