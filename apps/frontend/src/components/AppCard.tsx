@@ -45,10 +45,8 @@ export function AppCard({
     <button
       onClick={onClick}
       disabled={isLaunching}
-      className="group relative flex flex-col items-start gap-4 p-6 bg-white rounded-2xl border border-[rgba(59,40,0,0.08)] shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.97] active:shadow-sm transition-all duration-200 text-left w-full cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+      className="group relative flex flex-col items-start gap-4 p-6 bg-white rounded-2xl border border-[rgba(59,40,0,0.08)] shadow-sm hover:shadow-[0_0_24px_-4px_hsl(var(--primary-foreground)/0.35)] hover:-translate-y-0.5 active:scale-[0.97] active:shadow-sm transition-all duration-200 text-left w-full cursor-pointer disabled:opacity-60 disabled:cursor-wait"
     >
-      <div className="pointer-events-none absolute -inset-3 -z-10 rounded-[2rem] bg-isb-yellow blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-300" />
-
       <div
         className="flex items-center justify-center w-14 h-14 rounded-xl transition-transform duration-200 group-hover:scale-105"
         style={{ backgroundColor: bgColor }}
