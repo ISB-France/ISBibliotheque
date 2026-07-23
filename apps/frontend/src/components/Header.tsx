@@ -24,6 +24,7 @@ export function Header({ search, onSearchChange }: HeaderProps) {
   const location = useLocation()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState('')
+  const [avatarIcon, setAvatarIcon] = useState('')
   const isAdmin = user?.isAdmin ?? false
   const initials = user?.name
     ? user.name
@@ -41,6 +42,7 @@ export function Header({ search, onSearchChange }: HeaderProps) {
       .profile()
       .then((p) => {
         if (isImageUrl(p.icon)) setAvatarUrl(p.icon)
+        else if (p.icon) setAvatarIcon(p.icon)
       })
       .catch(() => {})
   }, [user])
@@ -124,7 +126,7 @@ export function Header({ search, onSearchChange }: HeaderProps) {
                 <img src={avatarUrl} alt="" className="w-full h-full object-cover rounded-lg" />
               ) : (
                 <AvatarFallback className="bg-primary text-primary-foreground text-[12px] font-bold rounded-lg">
-                  {initials}
+                  {avatarIcon || initials}
                 </AvatarFallback>
               )}
             </Avatar>
