@@ -196,6 +196,14 @@ export const api = {
       }).then((r) => r.user),
     deleteUser: (email: string) =>
       request<void>(`/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' }),
+    importUsers: (users: Array<{ firstName: string; lastName: string; email: string }>) =>
+      request<{
+        created: Array<{ email: string; name: string }>
+        skipped: Array<{ email: string; reason: string }>
+      }>('/admin/users/import', {
+        method: 'POST',
+        body: JSON.stringify({ users }),
+      }),
   },
   docker: {
     start: (id: string) =>
