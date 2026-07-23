@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Plus, Trash2, Pencil, ArrowLeft, RefreshCw, UserPlus } from 'lucide-react'
+import { Plus, Trash2, Pencil, ArrowLeft, RefreshCw, UserPlus, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, type AppResponse, type UserProfile } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
@@ -24,6 +24,31 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+
+function parseUsersCsv(
+  text: string,
+): Array<{ firstName: string; lastName: string; email: string }> {
+  const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0)
+  if (lines.length === 0) return []
+
+  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase())
+  const firstNameIdx = headers.findIndex((h) => ['prenom', 'prénom', 'firstname'].includes(h))
+  const lastNameIdx = headers.findIndex((h) => ['nom', 'lastname'].includes(h))
+  const emailIdx = headers.findIndex((h) => h === 'email')
+
+  if (firstNameIdx === -1 || lastNameIdx === -1 || emailIdx === -1) {
+    throw new Error('Colonnes attendues : nom, prenom, email')
+  }
+
+  return lines.slice(1).map((line) => {
+    const cols = line.split(',').map((c) => c.trim())
+    return {
+      firstName: cols[firstNameIdx] ?? '',
+      lastName: cols[lastNameIdx] ?? '',
+      email: cols[emailIdx] ?? '',
+    }
+  })
+}
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth()
@@ -53,6 +78,8 @@ export default function Admin() {
     email: string
     name: string
   } | null>(null)
+  const [importingUsers, setImportingUsers] = useState(false)
+  const csvInputRef = useRef<HTMLInputElement>(null)
 
   const fetchApps = useCallback(async () => {
     try {
@@ -174,6 +201,36 @@ export default function Admin() {
     }
   }
 
+  async function handleImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    setImportingUsers(true)
+    try {
+      const text = await file.text()
+      const rows = parseUsersCsv(text)
+      if (rows.length === 0) {
+        toast.error('Le fichier CSV ne contient aucune ligne')
+        return
+      }
+      const { created, skipped } = await api.admin.importUsers(rows)
+      if (created.length > 0) {
+        toast.success(`${created.length} utilisateur(s) importé(s)`)
+      }
+      if (skipped.length > 0) {
+        toast.error(
+          `${skipped.length} ligne(s) ignorée(s) (${skipped.map((s) => s.reason).join(', ')})`,
+        )
+      }
+      fetchUsers()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'import")
+    } finally {
+      setImportingUsers(false)
+    }
+  }
+
   if (authLoading) return <LoadingScreen />
   if (!user) {
     navigate('/login', { replace: true })
@@ -232,6 +289,21 @@ export default function Admin() {
               <Button variant="outline" onClick={fetchUsers}>
                 <RefreshCw size={15} />
                 Actualiser
+              </Button>
+              <input
+                ref={csvInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={handleImportCsv}
+              />
+              <Button
+                variant="outline"
+                onClick={() => csvInputRef.current?.click()}
+                disabled={importingUsers}
+              >
+                <Upload size={15} />
+                Importer un CSV
               </Button>
               <Button onClick={() => setShowUserModal(true)}>
                 <UserPlus size={16} />

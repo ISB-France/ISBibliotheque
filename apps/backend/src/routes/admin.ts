@@ -174,6 +174,47 @@ router.post('/admin/users', async (req: Request, res: Response, next: NextFuncti
   }
 })
 
+router.post('/admin/users/import', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { users } = req.body as {
+      users?: Array<{ firstName?: string; lastName?: string; email?: string }>
+    }
+    if (!Array.isArray(users) || users.length === 0) {
+      res.status(400).json({ error: { message: 'Aucun utilisateur à importer' } })
+      return
+    }
+
+    const created: Array<{ email: string; name: string }> = []
+    const skipped: Array<{ email: string; reason: string }> = []
+
+    for (const row of users) {
+      const firstName = row.firstName?.trim()
+      const lastName = row.lastName?.trim()
+      const email = row.email?.trim().toLowerCase()
+
+      if (!firstName || !lastName || !email) {
+        skipped.push({ email: email ?? '', reason: 'Champs manquants' })
+        continue
+      }
+
+      const existing = await prisma.user.findUnique({ where: { email } })
+      if (existing) {
+        skipped.push({ email, reason: 'Email déjà utilisé' })
+        continue
+      }
+
+      const user = await prisma.user.create({
+        data: { email, name: `${firstName} ${lastName}` },
+      })
+      created.push({ email: user.email, name: user.name })
+    }
+
+    res.status(201).json({ created, skipped })
+  } catch (err) {
+    next(err)
+  }
+})
+
 router.put('/admin/users/:email', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const oldEmail = String(req.params.email).toLowerCase()
