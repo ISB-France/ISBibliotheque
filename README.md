@@ -224,6 +224,12 @@ Navigation par profil (dev, admin, manager, designer).
 🚀 **[GUIDE_DEPLOYMENT.md](./doc/Figma/Maquettes/GUIDE_DEPLOYMENT.md)** ⭐ **POUR ADMINS IT**  
 Déploiement production (Docker, Nginx, SSL, monitoring, troubleshooting).
 
+👤 **[GUIDE_ADMINISTRATION.md](./docs/guides/GUIDE_ADMINISTRATION.md)**  
+Utilisation de la page Administration : applications, groupes, découverte Docker, utilisateurs.
+
+📥 **[IMPORT_UTILISATEURS_CSV.md](./docs/guides/IMPORT_UTILISATEURS_CSV.md)**  
+Import en masse d'utilisateurs via fichier CSV (format, règles de validation, erreurs).
+
 ### Ressources
 
 📋 **[ATTRIBUTIONS.md](./doc/Figma/Maquettes/ATTRIBUTIONS.md)**  
