@@ -40,6 +40,10 @@ email,prenom,nom
 marie.dupont@groupe-isb.fr,Marie,Dupont
 ```
 
+Des fichiers d'exemple prêts à l'emploi (cas valide, colonnes inversées, lignes
+ignorées, en-têtes invalides) sont disponibles dans
+[`examples/import-utilisateurs/`](./examples/import-utilisateurs/README.md).
+
 ## Déroulement de l'import
 
 1. L'utilisateur sélectionne un fichier `.csv` via le bouton d'import.
